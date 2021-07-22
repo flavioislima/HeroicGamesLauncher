@@ -1,6 +1,7 @@
 .Login {
   display: grid;
-  place-items: center;
+  place-items: stretch;
+  grid-template-columns: 1fr 1fr;
   width: 100%;
   height: 100%;
   position: absolute;
@@ -10,7 +11,6 @@
   position: absolute;
   height: 100%;
   width: 100%;
-  align-self: center;
   background: url('../../assets/login-background-1536x864.jpg');
   background-size: cover;
   z-index: -1;
@@ -30,7 +30,7 @@
   width: 205px;
   height: 48px;
   place-self: baseline;
-  margin-bottom: 31px;
+  margin-bottom: 60px;
 }
 
 .heroicText {
@@ -46,7 +46,7 @@
   font-family: Rubik;
   font-style: normal;
   font-weight: 500;
-  font-size: 24px;
+  font-size: 25px;
   line-height: 30px;
   color: var(--secondary);
 }
@@ -55,7 +55,7 @@
   font-family: Rubik;
   font-style: normal;
   font-weight: 400;
-  font-size: 19px;
+  font-size: 18px;
   line-height: 24.3px;
   color: var(--text-primary);
 }
@@ -66,21 +66,32 @@
   position: absolute;
   width: 46px;
   height: 46px;
+  border-radius: 5px;
+}
+
+.aboutWrapper {
+  display: grid;
+  place-items: center;
+  place-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.aboutContainer {
+  max-width: 550px;
+  padding: 25px;
 }
 
 .loginFormWrapper {
   display: grid;
   place-items: center;
   place-content: center;
-  width: 826px;
-  height: 475px;
-  background: rgba(29, 31, 31, 0.95);
-  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  background: rgba(29, 31, 31, 1);
 }
 
 .loginInstructions {
-  margin: 22px;
-  height: 219px;
   font-family: Cabin;
   font-style: normal;
   font-weight: 500;
@@ -105,13 +116,36 @@
   cursor: pointer;
 }
 
+.loginInstructions ol {
+  padding-left: 20px;
+}
+
+.loginInstructions ol li {
+  margin-bottom: 10px;
+}
+.loginInstructions p {
+  margin-bottom: 35px;
+  margin-top: 10px;
+}
+
+.pastesidtext {
+  color: var(--text-primary);
+  font-weight: 400;
+  font-size: 16px;
+  margin-bottom: 13px;
+}
+
+.button {
+  margin-top: 16px;
+  font-weight: 700;
+}
+
 .loginForm {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
   width: 400px;
-  height: 150px;
   align-self: center;
 }
 
@@ -129,15 +163,7 @@
   color: var(--text-primary);
   text-align: center;
   border: none;
-}
-
-.loginInput::placeholder {
-  font-family: Cabin;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 16px;
-  line-height: 19px;
-  color: var(--text-primary);
+  margin-bottom: 16px;
 }
 
 .loginForm > .message {
@@ -148,6 +174,7 @@
   line-height: 17px;
   color: var(--primary);
   display: flex;
+  margin: 0;
 }
 
 .message > .material-icons {

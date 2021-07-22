@@ -66,16 +66,16 @@ export default function Login({ refresh }: Props) {
 
   return (
     <div className="Login">
-      <div className="loginWrapper">
-        <div className="heroicLogo">
-          <span className="logo" />
-          <div className="heroicText">
-            <span className="heroicTitle">Heroic</span>
-            <span className="heroicSubTitle">Games Launcher</span>
+      <div className="aboutWrapper">
+        <div className="aboutContainer">
+          <div className="heroicLogo">
+            <span className="logo" />
+            <div className="heroicText">
+              <span className="heroicTitle">Heroic</span>
+              <span className="heroicSubTitle">Games Launcher</span>
+            </div>
           </div>
-        </div>
-        <div className="loginFormWrapper">
-          <span className="loginInstructions">
+          <div className="loginInstructions">
             <strong>{t('welcome', 'Welcome!')}</strong>
             <p>
               {t(
@@ -107,47 +107,51 @@ export default function Login({ refresh }: Props) {
                 {` ${t('message.part8')}`}
               </li>
             </ol>
-          </span>
-          <div className="loginForm">
-            <input
-              className="loginInput"
-              id="sidInput"
-              onChange={(event) => setInput(event.target.value)}
-              placeholder={t('input.placeholder', 'Paste the SID number here')}
-            />
-            {loading && (
-              <p className="message">
-                {message}
-                <Autorenew className="material-icons" />{' '}
-              </p>
-            )}
-            <button
-              onClick={() => handleLogin(input)}
-              className="button is-primary"
-              disabled={loading || input.length < 30}
-            >
-              {t('button.login', 'Login')}
-            </button>
           </div>
-          <span
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              marginBottom: '22px',
-              paddingRight: '22px',
-              width: '100%'
-            }}
+        </div>
+        <div
+          style={{
+            bottom: '0',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            marginBottom: '40px',
+            paddingRight: '22px',
+            position: 'absolute',
+            width: '50%'
+          }}
+        >
+          <LanguageSelector
+            handleLanguageChange={handleChangeLanguage}
+            currentLanguage={currentLanguage}
+            flagPossition={FlagPosition.PREPEND}
+            className="settingSelect language-login"
+          />
+        </div>
+        <div className="loginBackground"></div>
+      </div>
+      <div className="loginFormWrapper">
+        <div className="loginForm">
+          <span className="pastesidtext">{t('input.placeholder', 'Paste the SID number here')}</span>
+          <input
+            className="loginInput"
+            id="sidInput"
+            onChange={(event) => setInput(event.target.value)}
+          />
+          {loading && (
+            <p className="message">
+              {message}
+              <Autorenew className="material-icons" />{' '}
+            </p>
+          )}
+          <button
+            onClick={() => handleLogin(input)}
+            className="button is-primary"
+            disabled={loading || input.length < 30}
           >
-            <LanguageSelector
-              handleLanguageChange={handleChangeLanguage}
-              currentLanguage={currentLanguage}
-              flagPossition={FlagPosition.PREPEND}
-              className="settingSelect language-login"
-            />
-          </span>
+            {t('button.login', 'Login')}
+          </button>
         </div>
       </div>
-      <span className="loginBackground"></span>
     </div>
   )
 }

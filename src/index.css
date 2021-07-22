@@ -6,13 +6,13 @@ html {
   --background-secondary: #323035;
   --searchbar-background: rgba(26, 27, 28, 0.5);
   --primary: #07c5ef;
-  --secondary: #db9303;
-  --tertiary: #252121;
+  --secondary: #ffa800;
+  --tertiary: #1d1f1f;
   --danger: #bd0a0a;
   --success: #0bd58c;
 
-  --primary-hover: #23889e;
-  --secondary-hover: #a36e04;
+  --primary-hover: #36d1f3;
+  --secondary-hover: #feba36;
   --tertiary-hover: #322b2b;
   --success-hover: #30eca8;
   --danger-hover: #bd0a0a;
