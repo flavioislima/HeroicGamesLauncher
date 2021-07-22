@@ -249,6 +249,7 @@ if (!gotTheLock) {
       fallbackLng: 'en',
       lng: language,
       supportedLngs: [
+        'ca',
         'cs',
         'de',
         'el',
