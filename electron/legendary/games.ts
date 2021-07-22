@@ -6,7 +6,7 @@ import {
 } from 'graceful-fs'
 import axios from 'axios';
 
-import { BrowserWindow, ipcMain } from 'electron';
+import { BrowserWindow, app, ipcMain } from 'electron';
 import { DXVK } from '../dxvk'
 import { ExtraInfo, GameStatus, InstallProgress } from '../types';
 import { Game } from '../games';
@@ -262,17 +262,14 @@ class LegendaryGame extends Game {
    * @public
    */
   public async addDesktopShortcut(fromMenu?: boolean) {
-    if (process.platform !== 'linux'){
-      return
-    }
     const gameInfo = await this.getGameInfo()
-    const desktopFolder = `${home}/Desktop/${gameInfo.title}.desktop`
-    const applicationsFolder = `${home}/.local/share/applications/${gameInfo.title}.desktop`
     let shortcut;
+    let ext;
     const icon = await this.getIcon(gameInfo.app_name)
 
     switch(process.platform) {
     case 'linux': {
+      ext = '.desktop'
       shortcut = `[Desktop Entry]
 Name=${gameInfo.title}
 Exec=xdg-open heroic://launch/${gameInfo.app_name}
@@ -283,11 +280,22 @@ Icon=${icon}
 Categories=Game;
 `
       break; }
+    case 'win32': {
+      ext = '.url'
+      shortcut = `[InternetShortcut]
+      IDList=
+      IconIndex=0
+      URL=heroic://launch/${gameInfo.app_name}
+      IconFile=${icon}`
+      break; }
     default:
       logError("Shortcuts haven't been implemented in the current platform.")
       return
     }
     const { addDesktopShortcuts, addStartMenuShortcuts } = await GlobalConfig.get().getSettings()
+
+    const desktopFolder = `${app.getPath('desktop')}/${gameInfo.title}${ext}`
+    const applicationsFolder = `${home}/.local/share/applications/${gameInfo.title}${ext}`
 
     if (addDesktopShortcuts || fromMenu) {
       writeFile(desktopFolder, shortcut, () => {
@@ -308,12 +316,10 @@ Categories=Game;
    * @public
    */
   public async removeDesktopShortcut() {
-    if (process.platform !== 'linux'){
-      return
-    }
     const gameInfo = await this.getGameInfo()
-    const desktopFile = `${home}/Desktop/${gameInfo.title}.desktop`
-    const applicationsFile = `${home}/.local/share/applications/${gameInfo.title}.desktop`
+    const ext = process.platform == 'linux' ? '.desktop' : '.url'
+    const desktopFile = `${app.getPath('desktop')}/${gameInfo.title}${ext}`
+    const applicationsFile = `${home}/.local/share/applications/${gameInfo.title}${ext}`
     unlink(desktopFile, () => logInfo('Desktop shortcut removed'))
     unlink(applicationsFile, () => logInfo('Applications shortcut removed'))
   }
