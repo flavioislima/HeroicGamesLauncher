@@ -284,7 +284,7 @@ parts:
     source-type: tar
     override-pull: |
       mkdir -p $SNAPCRAFT_PART_INSTALL/bin
-      tar -xf heroic-${SNAPCRAFT_PROJECT_VERSION}-linux-x64.tar.xz --strip-components=1 -C $SNAPCRAFT_PART_INSTALL/bin
+      tar -xf Heroic-${SNAPCRAFT_PROJECT_VERSION}-linux-x64.tar.xz --strip-components=1 -C $SNAPCRAFT_PART_INSTALL/bin
     prime:
       - -chrome-*
       - -chrome_crashpad_handler
