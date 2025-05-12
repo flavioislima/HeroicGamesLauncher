@@ -280,17 +280,13 @@ parts:
 
   heroic:
     plugin: dump
-    source: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/releases/download/v2.16.1/heroic-2.16.1-linux-x64.tar.xz
+    source: https://github.com/Heroic-Games-Launcher/Heroic/releases/download/v${SNAPCRAFT_PROJECT_VERSION}/heroic-${SNAPCRAFT_PROJECT_VERSION}-linux-64.tar.xz
     source-type: tar
-    override-build: |
-      set -eux
-      craftctl default
-      # Move contents from the extracted folder if present
-      if [ -d "Heroic-2.16.1-linux-x64" ]; then
-        mv Heroic-2.16.1-linux-x64/* $CRAFT_PART_INSTALL/
-      else
-        mv * $CRAFT_PART_INSTALL/
-      fi
+    override-pull: |
+      snapcraftctl pull
+      # Ensure the extracted Heroic binary ends up in $SNAPCRAFT_PART_INSTALL/bin
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin
+      cp -a Heroic-${SNAPCRAFT_PROJECT_VERSION}/* $SNAPCRAFT_PART_INSTALL/
     prime:
       - -chrome-*
       - -chrome_crashpad_handler
