@@ -283,8 +283,6 @@ parts:
     source: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/releases/download/v${SNAPCRAFT_PROJECT_VERSION}/heroic-${SNAPCRAFT_PROJECT_VERSION}-linux-x64.tar.xz
     source-type: tar
     override-pull: |
-      craftctl pull
-      # Ensure the extracted Heroic binary ends up in $SNAPCRAFT_PART_INSTALL/bin
       mkdir -p $SNAPCRAFT_PART_INSTALL/bin
       tar -xf heroic-${SNAPCRAFT_PROJECT_VERSION}-linux-x64.tar.xz --strip-components=1 -C $SNAPCRAFT_PART_INSTALL/bin
     prime:
