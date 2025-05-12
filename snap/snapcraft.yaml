@@ -279,13 +279,18 @@ parts:
       - usr/lib/*/libgamemode*.so.*
 
   heroic:
-    source: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher.git
-    source-tag: 'v${SNAPCRAFT_PROJECT_VERSION}'
-    source-depth: 1
     plugin: dump
-    build-packages:
-      - dpkg-dev
-      - nodejs
+    source: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/releases/download/v2.16.1/heroic-2.16.1-linux-x64.tar.xz
+    source-type: tar
+    override-build: |
+      set -eux
+      craftctl default
+      # Move contents from the extracted folder if present
+      if [ -d "Heroic-2.16.1-linux-x64" ]; then
+        mv Heroic-2.16.1-linux-x64/* $CRAFT_PART_INSTALL/
+      else
+        mv * $CRAFT_PART_INSTALL/
+      fi
     prime:
       - -chrome-*
       - -chrome_crashpad_handler
@@ -304,41 +309,6 @@ parts:
       - -usr/lib/*/libvulkan*
       - -usr/lib/*/libVk*
       - -usr/lib/*/libLLVM*
-    override-build: |
-      set -eux
-      # Setup DNS resolution
-      echo "nameserver 8.8.8.8" > /etc/resolv.conf
-      echo "nameserver 1.1.1.1" >> /etc/resolv.conf
-
-      # Test DNS resolution
-      ping -c 1 github.com || echo "Warning: Cannot ping github.com but continuing anyway"
-
-      if [[ -n "${http_proxy:-}" ]]; then
-        export HTTP_PROXY="${http_proxy:-}"
-        export HTTPS_PROXY="${http_proxy:-}"
-        export ELECTRON_GET_USE_PROXY=1
-        export GLOBAL_AGENT_HTTP_PROXY="${http_proxy:-}"
-        export GLOBAL_AGENT_HTTPS_PROXY="${http_proxy:-}"
-        # Add DNS configuration for Node.js
-        export NODE_OPTIONS="--dns-result-order=ipv4first"
-      fi
-
-      npm config set -g registry https://registry.npmjs.org/
-      npm config set -g proxy "${http_proxy:-}"
-      npm config set -g https-proxy "${http_proxy:-}"
-      npm install -g pnpm
-      pnpm config set -g registry https://github.com/
-      pnpm config set -g proxy "${http_proxy:-}"
-      pnpm config set -g https-proxy "${http_proxy:-}"
-      pnpm config set -g registry https://registry.npmjs.org/
-      pnpm config set -g proxy "${http_proxy:-}"
-      pnpm config set -g https-proxy "${http_proxy:-}"
-      export NODE_OPTIONS="--experimental-specifier-resolution=node --dns-result-order=ipv4first"
-      npm install -g ts-node typescript
-      pnpm install
-      pnpm run download-helper-binaries
-      pnpm dist:linux --dir
-      cp -a dist/linux-unpacked/* $CRAFT_PART_INSTALL/
 
   debs:
     plugin: nil
