@@ -48,7 +48,7 @@
     "prepare": "husky install",
     "prettier": "prettier --check .",
     "prettier-fix": "prettier --write .",
-    "download-helper-binaries": "esbuild --bundle --platform=node --target=node21 meta/downloadHelperBinaries.ts | node",
+    "download-helper-binaries": "esbuild --bundle --platform=node --target=node21 --external:undici meta/downloadHelperBinaries.ts | node",
     "lint-translations": "esbuild --bundle --platform=node --target=node21 meta/lintTranslations.ts | node"
   },
   "dependencies": {
