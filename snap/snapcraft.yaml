@@ -280,7 +280,7 @@ parts:
 
   heroic:
     plugin: dump
-    source: https://github.com/Heroic-Games-Launcher/Heroic/releases/download/v${SNAPCRAFT_PROJECT_VERSION}/heroic-${SNAPCRAFT_PROJECT_VERSION}-linux-64.tar.xz
+    source: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/releases/download/v${SNAPCRAFT_PROJECT_VERSION}/heroic-${SNAPCRAFT_PROJECT_VERSION}-linux-64.tar.xz
     source-type: tar
     override-pull: |
       snapcraftctl pull
