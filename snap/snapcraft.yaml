@@ -284,13 +284,12 @@ parts:
     source-type: tar
     override-build: |
       set -eux
-      craftctl default
-      # Move contents from the extracted folder if present
+      # If extracted to a subdir, move contents up
       if [ -d "Heroic-2.16.1-linux-x64" ]; then
-        mv Heroic-2.16.1-linux-x64/* $CRAFT_PART_INSTALL/
-      else
-        mv * $CRAFT_PART_INSTALL/
+        mv Heroic-2.16.1-linux-x64/* .
+        rmdir Heroic-2.16.1-linux-x64
       fi
+      craftctl default
     prime:
       - -chrome-*
       - -chrome_crashpad_handler
