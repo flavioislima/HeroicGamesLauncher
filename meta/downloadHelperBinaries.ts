@@ -4,7 +4,7 @@ import { dirname, join } from 'path'
 import { Readable } from 'stream'
 import { finished } from 'stream/promises'
 
-import { setGlobalDispatcher, ProxyAgent } from 'undici'
+import { setGlobalDispatcher, ProxyAgent, fetch as undiciFetch } from 'undici'
 
 type SupportedPlatform = 'win32' | 'darwin' | 'linux'
 type DownloadedBinary = 'legendary' | 'gogdl' | 'nile' | 'comet'
@@ -27,10 +27,31 @@ async function downloadFile(url: string, dst: string) {
   const maxRetries = 3
   let lastError
 
+  const proxyUri = process.env['HTTPS_PROXY'] || process.env['https_proxy']
+  if (proxyUri) {
+    console.log(`Using proxy: ${proxyUri}`)
+    const proxyAgent = new ProxyAgent({
+      uri: proxyUri,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+      },
+      requestTls: {
+        minVersion: 'TLSv1.2',
+        ciphers: 'HIGH:!aNULL:!MD5'
+      },
+      proxyTls: {
+        minVersion: 'TLSv1.2',
+        ciphers: 'HIGH:!aNULL:!MD5'
+      }
+    })
+    setGlobalDispatcher(proxyAgent)
+  }
+
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       console.log(`Attempt ${attempt + 1}/${maxRetries} to download ${url}`)
-      const response = await fetch(url, {
+      const response = await undiciFetch(url, {
         keepalive: true,
         headers: {
           'User-Agent':

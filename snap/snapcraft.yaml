@@ -313,8 +313,26 @@ parts:
       # Test DNS resolution
       ping -c 1 github.com || echo "Warning: Cannot ping github.com but continuing anyway"
 
+      if [[ -n "${http_proxy:-}" ]]; then
+        export HTTP_PROXY="${http_proxy:-}"
+        export HTTPS_PROXY="${http_proxy:-}"
+        export ELECTRON_GET_USE_PROXY=1
+        export GLOBAL_AGENT_HTTP_PROXY="${http_proxy:-}"
+        export GLOBAL_AGENT_HTTPS_PROXY="${http_proxy:-}"
+        # Add DNS configuration for Node.js
+        export NODE_OPTIONS="--dns-result-order=ipv4first"
+      fi
+
       npm config set -g registry https://registry.npmjs.org/
+      npm config set -g proxy "${http_proxy:-}"
+      npm config set -g https-proxy "${http_proxy:-}"
       npm install -g pnpm
+      pnpm config set -g registry https://github.com/
+      pnpm config set -g proxy "${http_proxy:-}"
+      pnpm config set -g https-proxy "${http_proxy:-}"
+      pnpm config set -g registry https://registry.npmjs.org/
+      pnpm config set -g proxy "${http_proxy:-}"
+      pnpm config set -g https-proxy "${http_proxy:-}"
       pnpm install
       pnpm run download-helper-binaries
       pnpm dist:linux --dir
