@@ -283,7 +283,6 @@ parts:
     source-tag: 'v${SNAPCRAFT_PROJECT_VERSION}'
     source-depth: 1
     plugin: dump
-    disable-network: false
     build-packages:
       - dpkg-dev
       - nodejs
