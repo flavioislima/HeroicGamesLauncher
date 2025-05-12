@@ -283,6 +283,7 @@ parts:
     source-tag: 'v${SNAPCRAFT_PROJECT_VERSION}'
     source-depth: 1
     plugin: dump
+    disable-network: false
     build-packages:
       - dpkg-dev
       - nodejs
@@ -333,6 +334,8 @@ parts:
       pnpm config set -g registry https://registry.npmjs.org/
       pnpm config set -g proxy "${http_proxy:-}"
       pnpm config set -g https-proxy "${http_proxy:-}"
+      export NODE_OPTIONS="--experimental-specifier-resolution=node --dns-result-order=ipv4first"
+      npm install -g ts-node typescript
       pnpm install
       pnpm run download-helper-binaries
       pnpm dist:linux --dir
