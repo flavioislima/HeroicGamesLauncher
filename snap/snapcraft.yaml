@@ -12,6 +12,8 @@ architectures:
   - build-on: amd64
 base: core22
 compression: lzo
+assumes:
+  - snapd2.62
 
 license: GPL-3.0-only
 contact: https://discord.gg/rHJ2uqdquK
@@ -304,6 +306,15 @@ parts:
       - -usr/lib/*/libLLVM*
     override-build: |
       set -eux
+      # Setup DNS resolution
+      echo "nameserver 8.8.8.8" > /etc/resolv.conf
+      echo "nameserver 1.1.1.1" >> /etc/resolv.conf
+
+      # Test DNS resolution
+      ping -c 1 github.com || echo "Warning: Cannot ping github.com but continuing anyway"
+
+      npm config set -g registry https://registry.npmjs.org/
+      npm install -g pnpm
       pnpm install
       pnpm run download-helper-binaries
       pnpm dist:linux --dir
