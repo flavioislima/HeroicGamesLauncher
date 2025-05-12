@@ -286,7 +286,7 @@ parts:
       snapcraftctl pull
       # Ensure the extracted Heroic binary ends up in $SNAPCRAFT_PART_INSTALL/bin
       mkdir -p $SNAPCRAFT_PART_INSTALL/bin
-      cp -a Heroic-${SNAPCRAFT_PROJECT_VERSION}/* $SNAPCRAFT_PART_INSTALL/
+      cp -a Heroic-${SNAPCRAFT_PROJECT_VERSION}-linux-x64/* $SNAPCRAFT_PART_INSTALL/
     prime:
       - -chrome-*
       - -chrome_crashpad_handler
