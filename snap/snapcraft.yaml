@@ -407,7 +407,7 @@ parts:
 
 apps:
   heroic:
-    command-chain: [bin/heroic]
+    command-chain: [heroic]
     command: heroic --no-sandbox
     environment:
       HOME: $SNAP_USER_COMMON
