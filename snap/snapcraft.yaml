@@ -79,20 +79,6 @@ plugs:
     interface: content
     target: $SNAP/share/sounds
     default-provider: gtk-common-themes
-  dot-local-share-steam:
-    interface: personal-files
-    write:
-      - $HOME/.local/share/Steam
-      - $HOME/Steam
-      - $HOME/snap/steam/common/.steam
-  dot-local-share-applications:
-    interface: personal-files
-    write:
-      - $HOME/.local/share/applications
-  dot-local-share-icons:
-    interface: personal-files
-    write:
-      - $HOME/.local/share/icons
   desktop:
     mount-host-font-cache: false
   shmem:
@@ -441,4 +427,3 @@ apps:
       - steam-support
       - removable-media
       - upower-observe
-      - uinput
