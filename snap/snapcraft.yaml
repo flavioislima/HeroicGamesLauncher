@@ -393,7 +393,7 @@ parts:
 
 apps:
   heroic:
-    command-chain: [heroic]
+    command-chain: [local/src/desktop-launch]
     command: heroic --no-sandbox
     environment:
       HOME: $SNAP_USER_COMMON
