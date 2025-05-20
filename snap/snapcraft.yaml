@@ -424,6 +424,5 @@ apps:
       - bluez
       - network-control
       - fuse-support
-      - steam-support
       - removable-media
       - upower-observe
