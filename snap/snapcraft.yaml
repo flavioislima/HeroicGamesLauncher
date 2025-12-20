@@ -35,6 +35,14 @@ lint:
         - lib32/**
         - usr/lib32/**
 
+package-repositories:
+  - type: apt
+    components: [main, universe]
+    suites: [noble, noble-updates, noble-security]
+    architectures: [amd64, i386]
+    url: http://archive.ubuntu.com/ubuntu/
+    key-id: 871920D1991BC93D
+
 layout:
   /usr/share/zenity:
     bind: $SNAP/usr/share/zenity
@@ -333,6 +341,10 @@ parts:
 
   debs:
     plugin: nil
+    override-pull: |
+      craftctl default
+      dpkg --add-architecture i386
+      apt-get update
     stage-packages:
       - libappindicator3-1
       - libgtk-3-0t64
