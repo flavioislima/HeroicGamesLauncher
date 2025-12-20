@@ -41,7 +41,7 @@ package-repositories:
     suites: [noble, noble-updates, noble-security]
     architectures: [amd64, i386]
     url: http://archive.ubuntu.com/ubuntu/
-    key-id: 871920D1991BC93D
+    key-id: F6ECB3762474EDA9D21B7022871920D1991BC93C
 
 layout:
   /usr/share/zenity:
