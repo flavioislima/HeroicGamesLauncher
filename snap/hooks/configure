@@ -11,7 +11,7 @@ snap_ld_so_conf=$SNAP_DATA/etc/snap-ld.so.conf
 snap_ld_so_cache=$SNAP_DATA/etc/snap-ld.so.cache
 real_ld_so_cache=$SNAP_DATA/etc/ld.so.cache
 
-RUNTIME=$SNAP/gnome-platform
+
 
 cat > "$snap_ld_so_conf" <<EOF
 /var/lib/snapd/lib/gl

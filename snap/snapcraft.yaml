@@ -35,14 +35,6 @@ lint:
         - lib32/**
         - usr/lib32/**
 
-package-repositories:
-  - type: apt
-    components: [main]
-    suites: [jammy]
-    architectures: [amd64, i386]
-    key-id: 9FD3B784BC1C6FC31A8A0A1C1655A0AB68576280
-    url: https://deb.nodesource.com/node_20.x
-
 layout:
   /usr/share/zenity:
     bind: $SNAP/usr/share/zenity
@@ -283,9 +275,10 @@ parts:
     source-tag: 'v${SNAPCRAFT_PROJECT_VERSION}'
     source-depth: 1
     plugin: dump
+    build-snaps:
+      - node/22/stable
     build-packages:
       - dpkg-dev
-      - nodejs
     prime:
       - -chrome-*
       - -chrome_crashpad_handler
@@ -375,6 +368,11 @@ parts:
       - libxss1:amd64
       - libxss1:i386
       - x11-xserver-utils
+      - zenity
+      - cabextract
+      - unzip
+      - p7zip-full
+      - curl
     prime:
       - -etc/dconf
       - -etc/gtk*
