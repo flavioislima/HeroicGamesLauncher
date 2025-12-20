@@ -35,13 +35,6 @@ lint:
         - lib32/**
         - usr/lib32/**
 
-package-repositories:
-  - type: apt
-    components: [main, universe]
-    suites: [noble, noble-updates, noble-security]
-    architectures: [amd64, i386]
-    url: http://archive.ubuntu.com/ubuntu/
-
 layout:
   /usr/share/zenity:
     bind: $SNAP/usr/share/zenity
