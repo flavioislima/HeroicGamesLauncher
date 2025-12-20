@@ -8,8 +8,8 @@ version: 2.18.1
 icon: src/frontend/assets/heroic-icon.svg
 grade: stable
 confinement: strict
-architectures:
-  - build-on: amd64
+platforms:
+  amd64:
 base: core24
 compression: lzo
 assumes:
@@ -334,10 +334,10 @@ parts:
   debs:
     plugin: nil
     stage-packages:
-      - libappindicator3-1t64
+      - libappindicator3-1
       - libgtk-3-0t64
-      - libpangoxft-1.0-0t64
-      - libsasl2-2t64
+      - libpangoxft-1.0-0
+      - libsasl2-2
       - libasound2t64
       - libnspr4
       - libnss3
@@ -347,8 +347,8 @@ parts:
       - libpci3
       - libvulkan1:i386
       - libvulkan1:amd64
-      - libxml2t64:i386
-      - libxml2t64:amd64
+      - libxml2:i386
+      - libxml2:amd64
       - libicu74:i386
       - libicu74:amd64
       - zlib1g:i386
@@ -365,8 +365,8 @@ parts:
       - psmisc
       - libfuse2t64:amd64
       - libfuse2t64:i386
-      - libxss1t64:amd64
-      - libxss1t64:i386
+      - libxss1:amd64
+      - libxss1:i386
       - x11-xserver-utils
       - zenity
       - cabextract
