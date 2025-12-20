@@ -4,7 +4,7 @@ summary: An Open Source Launcher for GOG, Epic Games and Amazon Games
 description: |
   Heroic is an Open Source Games Launcher. Right now it supports launching games from the Epic Games
   Store using Legendary, Amazon Games using Nile and GOG Games using our custom implementations Nile and gogdl.
-version: 2.16.1
+version: 2.18.1
 icon: src/frontend/assets/heroic-icon.svg
 grade: stable
 confinement: strict
@@ -110,8 +110,8 @@ parts:
     plugin: nil
     source: $CRAFT_PROJECT_DIR/snap/local/src
     override-build: |
-      mkdir -p $CRAFT_PART_INSTALL/usr/bin
-      cp * $CRAFT_PART_INSTALL/usr/bin/
+      mkdir -p $CRAFT_PART_INSTALL/bin
+      cp * $CRAFT_PART_INSTALL/bin/
     stage-packages:
       - python3-gi
       - gir1.2-gtk-3.0
