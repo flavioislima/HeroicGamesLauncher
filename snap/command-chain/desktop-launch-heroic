@@ -1,0 +1,16 @@
+#!/bin/bash
+
+export XDG_CONFIG_HOME="$SNAP_USER_COMMON/.config"
+
+export XDG_DATA_HOME="$SNAP_USER_COMMON/.local/share"
+
+export XDG_CACHE_HOME="$SNAP_USER_COMMON/.cache"
+
+unset PYTHONPATH
+
+# Create a Desktop link in $SNAP_USER_COMMON that opens the user's actual desktop folder.
+DESKTOP_PATH=$(grep "XDG_DESKTOP_DIR" $SNAP_REAL_HOME/.config/user-dirs.dirs | cut -d'=' -f2 | sed 's/"//g' | sed "s#\$HOME#$SNAP_REAL_HOME#g")
+rm -r $SNAP_USER_COMMON/Desktop
+ln -sf "$DESKTOP_PATH" "$SNAP_USER_COMMON/Desktop"
+
+exec "$@"

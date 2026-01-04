@@ -10,6 +10,8 @@ grade: stable
 confinement: strict
 platforms:
   amd64:
+    build-on: [amd64]
+    build-for: [amd64]
 base: core24
 compression: lzo
 assumes:
@@ -25,459 +27,114 @@ donation:
 source-code: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher
 website: https://heroicgameslauncher.com/
 
-lint:
-  # Snapcraft's `ldd` lint can't handle 32-bit things,
-  # So just make it quiet and also make builds a surprising amount faster
-  ignore:
-    - library:
-        - lib/i386-linux-gnu/**
-        - usr/lib/i386-linux-gnu/**
-        - lib32/**
-        - usr/lib32/**
-
-package-repositories:
-  - type: apt
-    components: [main, universe]
-    suites: [noble, noble-updates, noble-security]
-    architectures: [amd64, i386]
-    url: http://archive.ubuntu.com/ubuntu/
-    key-id: F6ECB3762474EDA9D21B7022871920D1991BC93C
-
-layout:
-  /usr/share/zenity:
-    bind: $SNAP/usr/share/zenity
-  # https://discourse.ubuntu.com/t/the-graphics-core20-snap-interface/23000
-  /usr/share/drirc.d:
-    bind: $SNAP/graphics/usr/share/drirc.d
-  /usr/share/glvnd/egl_vendor.d:
-    bind: $SNAP/graphics/usr/share/glvnd/egl_vendor.d
-  /usr/lib/x86_64-linux-gnu/alsa-lib:
-    bind: $SNAP/usr/lib/x86_64-linux-gnu/alsa-lib
-  /usr/share/alsa:
-    bind: $SNAP/usr/share/alsa
-  /usr/share/X11/xkb:
-    bind: $SNAP/usr/share/X11/xkb
-  /etc/ld.so.cache:
-    bind-file: $SNAP_DATA/etc/ld.so.cache
-  /etc/fonts:
-    bind: $SNAP/etc/fonts
-
-plugs:
-  gaming-mesa:
-    interface: content
-    target: $SNAP/graphics
-    default-provider: gaming-graphics-core24
-  gtk-3-themes:
-    interface: content
-    target: $SNAP/share/themes
-    default-provider: gtk-common-themes
-  icon-themes:
-    interface: content
-    target: $SNAP/share/icons
-    default-provider: gtk-common-themes
-  sound-themes:
-    interface: content
-    target: $SNAP/share/sounds
-    default-provider: gtk-common-themes
-  dot-local-share-steam:
-    interface: personal-files
-    write:
-      - $HOME/.local/share/Steam
-      - $HOME/Steam
-      - $HOME/snap/steam/common/.steam
-  dot-local-share-applications:
-    interface: personal-files
-    write:
-      - $HOME/.local/share/applications
-  dot-local-share-icons:
-    interface: personal-files
-    write:
-      - $HOME/.local/share/icons
-  desktop:
-    mount-host-font-cache: false
-  shmem:
-    interface: shared-memory
-    private: true
-
-hooks:
-  configure:
-    plugs:
-      - opengl
-
-parts:
-  launcher:
-    after: [heroic]
-    plugin: nil
-    source: $CRAFT_PROJECT_DIR/snap/local/src
-    override-build: |
-      mkdir -p $CRAFT_PART_INSTALL/bin
-      cp * $CRAFT_PART_INSTALL/bin/
-    stage-packages:
-      - python3-gi
-      - gir1.2-gtk-3.0
-    stage:
-      - bin/*
-      - usr/lib/python3/dist-packages/*
-      - usr/share/mime/*
-      - usr/share/icons/*
-      - usr/lib/**/gtk-3.0*
-      - etc/gtk-3.0*
-      - usr/share/*/gir1.2-gtk-3.0*
-      - usr/**/libfontconfig*
-      - usr/**/cairo-1*
-      - usr/**/libatspi*
-      - usr/**/libavahi-client*
-      - usr/**/libavahi-common*
-      - usr/**/libcairo-gobject*
-      - usr/**/libcairo*
-      - usr/**/libcolord*
-      - usr/**/libcups*
-      - usr/**/libdatrie*
-      - usr/**/libdconf*
-      - usr/**/libdeflate*
-      - usr/**/libepoxy*
-      - usr/**/libfribidi*
-      - usr/**/*girepository*
-      - usr/**/libgraphite2*
-      - usr/**/libgtk-3*
-      - usr/**/libharfbuzz*
-      - usr/**/libjbig*
-      - usr/**/libjpeg*
-      - usr/**/liblcms2*
-      - usr/**/libpango-1*
-      - usr/**/libpangocairo-1*
-      - usr/**/libpangoft2-1*
-      - usr/**/libpangoxft-1*
-      - usr/**/libpixman-1*
-      - usr/**/libthai*
-      - usr/**/libtiff*
-      - usr/**/libwayland-cursor*
-      - usr/**/libwebp*
-      - usr/**/libxcb-render*
-      - usr/**/libxkbcommon*
-    prime:
-      - -etc/dconf
-      - -etc/gtk*
-      - -etc/init*
-      - -etc/ld*
-      - -etc/vulkan
-      - -etc/X11
-      - -etc/xdg
-
-  ninja:
-    after: [heroic]
-    plugin: nil
-    source: https://github.com/ninja-build/ninja.git
-    source-tag: 'v1.12.1'
-    override-build: |
-      rm -rf build
-      rm -f ninja
-      rm -f ninja_bootstrap
-      sed -i 's_^#!/usr/bin/env python$_#!/usr/bin/env python3_g' configure.py
-      ./configure.py --bootstrap
-      mv ninja ninja_bootstrap
-      rm -rf build
-      ./ninja_bootstrap
-      rm -f ninja_bootstrap
-      mkdir -p $CRAFT_PART_INSTALL/usr/bin
-      mv ninja $CRAFT_PART_INSTALL/usr/bin/
-    build-packages:
-      - python3
-    prime:
-      - -*
-
-  meson-deps:
-    after: [ninja]
-    plugin: nil
-    source: https://github.com/mesonbuild/meson.git
-    source-tag: '1.4.1'
-    source-depth: 1
-    override-build: |
-      python3 -m pip install .
-      mkdir -p $CRAFT_PART_INSTALL/usr/lib/python3/dist-packages
-      rm -rf $CRAFT_PART_INSTALL/usr/lib/python3/dist-packages/meson*
-      python3 -m pip install --target=$CRAFT_PART_INSTALL/usr .
-      mv $CRAFT_PART_INSTALL/usr/meson* $CRAFT_PART_INSTALL/usr/lib/python3/dist-packages/
-      sed -i "s%^#!/usr/bin/python3$%#!/usr/bin/env python3%g" /usr/local/bin/meson
-      sed -i "s%^#!/usr/bin/python3$%#!/usr/bin/env python3%g" $CRAFT_PART_INSTALL/usr/bin/meson
-    build-packages:
-      - python3-pip
-    prime:
-      - -*
-
-  mangohud:
-    after: [meson-deps]
-    source: https://github.com/flightlessmango/MangoHud.git
-    source-tag: 'v0.7.2'
-    source-depth: 1
-    plugin: meson
-    organize:
-      snap/heroic/current/usr: usr
-    build-environment:
-      - PKG_CONFIG_PATH: /usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig
-    meson-parameters:
-      - --prefix=/usr
-      - --libdir=lib/i386-linux-gnu
-      - -Dappend_libdir_mangohud=false
-    build-packages:
-      - gcc
-      - gcc-multilib
-      - g++
-      - g++-multilib
-      - glslang-dev
-      - glslang-tools
-      - libdbus-1-dev
-      - libgl-dev
-      - libglvnd-dev
-      - libx11-dev
-      - libxnvctrl-dev
-      - mesa-common-dev
-      - python3-mako
-      - libwayland-dev
-      - libxkbcommon-dev
-    # Fixes the $LIB being escaped for some reason
-    override-build: |
-      craftctl default
-      sed -i 's/\/usr\/\\\$LIB/\$SNAP\/usr\/lib\/x86_64-linux-gnu/' $CRAFT_PART_INSTALL/usr/bin/mangohud
-
-  mangohud64:
-    after: [meson-deps, mangohud]
-    source: https://github.com/flightlessmango/MangoHud.git
-    source-tag: 'v0.7.2'
-    source-depth: 1
-    plugin: meson
-    organize:
-      snap/heroic/current/usr: usr
-    meson-parameters:
-      - --prefix=/usr
-      - --libdir=lib/x86_64-linux-gnu
-      - -Dappend_libdir_mangohud=false
-    stage:
-      - -usr/bin/mangohud
-      - -usr/share/vulkan/implicit_layer.d/MangoHud.json
-      - -usr/share/vulkan/implicit_layer.d/MangoHud.x86_64.json
-      - -usr/share/vulkan/implicit_layer.d/libMangoApp.json
-      - -usr/share/doc/mangohud/MangoHud.conf.example
-      - -usr/share/man/man1/mangohud.1
-
-  gamemode:
-    after: [meson-deps]
-    source: https://github.com/FeralInteractive/gamemode.git
-    source-tag: '1.8.2'
-    source-depth: 1
-    plugin: meson
-    organize:
-      snap/heroic/current/usr: usr
-    meson-parameters:
-      - --prefix=/usr
-    build-packages:
-      - libsystemd-dev
-      - pkg-config
-      - libdbus-1-dev
-    prime:
-      - usr/bin/gamemoderun
-      - usr/lib/*/libgamemode*.so.*
-
-  heroic:
-    source: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher.git
-    source-tag: 'v${SNAPCRAFT_PROJECT_VERSION}'
-    source-depth: 1
-    plugin: dump
-    build-snaps:
-      - node/20/stable
-    build-packages:
-      - dpkg-dev
-    prime:
-      - -chrome-*
-      - -chrome_crashpad_handler
-      - -usr/share/doc
-      - -usr/share/man
-      - -usr/share/bug
-      - -usr/share/gdb
-      - -usr/share/emacs*
-      - -usr/share/lintian
-      - -usr/share/drirc.d
-      - -usr/share/vulkan
-      - -usr/share/Xsession.d
-      - -usr/lib/*/dri
-      - -usr/lib/*/vdpau
-      - -usr/lib/*/libvkd3d*
-      - -usr/lib/*/libvulkan*
-      - -usr/lib/*/libVk*
-      - -usr/lib/*/libLLVM*
-    override-build: |
-      set -eux
-      # Setup DNS resolution
-      echo "nameserver 8.8.8.8" > /etc/resolv.conf
-      echo "nameserver 1.1.1.1" >> /etc/resolv.conf
-
-      # Test DNS resolution
-      ping -c 1 github.com || echo "Warning: Cannot ping github.com but continuing anyway"
-
-      if [[ -n "${http_proxy:-}" ]]; then
-        export HTTP_PROXY="${http_proxy:-}"
-        export HTTPS_PROXY="${http_proxy:-}"
-        export ELECTRON_GET_USE_PROXY=1
-        export GLOBAL_AGENT_HTTP_PROXY="${http_proxy:-}"
-        export GLOBAL_AGENT_HTTPS_PROXY="${http_proxy:-}"
-        # Add DNS configuration for Node.js
-        export NODE_OPTIONS="--dns-result-order=ipv4first"
-      fi
-
-      npm config set -g registry https://registry.npmjs.org/
-      npm config set -g proxy "${http_proxy:-}"
-      npm config set -g https-proxy "${http_proxy:-}"
-      npm install -g pnpm
-      pnpm config set -g registry https://github.com/
-      pnpm config set -g proxy "${http_proxy:-}"
-      pnpm config set -g https-proxy "${http_proxy:-}"
-      pnpm config set -g registry https://registry.npmjs.org/
-      pnpm config set -g proxy "${http_proxy:-}"
-      pnpm config set -g https-proxy "${http_proxy:-}"
-      pnpm install
-      pnpm run download-helper-binaries
-      pnpm dist:linux --dir
-      cp -a dist/linux-unpacked/* $CRAFT_PART_INSTALL/
-
-  debs:
-    plugin: nil
-    override-pull: |
-      craftctl default
-      dpkg --add-architecture i386
-      apt-get update
-    stage-packages:
-      - libappindicator3-1
-      - libgtk-3-0t64
-      - libpangoxft-1.0-0
-      - libsasl2-2
-      - libasound2t64
-      - libnspr4
-      - libnss3
-      - libcurl4t64
-      - libxcb-dri3-0t64:amd64
-      - libxcb-dri3-0t64:i386
-      - libpci3
-      - libvulkan1:i386
-      - libvulkan1:amd64
-      - libxml2:i386
-      - libxml2:amd64
-      - libicu74:i386
-      - libicu74:amd64
-      - zlib1g:i386
-      - zlib1g:amd64
-      - xdg-utils
-      - xdg-user-dirs
-      - xz-utils
-      - fontconfig-config
-      - fontconfig:i386
-      - fontconfig:amd64
-      - pciutils
-      - lsof
-      - usbutils # Allows finding controllers etc
-      - psmisc
-      - libfuse2t64:amd64
-      - libfuse2t64:i386
-      - libxss1:amd64
-      - libxss1:i386
-      - x11-xserver-utils
-      - zenity
-      - cabextract
-      - unzip
-      - p7zip-full
-      - curl
-    prime:
-      - -etc/dconf
-      - -etc/gtk*
-      - -etc/init*
-      - -etc/ld*
-      - -etc/vulkan
-      - -etc/X11
-      - -etc/xdg
-      - -usr/bin/cpp*
-      - -usr/bin/X11
-      - -usr/bin/browse
-      - -usr/bin/x86*
-      - -usr/bin/iceauth
-      - -usr/include
-      - -usr/lib/gcc
-      - -usr/lib/systemd
-      - -usr/lib/X11
-      - -usr/sbin
-      - -usr/share/doc*
-      - -usr/share/man
-      - -usr/share/bug
-      - -usr/share/apport
-      - -usr/share/gcc
-      - -usr/share/lintian
-      - -usr/share/libthai
-      - -usr/share/pkgconfig
-      - -usr/share/themes
-      - -usr/libexec
-
-  conditioning:
-    after: [heroic, debs]
-    plugin: nil
-    build-packages:
-      - shared-mime-info
-      - gtk-update-icon-cache
-    override-prime: |
-      set -eux
-      craftctl default
-      for dir in usr/share/icons/*; do
-        if [ -f "$dir/index.theme" ]; then
-          gtk-update-icon-cache --force "$dir"
-        fi
-      done
-
-  cleanup:
-    after: [heroic, conditioning]
-    plugin: nil
-    build-snaps:
-      - gaming-graphics-core24/kisak-fresh/candidate
-    override-prime: |
-      set -eux
-      cd /snap/gaming-graphics-core24/current/usr/lib
-      find . -type f,l -exec rm -rf $CRAFT_PRIME/usr/lib/{} \;
-      cd /snap/gaming-graphics-core24/current/usr/share
-      find . -type f,l -exec rm -rf $CRAFT_PRIME/usr/share/{} \;
-      for snap in "core24"; do
-        cd "/snap/$snap/current" && find . -type f,l -exec rm -rf "$CRAFT_PRIME/{}" \;
-      done
-
 apps:
   heroic:
-    command-chain: [bin/desktop-launch]
-    command: heroic --no-sandbox
+    command-chain: [snap/command-chain/desktop-launch-heroic]
+    command: opt/Heroic/heroic --no-sandbox
+    desktop: usr/share/applications/heroic.desktop
+    common-id: com.heroicgameslauncher.hgl
     environment:
       HOME: $SNAP_USER_COMMON
-      #LIBGL_DEBUG: verbose
-      TMPDIR: $XDG_RUNTIME_DIR
-      ALWAYS_USE_PULSEAUDIO: 1
-      PYTHONPATH: $SNAP/usr/lib/python3/dist-packages
-      GI_TYPELIB_PATH: $SNAP/usr/lib/x86_64-linux-gnu/girepository-1.0
+      PATH: $SNAP/usr/games:$PATH
+    extensions: [gnome]
     plugs:
-      - shmem
-      - desktop
-      - desktop-legacy
-      - wayland
-      - home
-      - x11
-      - gsettings
-      - hardware-observe
-      - mount-observe
-      - system-observe
-      - joystick
+      - audio-playback
+      - unity7
       - network
       - network-bind
-      - opengl
-      - audio-playback
-      - audio-record
       - screen-inhibit-control
-      - process-control
-      - bluez
-      - network-control
-      - fuse-support
-      - steam-support
+      - home
       - removable-media
-      - upower-observe
-      - uinput
+      - mount-observe
+      - joystick
+      - bluez
+      - udisks2
+      - steam-support
+
+plugs:
+  shared-memory:
+    private: true
+
+layout:
+  /usr/lib/x86_64-linux-gnu/mangohud:
+    symlink: $SNAP/usr/lib/x86_64-linux-gnu/mangohud
+
+parts:
+  heroic-app:
+    plugin: dump
+    source: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/releases/download/v$SNAPCRAFT_PROJECT_VERSION/Heroic-$SNAPCRAFT_PROJECT_VERSION-linux-amd64.deb
+    override-build: |
+      craftctl default
+      sed -i 's|Name=Heroic Games Launcher|Name=Heroic [Snap]|' $CRAFT_PART_INSTALL/usr/share/applications/heroic.desktop
+      sed -i 's|Exec=/opt/Heroic/heroic %U|Exec=${SNAP}/opt/Heroic/heroic %U|' $CRAFT_PART_INSTALL/usr/share/applications/heroic.desktop
+      sed -i 's|Icon=heroic|Icon=${SNAP}/meta/gui/icon.svg|' $CRAFT_PART_INSTALL/usr/share/applications/heroic.desktop
+    prime:
+      - opt/Heroic
+      - usr/share/applications/heroic.desktop
+
+  base-dependencies:
+    after: [heroic-app]
+    plugin: nil
+    stage-packages: [curl, zenity, unzip, cabextract, 7zip]
+
+  gamemode:
+    plugin: nil
+    stage-packages: [gamemode, gamemode-daemon, libgamemode0, libgamemodeauto0]
+    prime:
+      - etc/security/limits.d/10-gamemode.conf
+      - usr/bin/gamemoded
+      - usr/games/gamemodelist
+      - usr/games/gamemoderun
+      - usr/games/gamemode-simulate-game
+      - usr/lib/*/libgamemode.so*
+      - usr/lib/*/libgamemodeauto.so*
+      - usr/lib/*/libinih.so*
+      - usr/lib/systemd/user/gamemoded.service
+      - usr/lib/sysusers.d/gamemode.conf
+      - usr/libexec/cpucorectl
+      - usr/libexec/cpugovctl
+      - usr/libexec/gpuclockctl
+      - usr/libexec/procsysctl
+      - usr/share/dbus-1/services/com.feralinteractive.GameMode.service
+      - usr/share/gamemode/gamemode.ini
+      - usr/share/lintian/overrides/libgamemode0
+      - usr/share/metainfo/io.github.feralinteractive.gamemode.metainfo.xml
+      - usr/share/polkit-1/actions/com.feralinteractive.GameMode.policy
+      - usr/share/polkit-1/rules.d/gamemode.rules
+
+  mangohud:
+    plugin: nil
+    stage-packages: [mangohud, libspdlog1.12, libfmt9]
+    prime:
+      - usr/bin/mangohud
+      - usr/lib/x86_64-linux-gnu/mangohud/libMangoHud.so*
+      - usr/lib/x86_64-linux-gnu/mangohud/libMangoHud_opengl.so*
+      - usr/lib/x86_64-linux-gnu/mangohud/libMangoHud_shim.so*
+      - usr/lib/x86_64-linux-gnu/libspdlog.so*
+      - usr/lib/x86_64-linux-gnu/libfmt.so*
+      - usr/share/metainfo/io.github.flightlessmango.mangohud.metainfo.xml
+      - usr/share/vulkan/implicit_layer.d/MangoHud.x86_64.json
+
+  command-chain:
+    plugin: dump
+    source: $CRAFT_PROJECT_DIR/snap/command-chain/
+    organize:
+      desktop-launch-heroic: snap/command-chain/desktop-launch-heroic
+
+  cleanup:
+    after: [heroic-app, base-dependencies, gamemode, mangohud]
+    plugin: nil
+    build-snaps:
+      - mesa-2404
+      - gnome-46-2404
+    override-prime: |
+      set -eux
+      cd /snap/mesa-2404/current/usr/lib
+      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/lib/{} \;
+      cd /snap/mesa-2404/current/usr/share
+      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/share/{} \;
+
+      cd /snap/gnome-46-2404/current/usr/lib
+      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/lib/{} \;
+      cd /snap/gnome-46-2404/current/usr/share
+      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/share/{} \;
