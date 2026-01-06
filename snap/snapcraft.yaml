@@ -117,9 +117,9 @@ parts:
 
   command-chain:
     plugin: dump
-    source: ./snap/command-chain/
+    source: $CRAFT_PROJECT_DIR/command-chain/
     organize:
-      desktop-launch-heroic: snap/command-chain/desktop-launch-heroic
+      desktop-launch-heroic: command-chain/desktop-launch-heroic
 
   cleanup:
     after: [heroic-app, base-dependencies, gamemode, mangohud]
