@@ -117,7 +117,7 @@ parts:
 
   command-chain:
     plugin: dump
-    source: $CRAFT_PROJECT_DIR/command-chain/
+    source: /snap/command-chain/
     organize:
       desktop-launch-heroic: command-chain/desktop-launch-heroic
 
