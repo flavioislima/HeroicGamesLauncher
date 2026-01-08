@@ -119,7 +119,7 @@ parts:
     plugin: dump
     source: ./snap/command-chain/
     organize:
-      desktop-launch-heroic: desktop-launch-heroic
+      desktop-launch-heroic: snap/command-chain/desktop-launch-heroic
 
   cleanup:
     after: [heroic-app, base-dependencies, gamemode, mangohud]
