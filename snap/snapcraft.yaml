@@ -29,7 +29,7 @@ website: https://heroicgameslauncher.com/
 
 apps:
   heroic:
-    command-chain: [snap/command-chain/desktop-launch-heroic]
+    command-chain: [scripts/desktop-launch-heroic]
     command: opt/Heroic/heroic --no-sandbox
     desktop: usr/share/applications/heroic.desktop
     common-id: com.heroicgameslauncher.hgl
@@ -119,7 +119,9 @@ parts:
     plugin: dump
     source: ./snap/command-chain/
     organize:
-      desktop-launch-heroic: snap/command-chain/desktop-launch-heroic
+      desktop-launch-heroic: scripts/desktop-launch-heroic
+    prime:
+      - scripts/desktop-launch-heroic
 
   cleanup:
     after: [heroic-app, base-dependencies, gamemode, mangohud]
