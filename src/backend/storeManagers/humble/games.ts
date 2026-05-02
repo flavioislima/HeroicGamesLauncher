@@ -26,23 +26,9 @@ import {
   createGameLogWriter
 } from 'backend/logger'
 import { GameConfig } from 'backend/game_config'
-import {
-  getKnownFixesEnvVariables,
-  launchCleanup,
-  prepareLaunch,
-  prepareWineLaunch,
-  setupEnvVars,
-  setupWrapperEnvVars,
-  setupWrappers
-} from 'backend/launcher'
 import { existsSync } from 'graceful-fs'
 import { rm } from 'fs/promises'
-import { spawn } from 'child_process'
-import { showDialogBoxModalAuto } from 'backend/dialog/dialog'
-import { t } from 'i18next'
 import { isWindows } from 'backend/constants/environment'
-import { getWineFlagsArray } from 'backend/utils/compatibility_layers'
-import shlex from 'shlex'
 import {
   killPattern,
   moveOnUnix,
@@ -57,9 +43,16 @@ import {
 } from '../../shortcuts/shortcuts/shortcuts'
 import { removeNonSteamGame } from 'backend/shortcuts/nonesteamgame/nonesteamgame'
 import { sendFrontendMessage } from '../../ipc'
+import { showDialogBoxModalAuto } from 'backend/dialog/dialog'
+import { t } from 'i18next'
 import { join } from 'path'
-import { downloadToTempFile, runInstaller } from './installers'
+import {
+  downloadToTempFile,
+  findGameExecutable,
+  runInstaller
+} from './installers'
 import { HumbleInstalledInfo } from 'common/types/humble'
+import { launchGame } from 'backend/storeManagers/storeManagerCommon/games'
 
 import type LogWriter from 'backend/logger/log_writer'
 
@@ -179,12 +172,30 @@ async function runDownloadAndInstall(
       }
     )
 
-    const { executable } = await runInstaller({
+    await runInstaller({
       appName,
       archivePath: tempFile,
       installPath,
       gameSettings
     })
+
+    // The InnoSetup / MojoSetup runs are silent and don't tell us what the
+    // game's main executable is, so scan the install folder ourselves.
+    const discoveredExe = findGameExecutable(
+      installPath,
+      entry.subproduct.human_name
+    )
+    if (!discoveredExe) {
+      logWarning(
+        `Could not auto-detect a launcher exe for ${appName} in ${installPath}; user will need to set targetExe in game settings`,
+        LogPrefix.Humble
+      )
+    } else {
+      logInfo(
+        [`Auto-detected launcher for ${appName}: ${discoveredExe}`],
+        LogPrefix.Humble
+      )
+    }
 
     const installed: HumbleInstalledInfo = {
       app_name: appName,
@@ -192,7 +203,7 @@ async function runDownloadAndInstall(
       subproduct_machine_name: entry.subproduct.machine_name,
       install_path: installPath,
       platform: installInfo.game.platform,
-      executable,
+      executable: discoveredExe,
       md5: installInfo.manifest.md5,
       version: installInfo.game.version,
       install_size: installInfo.manifest.disk_size
@@ -273,47 +284,39 @@ export async function removeShortcuts(appName: string) {
 export async function launch(
   appName: string,
   logWriter: LogWriter,
-  launchArguments?: LaunchOption,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _launchArguments?: LaunchOption,
   args: string[] = []
 ): Promise<boolean> {
-  const gameSettings = await getSettings(appName)
+  // Delegate to the same launcher Sideload uses: it handles
+  // prepareLaunch / prepareWineLaunch / wrappers / proton verbs / target
+  // exe override, all in one place. The Humble-specific work (download,
+  // install, exe discovery) is already done by `install()`, which sets
+  // gameInfo.install.executable so this lookup succeeds.
   const gameInfo = getGameInfo(appName)
-  const installed = getInstalled(appName)
-  if (!installed?.install_path) {
-    logWriter.logError(`Cannot launch ${appName}: not installed`)
-    return false
-  }
+  const settings = await getSettings(appName)
+  const resolvedExe = settings.targetExe?.length
+    ? settings.targetExe
+    : gameInfo.install.executable
 
-  const {
-    success: launchPrepSuccess,
-    failureReason: launchPrepFailReason,
-    rpcClient,
-    mangoHudCommand,
-    gameModeBin,
-    gameScopeCommand,
-    steamRuntime
-  } = await prepareLaunch(gameSettings, logWriter, gameInfo, isNative(appName))
+  logInfo(
+    [
+      `Launching Humble ${appName} —`,
+      `install_path=${gameInfo.install.install_path ?? '<unset>'}`,
+      `executable=${resolvedExe ?? '<unset>'}`,
+      `targetExe=${settings.targetExe || '<unset>'}`,
+      `isNative=${isNative(appName)}`
+    ],
+    LogPrefix.Humble
+  )
+  logWriter.logInfo(
+    `Humble launch: install_path=${gameInfo.install.install_path}, executable=${resolvedExe}, isNative=${isNative(appName)}`
+  )
 
-  if (!launchPrepSuccess) {
-    logWriter.logError(['Launch aborted:', launchPrepFailReason])
-    launchCleanup()
-    showDialogBoxModalAuto({
-      title: t('box.error.launchAborted', 'Launch aborted'),
-      message: launchPrepFailReason!,
-      type: 'ERROR'
-    })
-    return false
-  }
-
-  let executable = installed.executable
-  if (launchArguments?.type === 'altExe') {
-    executable = launchArguments.executable
-  } else if (gameSettings.targetExe) {
-    executable = gameSettings.targetExe
-  }
-  if (!executable) {
-    logWriter.logError(
-      `No executable recorded for ${appName}; cannot launch automatically`
+  if (!resolvedExe) {
+    logError(
+      `No executable for ${appName}; auto-detection didn't find one and the user hasn't set targetExe`,
+      LogPrefix.Humble
     )
     showDialogBoxModalAuto({
       title: t('box.error.launchAborted', 'Launch aborted'),
@@ -326,84 +329,17 @@ export async function launch(
     return false
   }
 
-  const wrappers = setupWrappers(
-    gameSettings,
-    mangoHudCommand,
-    gameModeBin,
-    gameScopeCommand,
-    steamRuntime?.length ? [...steamRuntime] : undefined
-  )
-
-  let commandEnv: NodeJS.ProcessEnv = {
-    ...process.env,
-    ...setupWrapperEnvVars({ appName, appRunner: 'humble' }),
-    ...(isWindows ? {} : setupEnvVars(gameSettings, installed.install_path)),
-    ...getKnownFixesEnvVariables(appName, 'humble')
-  }
-
-  let cmd = executable
-  let cmdArgs: string[] = [
-    ...shlex.split(
-      launchArguments &&
-        launchArguments.type !== 'altExe' &&
-        launchArguments.type !== 'dlc'
-        ? (launchArguments.parameters ?? '')
-        : ''
-    ),
-    ...shlex.split(gameSettings.launcherArgs ?? ''),
-    ...args
-  ]
-
-  if (!isNative(appName)) {
-    const {
-      success: wineLaunchPrepSuccess,
-      failureReason: wineLaunchPrepFailReason,
-      envVars: wineEnvVars
-    } = await prepareWineLaunch('humble', appName, logWriter)
-    if (!wineLaunchPrepSuccess) {
-      logWriter.logError(['Launch aborted:', wineLaunchPrepFailReason])
-      if (wineLaunchPrepFailReason) {
-        showDialogBoxModalAuto({
-          title: t('box.error.launchAborted', 'Launch aborted'),
-          message: wineLaunchPrepFailReason,
-          type: 'ERROR'
-        })
-      }
-      return false
-    }
-    commandEnv = { ...commandEnv, ...wineEnvVars }
-    const wineFlags = await getWineFlagsArray(
-      gameSettings,
-      shlex.join(wrappers)
+  const ok = await launchGame(appName, logWriter, gameInfo, 'humble', args)
+  if (!ok) {
+    logError(
+      [
+        `Humble launch returned false for ${appName} —`,
+        'see log above for the wine/proton command details'
+      ],
+      LogPrefix.Humble
     )
-    cmd = wrappers[0] ?? wineFlags[0] ?? cmd
-    cmdArgs = [...wineFlags.slice(1), executable, ...cmdArgs]
-  } else if (wrappers.length) {
-    cmd = wrappers[0]
-    cmdArgs = [...wrappers.slice(1), executable, ...cmdArgs]
   }
-
-  sendGameStatusUpdate({ appName, runner: 'humble', status: 'playing' })
-
-  return new Promise<boolean>((resolve) => {
-    const child = spawn(cmd, cmdArgs, {
-      env: commandEnv,
-      cwd: installed.install_path,
-      stdio: 'pipe'
-    })
-    child.stdout?.on('data', (d: Buffer) => logWriter.logInfo(d.toString()))
-    child.stderr?.on('data', (d: Buffer) => logWriter.logInfo(d.toString()))
-    child.on('error', (err) => {
-      logError(['Failed to launch Humble game:', err], LogPrefix.Humble)
-      launchCleanup(rpcClient)
-      resolve(false)
-    })
-    child.on('exit', (code) => {
-      launchCleanup(rpcClient)
-      logInfo([`${gameInfo.title} exited with code ${code}`], LogPrefix.Humble)
-      resolve(code === 0 || code === null)
-    })
-  })
+  return ok
 }
 
 export async function moveInstall(

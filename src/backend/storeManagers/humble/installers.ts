@@ -4,6 +4,8 @@ import {
   createWriteStream,
   existsSync,
   mkdirSync,
+  readdirSync,
+  statSync,
   unlinkSync,
   chmodSync
 } from 'graceful-fs'
@@ -217,4 +219,163 @@ function runShell(cmd: string, args: string[]): Promise<void> {
       }
     })
   })
+}
+
+// Patterns of .exe files that are clearly NOT the game launcher: bundled
+// redistributables, uninstallers, crash reporters, etc.
+const EXE_BLOCKLIST = [
+  /^unins\d*\.exe$/i,
+  /^vc_redist[^/]*\.exe$/i,
+  /^vcredist[^/]*\.exe$/i,
+  /^dxsetup\.exe$/i,
+  /^directx[^/]*\.exe$/i,
+  /^dxwebsetup\.exe$/i,
+  /^dotnetfx[^/]*\.exe$/i,
+  /^ndp\d+[^/]*\.exe$/i,
+  /^oalinst\.exe$/i,
+  /^physx[^/]*\.exe$/i,
+  /^ueprereqsetup[^/]*\.exe$/i,
+  /^crashreport(er)?\.exe$/i,
+  /^crashsender[^/]*\.exe$/i,
+  /^7z\.exe$/i,
+  /^setup\.exe$/i
+]
+
+// Subdirectory name fragments that contain dependencies, not the game.
+const DIR_BLOCKLIST = [
+  '_commonredist',
+  'redist',
+  'redistributable',
+  'directx',
+  'dotnet',
+  'vcredist',
+  '$_outputs',
+  'support'
+]
+
+function isLikelyGameExe(filePath: string): boolean {
+  const lowerPath = filePath.toLowerCase().replace(/\\/g, '/')
+  if (DIR_BLOCKLIST.some((seg) => lowerPath.includes(`/${seg}/`))) {
+    return false
+  }
+  const name = basename(filePath)
+  if (EXE_BLOCKLIST.some((re) => re.test(name))) {
+    return false
+  }
+  return true
+}
+
+interface ExeCandidate {
+  path: string
+  size: number
+  depth: number
+}
+
+function walkExes(dir: string, out: ExeCandidate[], depth = 0, maxDepth = 5) {
+  if (depth > maxDepth) return
+  let entries: string[]
+  try {
+    entries = readdirSync(dir)
+  } catch {
+    return
+  }
+  for (const entry of entries) {
+    const full = join(dir, entry)
+    let stat
+    try {
+      stat = statSync(full)
+    } catch {
+      continue
+    }
+    if (stat.isDirectory()) {
+      walkExes(full, out, depth + 1, maxDepth)
+    } else if (entry.toLowerCase().endsWith('.exe')) {
+      out.push({ path: full, size: stat.size, depth })
+    }
+  }
+}
+
+function tokensFromTitle(title: string): string[] {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .split(/\s+/)
+    .filter((t) => t.length > 2)
+}
+
+/**
+ * Scan an install folder for the most likely game executable. InnoSetup and
+ * other Humble installers run silently and don't tell us where the launcher
+ * landed, so we walk the tree and apply a few heuristics:
+ *
+ *  1. Filter out known redistributable / uninstaller / setup names.
+ *  2. Prefer files at shallow depth (top-level "GameName.exe" beats
+ *     `Engine/Binaries/Win64/...UnrealLauncher.exe`).
+ *  3. Prefer names that share tokens with the game title.
+ *  4. Break remaining ties by file size (game launchers are usually >1MB).
+ *
+ * Returns undefined if no plausible candidate exists; the caller should then
+ * surface the "set the target executable" dialog.
+ */
+export function findGameExecutable(
+  installPath: string,
+  title?: string
+): string | undefined {
+  if (!existsSync(installPath)) {
+    logError(
+      `findGameExecutable: install path does not exist: ${installPath}`,
+      LogPrefix.Humble
+    )
+    return undefined
+  }
+
+  const candidates: ExeCandidate[] = []
+  walkExes(installPath, candidates)
+
+  if (!candidates.length) {
+    logError(
+      `findGameExecutable: zero .exe files found under ${installPath} — install probably failed`,
+      LogPrefix.Humble
+    )
+    return undefined
+  }
+
+  const filtered = candidates.filter((c) => isLikelyGameExe(c.path))
+  if (!filtered.length) {
+    logError(
+      [
+        `findGameExecutable: all candidates filtered out for ${installPath} —`,
+        candidates.map((c) => basename(c.path)).join(', ')
+      ],
+      LogPrefix.Humble
+    )
+    return undefined
+  }
+
+  const titleTokens = title ? tokensFromTitle(title) : []
+  const scored = filtered.map((c) => {
+    const lowerName = basename(c.path).toLowerCase()
+    const tokenMatches = titleTokens.filter((tok) =>
+      lowerName.includes(tok)
+    ).length
+    return {
+      ...c,
+      score:
+        tokenMatches * 1000 - // strong preference for title-matching names
+        c.depth * 10 + // shallower is better
+        Math.min(c.size / 1_000_000, 50) // bigger up to 50MB tiebreak
+    }
+  })
+
+  scored.sort((a, b) => b.score - a.score)
+  logInfo(
+    [
+      `Picked ${scored[0].path} from ${scored.length} candidate(s):`,
+      scored
+        .map((s) => `${basename(s.path)}(score=${s.score.toFixed(1)})`)
+        .join(', ')
+    ],
+    LogPrefix.Humble
+  )
+  return scored[0].path
 }
