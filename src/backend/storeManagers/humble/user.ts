@@ -1,23 +1,49 @@
-import { LogPrefix, logError, logInfo } from 'backend/logger'
+import {
+  LogPrefix,
+  logDebug,
+  logError,
+  logInfo,
+  logWarning
+} from 'backend/logger'
 import { session } from 'electron'
 import { HumbleUserData } from 'common/types/humble'
 import { configStore } from './electronStores'
-import {
-  HUMBLE_API_BASE,
-  HUMBLE_PARTITION,
-  HUMBLE_SESSION_COOKIE
-} from './constants'
+import { HUMBLE_PARTITION, HUMBLE_SESSION_COOKIE } from './constants'
 import { clearCache } from 'backend/utils'
 import { validateSession } from './api'
 
 async function readSessionCookieFromPartition(): Promise<string | undefined> {
   try {
     const partitionSession = session.fromPartition(HUMBLE_PARTITION)
-    const cookies = await partitionSession.cookies.get({
-      name: HUMBLE_SESSION_COOKIE,
-      url: HUMBLE_API_BASE
-    })
-    return cookies[0]?.value
+    // Don't filter by URL — Humble sets the cookie on `.humblebundle.com`
+    // and the URL match is finicky depending on the cookie's secure/SameSite
+    // flags. Reading everything in the partition and filtering by name is
+    // both simpler and easier to debug.
+    const allCookies = await partitionSession.cookies.get({})
+    logDebug(
+      [
+        `Found ${allCookies.length} cookie(s) in Humble partition:`,
+        allCookies.map((c) => `${c.domain}:${c.name}`).join(', ')
+      ],
+      LogPrefix.Humble
+    )
+    const sessionCookie = allCookies.find(
+      (c) => c.name === HUMBLE_SESSION_COOKIE
+    )
+    if (!sessionCookie) {
+      logWarning(
+        `No ${HUMBLE_SESSION_COOKIE} cookie found in partition`,
+        LogPrefix.Humble
+      )
+      return undefined
+    }
+    logDebug(
+      [
+        `Found session cookie on domain ${sessionCookie.domain}, length=${sessionCookie.value.length}`
+      ],
+      LogPrefix.Humble
+    )
+    return sessionCookie.value
   } catch (error) {
     logError(
       ['Failed to read Humble session cookie from webview partition:', error],
@@ -37,15 +63,20 @@ export class HumbleUser {
     status: 'done' | 'failed'
     user: HumbleUserData | undefined
   }> {
+    logInfo('Attempting Humble login', LogPrefix.Humble)
     const cookie = await readSessionCookieFromPartition()
     if (!cookie) {
-      logError('No Humble session cookie found after login', LogPrefix.Humble)
+      // Not necessarily an error: this fires on every humblebundle.com page
+      // navigation, before the user has finished signing in.
       return { status: 'failed', user: undefined }
     }
 
     const valid = await validateSession(cookie)
     if (!valid) {
-      logError('Humble session cookie did not validate', LogPrefix.Humble)
+      logError(
+        `Humble session cookie did not validate (cookie length: ${cookie.length})`,
+        LogPrefix.Humble
+      )
       return { status: 'failed', user: undefined }
     }
 

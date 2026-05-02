@@ -154,6 +154,39 @@ export default function WebView() {
     navigate('/login')
   }
 
+  // Humble has no OAuth code or token in the URL — login success is just
+  // "the session cookie now exists in the webview partition." Skip while
+  // we're still on the login page itself; on every other humblebundle.com
+  // page, ask the backend to read the cookie and validate it. The IPC is
+  // a no-op when no cookie exists, so it's safe to call repeatedly.
+  const humbleLoginAttemptedRef = useRef(false)
+  const tryHumbleLogin = (pageURL: string) => {
+    if (humbleLoginAttemptedRef.current) return
+    if (!pageURL.includes('humblebundle.com')) return
+    if (pageURL.includes('humblebundle.com/login')) return
+    humbleLoginAttemptedRef.current = true
+    setLoading({
+      refresh: true,
+      message: t('status.logging', 'Logging In...')
+    })
+    humble
+      .login()
+      .then((status) => {
+        if (status === 'done') {
+          handleSuccessfulLogin()
+        } else {
+          // Cookie wasn't there yet (or the request failed); reset so the
+          // next navigation can retry.
+          humbleLoginAttemptedRef.current = false
+          setLoading({ refresh: false, message: '' })
+        }
+      })
+      .catch(() => {
+        humbleLoginAttemptedRef.current = false
+        setLoading({ refresh: false, message: '' })
+      })
+  }
+
   const [webviewPreloadPath, setWebviewPreloadPath] = useState('')
   useEffect(() => {
     const fetchWebviewPreloadPath = async () => {
@@ -202,24 +235,7 @@ export default function WebView() {
             handleAmazonLogin(code)
           }
         } else if (runner === 'humble') {
-          const pageURL = webview.getURL()
-          if (
-            pageURL.includes('humblebundle.com/home/library') ||
-            pageURL.includes('humblebundle.com/home/keys')
-          ) {
-            setLoading({
-              refresh: true,
-              message: t('status.logging', 'Logging In...')
-            })
-            humble.login().then((status) => {
-              if (status === 'done') handleSuccessfulLogin()
-              else
-                setLoading({
-                  refresh: false,
-                  message: ''
-                })
-            })
-          }
+          tryHumbleLogin(webview.getURL())
         } else if (runner == 'legendary') {
           const pageUrl = webview.getURL()
           const parsedUrl = new URL(pageUrl)
@@ -302,6 +318,8 @@ export default function WebView() {
             })
             zoom.login(pageURL).then(() => handleSuccessfulLogin())
           }
+        } else if (runner === 'humble') {
+          tryHumbleLogin(webview.getURL())
         }
       }
 
