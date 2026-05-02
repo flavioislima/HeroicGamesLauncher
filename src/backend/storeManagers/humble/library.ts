@@ -18,6 +18,8 @@ import {
 import { installStore, libraryStore } from './electronStores'
 import { HumbleUser } from './user'
 import { getAllOrders, isUnauthorized } from './api'
+import { discoverArtworkForMany, getCachedArtwork } from './artwork'
+import { sendFrontendMessage } from '../../ipc'
 
 const installedGames: Map<string, HumbleInstalledInfo> = new Map()
 const library: Map<string, GameInfo> = new Map()
@@ -97,13 +99,17 @@ function subproductToGameInfo(
   if (!preferred) return undefined
 
   const installed = installedGames.get(subproduct.machine_name)
+  const artwork = getCachedArtwork(subproduct.machine_name)
+  const betterArt = artwork?.url
+  const fallbackIcon = subproduct.icon ?? ''
 
   return {
     app_name: subproduct.machine_name,
     runner: 'humble',
     title: subproduct.human_name,
-    art_cover: subproduct.icon ?? '',
-    art_square: subproduct.icon ?? '',
+    art_cover: betterArt ?? fallbackIcon,
+    art_square: betterArt ?? fallbackIcon,
+    art_background: betterArt ?? fallbackIcon,
     art_logo: subproduct.icon,
     is_installed: Boolean(installed),
     canRunOffline: true,
@@ -160,11 +166,35 @@ export async function refresh(): Promise<ExecResult | null> {
     writeFileSync(humbleOrdersCachePath, JSON.stringify(orders), 'utf-8')
     cacheOrders(orders)
     refreshInstalled()
+    // First pass with whatever artwork we already have cached, so the user
+    // sees their library immediately. Then look up Steam artwork for any
+    // new titles in the background and rebuild once done.
     rebuildLibrary()
     logInfo(
       ['Loaded', `${library.size}`, 'Humble DRM-free games'],
       LogPrefix.Humble
     )
+
+    const subproductsToEnrich = Array.from(cachedSubproducts.values()).map(
+      ({ subproduct }) => ({
+        machine_name: subproduct.machine_name,
+        human_name: subproduct.human_name
+      })
+    )
+    discoverArtworkForMany(subproductsToEnrich)
+      .then(() => {
+        rebuildLibrary()
+        // Tell the renderer to re-read the cache, otherwise users keep
+        // staring at the small Humble icons until the next manual refresh.
+        sendFrontendMessage('refreshLibrary', 'humble')
+      })
+      .catch((error) => {
+        logWarning(
+          ['Humble artwork enrichment failed:', error],
+          LogPrefix.Humble
+        )
+      })
+
     return { stdout: '', stderr: '' }
   } catch (error) {
     if (isUnauthorized(error)) {
