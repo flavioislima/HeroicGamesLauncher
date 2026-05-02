@@ -158,16 +158,29 @@ async function runDownloadAndInstall(
       installInfo.manifest.md5,
       abort.signal,
       ({ percent, bytesDownloaded, totalBytes, speedBytesPerSecond }) => {
+        // Round to one decimal place — the raw float ends up rendered
+        // verbatim in the progress UI, so 90.0849633855638% leaks through
+        // unless we trim it here. Mirror Nile's format for the log line so
+        // anyone tailing the runner log gets the same shape across stores.
+        const progress = {
+          percent: Number(percent.toFixed(1)),
+          bytes: humanBytes(bytesDownloaded),
+          eta: estimateEta(bytesDownloaded, totalBytes, speedBytesPerSecond),
+          downSpeed: Number((speedBytesPerSecond / (1024 * 1024)).toFixed(2))
+        }
+        logInfo(
+          [
+            `Progress for ${entry.subproduct.human_name}:`,
+            `${progress.percent}%/${progress.bytes}/${progress.eta}`.trim(),
+            `Down: ${progress.downSpeed}MB/s`
+          ],
+          LogPrefix.Humble
+        )
         sendProgressUpdate({
           appName,
           runner: 'humble',
           status: action,
-          progress: {
-            percent,
-            bytes: humanBytes(bytesDownloaded),
-            eta: estimateEta(bytesDownloaded, totalBytes, speedBytesPerSecond),
-            downSpeed: speedBytesPerSecond / (1024 * 1024)
-          }
+          progress
         })
       }
     )
