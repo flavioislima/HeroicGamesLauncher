@@ -6,6 +6,7 @@ const LogPrefix = {
   Gog: 'Gog',
   Nile: 'Nile',
   Zoom: 'Zoom',
+  Humble: 'Humble',
   WineDownloader: 'WineDownloader',
   ToolInstaller: 'ToolInstaller',
   GlobalConfig: 'GlobalConfig',
@@ -33,7 +34,8 @@ const RunnerToLogPrefixMap: Record<Runner, LogPrefix> = {
   gog: LogPrefix.Gog,
   nile: LogPrefix.Nile,
   sideload: LogPrefix.Sideload,
-  zoom: LogPrefix.Zoom
+  zoom: LogPrefix.Zoom,
+  humble: LogPrefix.Humble
 }
 
 const LogLevel = ['DEBUG', 'INFO', 'WARNING', 'ERROR'] as const

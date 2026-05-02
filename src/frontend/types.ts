@@ -17,6 +17,7 @@ import {
   InstallInfo
 } from 'common/types'
 import { NileLoginData, NileRegisterData } from 'common/types/nile'
+import { HumbleUserData } from 'common/types/humble'
 
 export type Category =
   | 'all'
@@ -25,6 +26,7 @@ export type Category =
   | 'sideload'
   | 'nile'
   | 'zoom'
+  | 'humble'
 
 export interface ContextType {
   error: boolean
@@ -94,6 +96,14 @@ export interface ContextType {
     login: (url: string) => Promise<string>
     logout: () => Promise<void>
     enabled: boolean
+  }
+  humble: {
+    library: GameInfo[]
+    user_id?: string
+    username?: string
+    user?: HumbleUserData
+    login: () => Promise<string>
+    logout: () => Promise<void>
   }
   installingEpicGame: boolean
   allTilesInColor: boolean
@@ -212,6 +222,7 @@ export interface StoresFilters {
   nile: boolean
   sideload: boolean
   zoom: boolean
+  humble: boolean
 }
 
 export interface PlatformsFilters {

@@ -48,6 +48,7 @@ import type {
 import type { CatalogLocaleSettings, CatalogProduct } from './discounts'
 import type { GOGCloudSavesLocation, UserData } from './gog'
 import type { NileLoginData, NileRegisterData, NileUserData } from './nile'
+import type { HumbleUserData } from './humble'
 import type { GameOverride, SelectiveDownload } from './legendary'
 import type { GetLogFileArgs } from 'backend/logger/paths'
 
@@ -203,8 +204,14 @@ interface AsyncIPCFunctions {
     user: NileUserData | undefined
   }>
   authZoom: (url: string) => Promise<{ status: 'done' | 'error' }>
+  authHumble: () => Promise<{
+    status: 'done' | 'failed'
+    user: HumbleUserData | undefined
+  }>
+  getHumbleUserInfo: () => Promise<HumbleUserData | undefined>
   logoutLegendary: () => Promise<void>
   logoutAmazon: () => Promise<void>
+  logoutHumble: () => Promise<void>
   getAlternativeWine: () => Promise<WineInstallation[]>
   readConfig: (config_class: 'library' | 'user') => Promise<GameInfo[] | string>
   requestAppSettings: () => AppSettings

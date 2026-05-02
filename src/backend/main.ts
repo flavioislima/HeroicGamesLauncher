@@ -36,6 +36,7 @@ import { LegendaryUser } from 'backend/storeManagers/legendary/user'
 import { GOGUser } from './storeManagers/gog/user'
 import gogPresence from './storeManagers/gog/presence'
 import { NileUser } from './storeManagers/nile/user'
+import { HumbleUser } from './storeManagers/humble/user'
 import { ZoomUser } from './storeManagers/zoom/user'
 import {
   clearCache,
@@ -826,6 +827,10 @@ addHandler('authZoom', async (event, url) => {
 
 addListener('logoutZoom', ZoomUser.logout)
 addHandler('getZoomUserInfo', async () => ZoomUser.getUserDetails())
+
+addHandler('authHumble', async () => HumbleUser.login())
+addHandler('logoutHumble', HumbleUser.logout)
+addHandler('getHumbleUserInfo', async () => HumbleUser.getUserData())
 
 addHandler('getAlternativeWine', async () =>
   GlobalConfig.get().getAlternativeWine()

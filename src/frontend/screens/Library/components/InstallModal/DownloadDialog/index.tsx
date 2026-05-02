@@ -482,7 +482,7 @@ export default function DownloadDialog({
   const haveDLCs =
     gameInstallInfo &&
     'game' in gameInstallInfo &&
-    gameInstallInfo?.game?.owned_dlc?.length > 0
+    (gameInstallInfo?.game?.owned_dlc?.length ?? 0) > 0
   const DLCList: Array<GOGDLCInfo | LegendaryDLCInfo> =
     (gameInstallInfo &&
       'game' in gameInstallInfo &&

@@ -24,6 +24,8 @@ const validStoredUrl = (url: string, store: string) => {
       return url.includes('gaming.amazon.com')
     case 'zoom':
       return url.includes('zoom-platform.com')
+    case 'humble':
+      return url.includes('humblebundle.com')
     default:
       return false
   }
@@ -33,7 +35,8 @@ export default function WebView() {
   const { i18n } = useTranslation()
   const { pathname, search } = useLocation()
   const { t } = useTranslation()
-  const { epic, gog, amazon, zoom, connectivity } = useContext(ContextProvider)
+  const { epic, gog, amazon, zoom, humble, connectivity } =
+    useContext(ContextProvider)
   const [loading, setLoading] = useState<{
     refresh: boolean
     message: string
@@ -70,6 +73,8 @@ export default function WebView() {
     'https://auth.gog.com/auth?client_id=46899977096215655&redirect_uri=https%3A%2F%2Fembed.gog.com%2Fon_login_success%3Forigin%3Dclient&response_type=code&layout=galaxy'
   const zoomLoginUrl =
     'https://www.zoom-platform.com/login?li=heroic&return_li_token=true'
+  const humbleStore = 'https://www.humblebundle.com/store'
+  const humbleLoginUrl = 'https://www.humblebundle.com/login'
 
   const trueAsStr = 'true' as unknown as boolean | undefined
 
@@ -78,13 +83,15 @@ export default function WebView() {
     '/store/gog': gogStore,
     '/store/amazon': amazonStore,
     '/store/zoom': zoomStore,
+    '/store/humble': humbleStore,
     '/wiki': wikiURL,
     '/loginEpic': epicLoginUrl,
     '/loginGOG': gogLoginUrl,
     '/loginweb/legendary': epicLoginUrl,
     '/loginweb/gog': gogLoginUrl,
     '/loginweb/nile': amazonLoginData ? amazonLoginData.url : '',
-    '/loginweb/zoom': zoomLoginUrl
+    '/loginweb/zoom': zoomLoginUrl,
+    '/loginweb/humble': humbleLoginUrl
   }
   let startUrl = urls[pathname]
 
@@ -193,6 +200,25 @@ export default function WebView() {
           )
           if (code) {
             handleAmazonLogin(code)
+          }
+        } else if (runner === 'humble') {
+          const pageURL = webview.getURL()
+          if (
+            pageURL.includes('humblebundle.com/home/library') ||
+            pageURL.includes('humblebundle.com/home/keys')
+          ) {
+            setLoading({
+              refresh: true,
+              message: t('status.logging', 'Logging In...')
+            })
+            humble.login().then((status) => {
+              if (status === 'done') handleSuccessfulLogin()
+              else
+                setLoading({
+                  refresh: false,
+                  message: ''
+                })
+            })
           }
         } else if (runner == 'legendary') {
           const pageUrl = webview.getURL()
@@ -380,7 +406,13 @@ export default function WebView() {
         key={store}
         ref={webviewRef}
         className="WebView__webview"
-        partition={`persist:${startUrl === epicLoginUrl ? 'epicstore' : store}`}
+        partition={`persist:${
+          startUrl === epicLoginUrl
+            ? 'epicstore'
+            : runner === 'humble' || store === 'humble'
+              ? 'humble'
+              : store
+        }`}
         src={startUrl}
         allowpopups={trueAsStr}
         preload={webviewPreloadPath}

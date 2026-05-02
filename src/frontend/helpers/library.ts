@@ -474,5 +474,6 @@ export const gogCategories = ['all', 'gog']
 export const sideloadedCategories = ['all', 'sideload']
 export const amazonCategories = ['all', 'nile', 'amazon']
 export const zoomCategories = ['all', 'zoom']
+export const humbleCategories = ['all', 'humble']
 
 export { handleStopInstallation, install, launch, repair, updateGame }

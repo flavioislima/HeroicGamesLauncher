@@ -161,6 +161,14 @@ const nileConfigStore = new TypeCheckedStoreFrontend('nileConfigStore', {
   cwd: 'nile_store'
 })
 
+const humbleLibraryStore = new CacheStore<GameInfo[], 'library'>(
+  'humble_library',
+  null
+)
+const humbleConfigStore = new TypeCheckedStoreFrontend('humbleConfigStore', {
+  cwd: 'humble_store'
+})
+
 const timestampStore = new TypeCheckedStoreFrontend('timestampStore', {
   cwd: 'store',
   name: 'timestamp'
@@ -188,6 +196,8 @@ export {
   downloadManagerStore,
   nileLibraryStore,
   nileConfigStore,
+  humbleLibraryStore,
+  humbleConfigStore,
   zoomLibraryStore,
   zoomInstalledGamesStore,
   zoomConfigStore

@@ -32,6 +32,8 @@ import {
   libraryStore,
   nileConfigStore,
   nileLibraryStore,
+  humbleConfigStore,
+  humbleLibraryStore,
   wineDownloaderInfoStore,
   sideloadLibrary,
   zoomConfigStore,
@@ -72,6 +74,11 @@ interface StateProps {
     library: GameInfo[]
     username?: string
     enabled: boolean
+  }
+  humble: {
+    library: GameInfo[]
+    user_id?: string
+    username?: string
   }
   wineVersions: WineVersionInfo[]
   error: boolean
@@ -151,6 +158,11 @@ class GlobalState extends PureComponent<Props> {
 
     return games
   }
+  loadHumbleLibrary = (): Array<GameInfo> => {
+    const games = humbleLibraryStore.get('library', [])
+
+    return games
+  }
 
   loadZoomLibrary = (): Array<GameInfo> => {
     const games = zoomLibraryStore.get('games', [])
@@ -185,6 +197,11 @@ class GlobalState extends PureComponent<Props> {
       library: this.loadZoomLibrary(),
       username: zoomConfigStore.get_nodefault('username'),
       enabled: !!globalSettings?.experimentalFeatures?.zoomPlatform
+    },
+    humble: {
+      library: this.loadHumbleLibrary(),
+      user_id: humbleConfigStore.get_nodefault('userData.user_id'),
+      username: humbleConfigStore.get_nodefault('userData.username')
     },
     wineVersions: wineDownloaderInfoStore.get('wine-releases', []),
     error: false,
@@ -606,6 +623,38 @@ class GlobalState extends PureComponent<Props> {
 
   getAmazonLoginData = async () => window.api.getAmazonLoginData()
 
+  humbleLogin = async () => {
+    console.log('logging humble')
+    const response = await window.api.authHumble()
+
+    if (response.status === 'done') {
+      this.setState({
+        humble: {
+          library: [],
+          user_id: response.user?.user_id,
+          username: response.user?.username
+        }
+      })
+
+      this.handleSuccessfulLogin('humble')
+    }
+
+    return response.status
+  }
+
+  humbleLogout = async () => {
+    await window.api.logoutHumble()
+    this.setState({
+      humble: {
+        library: [],
+        user_id: null,
+        username: null
+      }
+    })
+    console.log('Logging out from humble')
+    window.location.reload()
+  }
+
   zoomLogin = async (url: string) => {
     console.log('logging zoom')
     const response = await window.api.authZoom(url)
@@ -645,7 +694,7 @@ class GlobalState extends PureComponent<Props> {
   ): Promise<void> => {
     console.log('refreshing')
 
-    const { epic, gog, amazon, zoom, gameUpdates } = this.state
+    const { epic, gog, amazon, zoom, humble, gameUpdates } = this.state
 
     let updates = gameUpdates
     if (checkUpdates) {
@@ -689,6 +738,13 @@ class GlobalState extends PureComponent<Props> {
       amazonLibrary = this.loadAmazonLibrary()
     }
 
+    let humbleLibrary = humbleLibraryStore.get('library', [])
+    if (humble.user_id && (!humbleLibrary.length || !humble.library.length)) {
+      window.api.logInfo('No cache found, getting data from humble...')
+      await window.api.refreshLibrary('humble')
+      humbleLibrary = this.loadHumbleLibrary()
+    }
+
     const updatedSideload = sideloadLibrary.get('games', [])
 
     this.setState({
@@ -709,6 +765,11 @@ class GlobalState extends PureComponent<Props> {
         library: amazonLibrary,
         user_id: amazon.user_id,
         username: amazon.username
+      },
+      humble: {
+        library: humbleLibrary,
+        user_id: humble.user_id,
+        username: humble.username
       },
       gameUpdates: updates,
       refreshing: false,
@@ -830,6 +891,7 @@ class GlobalState extends PureComponent<Props> {
       gog,
       amazon,
       zoom,
+      humble,
       gameUpdates = [],
       libraryStatus,
       platform
@@ -923,6 +985,7 @@ class GlobalState extends PureComponent<Props> {
     const legendaryUser = configStore.has('userInfo')
     const gogUser = gogConfigStore.has('userData')
     const amazonUser = nileConfigStore.has('userData')
+    const humbleUser = humbleConfigStore.has('userData')
     const zoomUser = zoomConfigStore.has('isLoggedIn')
 
     if (legendaryUser) {
@@ -931,6 +994,10 @@ class GlobalState extends PureComponent<Props> {
 
     if (amazonUser) {
       await window.api.getAmazonUserInfo()
+    }
+
+    if (humbleUser) {
+      await window.api.getHumbleUserInfo()
     }
 
     if (zoom.enabled && zoomUser) {
@@ -942,13 +1009,20 @@ class GlobalState extends PureComponent<Props> {
       this.setState({ gameUpdates: storedGameUpdates })
     }
 
-    if (legendaryUser || gogUser || amazonUser || (zoom.enabled && zoomUser)) {
+    if (
+      legendaryUser ||
+      gogUser ||
+      amazonUser ||
+      humbleUser ||
+      (zoom.enabled && zoomUser)
+    ) {
       this.refreshLibrary({
         checkForUpdates: true,
         runInBackground:
           epic.library.length !== 0 ||
           gog.library.length !== 0 ||
           amazon.library.length !== 0 ||
+          humble.library.length !== 0 ||
           ((this.state.zoom.enabled && zoom.library) || []).length !== 0
       })
     }
@@ -1047,6 +1121,7 @@ class GlobalState extends PureComponent<Props> {
       gog,
       amazon,
       zoom,
+      humble,
       favouriteGames,
       customCategories,
       hiddenGames,
@@ -1090,6 +1165,13 @@ class GlobalState extends PureComponent<Props> {
             login: this.zoomLogin,
             logout: this.zoomLogout,
             enabled: this.state.zoom.enabled
+          },
+          humble: {
+            library: humble.library,
+            user_id: humble.user_id,
+            username: humble.username,
+            login: this.humbleLogin,
+            logout: this.humbleLogout
           },
           installingEpicGame,
           setLanguage: this.setLanguage,

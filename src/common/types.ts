@@ -9,6 +9,7 @@ import {
   LegendaryInstallInfo
 } from './types/legendary'
 import { NileInstallInfo, NileInstallPlatform } from './types/nile'
+import { HumbleInstallInfo, HumbleInstallPlatform } from './types/humble'
 import {
   ZoomInstallPlatform,
   ZoomInstalledInfo,
@@ -20,7 +21,13 @@ import type { HeroicHowLongToBeatEntry } from 'backend/wiki_game_info/howlongtob
 import type { Path } from 'backend/schemas'
 import type LogWriter from 'backend/logger/log_writer'
 
-export type Runner = 'legendary' | 'gog' | 'sideload' | 'nile' | 'zoom'
+export type Runner =
+  | 'legendary'
+  | 'gog'
+  | 'sideload'
+  | 'nile'
+  | 'zoom'
+  | 'humble'
 
 // NOTE: Do not put enum's in this module or it will break imports
 
@@ -179,7 +186,7 @@ export type GOGAchievement = {
 export type GameAchievement = GOGAchievement
 
 export interface GameInfo {
-  runner: 'legendary' | 'gog' | 'sideload' | 'nile' | 'zoom'
+  runner: 'legendary' | 'gog' | 'sideload' | 'nile' | 'zoom' | 'humble'
   store_url?: string
   app_name: string
   art_cover: string
@@ -600,6 +607,7 @@ export type InstallPlatform =
   | GogInstallPlatform
   | NileInstallPlatform
   | ZoomInstallPlatform
+  | HumbleInstallPlatform
   | 'Browser'
 
 export type ConnectivityStatus = 'offline' | 'check-online' | 'online'
@@ -825,6 +833,7 @@ export type InstallInfo =
   | NileInstallInfo
   | ZoomInstalledInfo
   | ZoomInstallInfo
+  | HumbleInstallInfo
 
 export interface KnowFixesInfo {
   title: string

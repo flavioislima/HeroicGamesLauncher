@@ -42,6 +42,10 @@ import {
   installStore as nileInstallStore,
   libraryStore as nileLibraryStore
 } from './storeManagers/nile/electronStores'
+import {
+  installStore as humbleInstallStore,
+  libraryStore as humbleLibraryStore
+} from './storeManagers/humble/electronStores'
 import * as fileSize from 'filesize'
 import { Client as discordClient } from '@xhayper/discord-rpc'
 import { notify, showDialogBoxModalAuto } from './dialog/dialog'
@@ -372,7 +376,7 @@ async function openUrlOrFile(url: string): Promise<string | void> {
 }
 
 function clearCache(
-  library?: 'gog' | 'legendary' | 'nile' | 'zoom',
+  library?: 'gog' | 'legendary' | 'nile' | 'zoom' | 'humble',
   fromVersionChange = false
 ) {
   wikiGameInfoStore.clear()
@@ -394,6 +398,10 @@ function clearCache(
   if (library === 'nile' || !library) {
     nileInstallStore.clear()
     nileLibraryStore.clear()
+  }
+  if (library === 'humble' || !library) {
+    humbleInstallStore.clear()
+    humbleLibraryStore.clear()
   }
 
   if (!fromVersionChange) {
