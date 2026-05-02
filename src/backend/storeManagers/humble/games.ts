@@ -40,7 +40,7 @@ import { rm } from 'fs/promises'
 import { spawn } from 'child_process'
 import { showDialogBoxModalAuto } from 'backend/dialog/dialog'
 import { t } from 'i18next'
-import { isLinux, isMac, isWindows } from 'backend/constants/environment'
+import { isWindows } from 'backend/constants/environment'
 import { getWineFlagsArray } from 'backend/utils/compatibility_layers'
 import shlex from 'shlex'
 import {
@@ -59,7 +59,7 @@ import { removeNonSteamGame } from 'backend/shortcuts/nonesteamgame/nonesteamgam
 import { sendFrontendMessage } from '../../ipc'
 import { join } from 'path'
 import { downloadToTempFile, runInstaller } from './installers'
-import { HumbleInstallPlatform, HumbleInstalledInfo } from 'common/types/humble'
+import { HumbleInstalledInfo } from 'common/types/humble'
 
 import type LogWriter from 'backend/logger/log_writer'
 
@@ -254,20 +254,12 @@ export async function update(appName: string): Promise<InstallResult> {
   return runDownloadAndInstall(appName, installed.install_path, 'updating')
 }
 
-export function isNative(appName?: string): boolean {
-  if (!appName) return false
-  const installed = getInstalled(appName)
-  const platform: HumbleInstallPlatform | undefined = installed?.platform
-  if (!platform) {
-    const info = humbleGetGameInfo(appName)
-    if (info?.is_linux_native && isLinux) return true
-    if (info?.is_mac_native && isMac) return true
-    return isWindows
-  }
-  if (platform === 'windows') return isWindows
-  if (platform === 'linux') return isLinux
-  if (platform === 'osx') return isMac
-  return false
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function isNative(_appName?: string): boolean {
+  // MVP: Humble runner only ever installs the Windows download, so the
+  // game is "native" only on Windows hosts. On Linux/Mac it always runs
+  // through the configured Wine/Proton/CrossOver prefix.
+  return isWindows
 }
 
 export async function addShortcuts(appName: string, fromMenu?: boolean) {

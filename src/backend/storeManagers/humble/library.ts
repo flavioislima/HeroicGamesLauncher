@@ -18,7 +18,6 @@ import {
 import { installStore, libraryStore } from './electronStores'
 import { HumbleUser } from './user'
 import { getAllOrders, isUnauthorized } from './api'
-import { isMac, isWindows } from 'backend/constants/environment'
 
 const installedGames: Map<string, HumbleInstalledInfo> = new Map()
 const library: Map<string, GameInfo> = new Map()
@@ -62,18 +61,18 @@ function cacheOrders(orders: HumbleOrder[]) {
   }
 }
 
-function normalizePlatform(raw: string): HumbleInstallPlatform | undefined {
-  if (raw === 'windows') return 'windows'
-  if (raw === 'linux') return 'linux'
-  if (raw === 'mac' || raw === 'osx') return 'osx'
-  return undefined
+// MVP scope: only Windows DRM-free downloads are supported. On Linux/Mac
+// the game runs through Wine/Proton like every other Heroic runner. Native
+// Linux installers were dropped because Humble distributes a mix of .deb,
+// .rpm, .sh (MojoSetup) and bare archives — there's no portable install
+// strategy across distros, and many "Linux" entries on Humble are actually
+// .deb files that fail outright on Arch/Fedora/etc.
+function isWindowsDownload(d: HumbleDownload): boolean {
+  return d.platform === 'windows' && Boolean(d.download_struct?.length)
 }
 
 function hasInstallableDownload(subproduct: HumbleSubproduct): boolean {
-  if (!subproduct.downloads?.length) return false
-  return subproduct.downloads.some(
-    (d) => d.download_struct?.length && normalizePlatform(d.platform)
-  )
+  return Boolean(subproduct.downloads?.some(isWindowsDownload))
 }
 
 function pickPreferredDownload(subproduct: HumbleSubproduct):
@@ -83,25 +82,11 @@ function pickPreferredDownload(subproduct: HumbleSubproduct):
       platform: HumbleInstallPlatform
     }
   | undefined {
-  // Prefer the platform we're running on, then linux/mac for native, then
-  // windows as Wine-launchable fallback.
-  const order: HumbleInstallPlatform[] = isWindows
-    ? ['windows', 'linux', 'osx']
-    : isMac
-      ? ['osx', 'linux', 'windows']
-      : ['linux', 'osx', 'windows']
-
-  for (const platform of order) {
-    const dl = subproduct.downloads.find(
-      (d) =>
-        normalizePlatform(d.platform) === platform && d.download_struct?.length
-    )
-    if (dl) {
-      const struct = dl.download_struct.find((s) => s.url?.web)
-      if (struct) return { download: dl, struct, platform }
-    }
-  }
-  return undefined
+  const dl = subproduct.downloads?.find(isWindowsDownload)
+  if (!dl) return undefined
+  const struct = dl.download_struct.find((s) => s.url?.web)
+  if (!struct) return undefined
+  return { download: dl, struct, platform: 'windows' }
 }
 
 function subproductToGameInfo(
@@ -112,7 +97,6 @@ function subproductToGameInfo(
   if (!preferred) return undefined
 
   const installed = installedGames.get(subproduct.machine_name)
-  const platform = preferred.platform
 
   return {
     app_name: subproduct.machine_name,
@@ -123,8 +107,8 @@ function subproductToGameInfo(
     art_logo: subproduct.icon,
     is_installed: Boolean(installed),
     canRunOffline: true,
-    is_linux_native: platform === 'linux',
-    is_mac_native: platform === 'osx',
+    is_linux_native: false,
+    is_mac_native: false,
     developer: subproduct.payee?.human_name,
     description: subproduct.human_name,
     folder_name: subproduct.machine_name,
