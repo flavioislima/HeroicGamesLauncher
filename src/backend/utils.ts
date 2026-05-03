@@ -42,6 +42,10 @@ import {
   installStore as nileInstallStore,
   libraryStore as nileLibraryStore
 } from './storeManagers/nile/electronStores'
+import {
+  installStore as eaInstallStore,
+  libraryStore as eaLibraryStore
+} from './storeManagers/ea/electronStores'
 import * as fileSize from 'filesize'
 import { Client as discordClient } from '@xhayper/discord-rpc'
 import { notify, showDialogBoxModalAuto } from './dialog/dialog'
@@ -372,7 +376,7 @@ async function openUrlOrFile(url: string): Promise<string | void> {
 }
 
 function clearCache(
-  library?: 'gog' | 'legendary' | 'nile' | 'zoom',
+  library?: 'gog' | 'legendary' | 'nile' | 'zoom' | 'ea',
   fromVersionChange = false
 ) {
   wikiGameInfoStore.clear()
@@ -394,6 +398,10 @@ function clearCache(
   if (library === 'nile' || !library) {
     nileInstallStore.clear()
     nileLibraryStore.clear()
+  }
+  if (library === 'ea' || !library) {
+    eaInstallStore.clear()
+    eaLibraryStore.clear()
   }
 
   if (!fromVersionChange) {
@@ -503,6 +511,21 @@ function getNileBin(): { dir: string; bin: string } {
   if (!defaultNilePath) defaultNilePath = archSpecificBinary('nile')
 
   return splitPathAndName(fixAsarPath(defaultNilePath))
+}
+
+let defaultEAPath: string | undefined = undefined
+function getEABin(): { dir: string; bin: string } {
+  const settings = GlobalConfig.get().getSettings()
+  if (settings?.altEABin) {
+    return splitPathAndName(settings.altEABin)
+  }
+
+  // We expect a `maxima-cli` (or symlinked `ea-cli`) binary to be
+  // shipped alongside legendary/nile. Heroic does not yet vendor it;
+  // until then users supply the path via altEABin.
+  if (!defaultEAPath) defaultEAPath = archSpecificBinary('maxima-cli')
+
+  return splitPathAndName(fixAsarPath(defaultEAPath))
 }
 
 export function createNecessaryFolders() {
@@ -1693,6 +1716,7 @@ export {
   getGOGdlBin,
   getCometBin,
   getNileBin,
+  getEABin,
   formatEpicStoreUrl,
   getSteamRuntime,
   constructAndUpdateRPC,

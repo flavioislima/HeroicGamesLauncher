@@ -13,6 +13,7 @@ import { getSteamDeckInfo, type SteamDeckInfo } from './steamDeck'
 import { getHeroicVersion } from './heroicVersion'
 import {
   getCometVersion,
+  getEAVersion,
   getGogdlVersion,
   getLegendaryVersion,
   getNileVersion
@@ -62,6 +63,7 @@ interface SystemInformation {
     gogdlVersion: string
     cometVersion: string
     nileVersion: string
+    eaVersion: string
   }
 }
 
@@ -79,12 +81,13 @@ async function getSystemInfo(cache = true): Promise<SystemInformation> {
   const gpus = await getGpuInfo()
   const detailedOsInfo = await getOsInfo()
   const deckInfo = getSteamDeckInfo(cpus, gpus)
-  const [legendaryVersion, gogdlVersion, cometVersion, nileVersion] =
+  const [legendaryVersion, gogdlVersion, cometVersion, nileVersion, eaVersion] =
     await Promise.all([
       getLegendaryVersion(),
       getGogdlVersion(),
       getCometVersion(),
-      getNileVersion()
+      getNileVersion(),
+      getEAVersion()
     ])
 
   const sysinfo: SystemInformation = {
@@ -114,7 +117,8 @@ async function getSystemInfo(cache = true): Promise<SystemInformation> {
       legendaryVersion: legendaryVersion,
       gogdlVersion: gogdlVersion,
       cometVersion: cometVersion,
-      nileVersion: nileVersion
+      nileVersion: nileVersion,
+      eaVersion: eaVersion
     }
   }
   cachedSystemInfo = sysinfo
@@ -151,7 +155,8 @@ Software Versions:
   Legendary: ${info.softwareInUse.legendaryVersion}
   gogdl: ${info.softwareInUse.gogdlVersion}
   comet: ${info.softwareInUse.cometVersion}
-  Nile: ${info.softwareInUse.nileVersion}`
+  Nile: ${info.softwareInUse.nileVersion}
+  Maxima (EA): ${info.softwareInUse.eaVersion}`
 }
 
 export { getSystemInfo, formatSystemInfo }

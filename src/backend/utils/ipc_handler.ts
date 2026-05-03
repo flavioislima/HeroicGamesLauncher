@@ -4,6 +4,7 @@ import { addListener, addHandler } from 'backend/ipc'
 import { callAbortController } from './aborthandler/aborthandler'
 import {
   getCometVersion,
+  getEAVersion,
   getGogdlVersion,
   getLegendaryVersion,
   getNileVersion
@@ -19,6 +20,7 @@ addHandler('getLegendaryVersion', getLegendaryVersion)
 addHandler('getGogdlVersion', getGogdlVersion)
 addHandler('getCometVersion', getCometVersion)
 addHandler('getNileVersion', getNileVersion)
+addHandler('getEAVersion', getEAVersion)
 addHandler('getSystemInfo', async (e, cache) => getSystemInfo(cache))
 addListener('copySystemInfoToClipboard', async () =>
   getSystemInfo().then(formatSystemInfo).then(clipboard.writeText)

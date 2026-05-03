@@ -48,6 +48,7 @@ import type {
 import type { CatalogLocaleSettings, CatalogProduct } from './discounts'
 import type { GOGCloudSavesLocation, UserData } from './gog'
 import type { NileLoginData, NileRegisterData, NileUserData } from './nile'
+import type { EALoginData, EARegisterData, EAUserData } from './ea'
 import type { GameOverride, SelectiveDownload } from './legendary'
 import type { GetLogFileArgs } from 'backend/logger/paths'
 
@@ -139,6 +140,8 @@ interface TestSyncIPCFunctions {
   resetGogdlCommandStub: () => void
   setNileCommandStub: (stubs: RunnerCommandStub[]) => void
   resetNileCommandStub: () => void
+  setEACommandStub: (stubs: RunnerCommandStub[]) => void
+  resetEACommandStub: () => void
 }
 
 // ts-prune-ignore-next
@@ -160,6 +163,7 @@ interface AsyncIPCFunctions {
   getGogdlVersion: () => Promise<string>
   getCometVersion: () => Promise<string>
   getNileVersion: () => Promise<string>
+  getEAVersion: () => Promise<string>
   isFullscreen: () => boolean
   isFrameless: () => boolean
   isMaximized: () => boolean
@@ -188,6 +192,7 @@ interface AsyncIPCFunctions {
   ) => Promise<InstallInfo | null>
   getUserInfo: () => Promise<UserInfo | undefined>
   getAmazonUserInfo: () => Promise<NileUserData | undefined>
+  getEAUserInfo: () => Promise<EAUserData | undefined>
   getZoomUserInfo: () => Promise<{ username: string } | undefined>
   isLoggedIn: () => boolean
   login: (sid: string) => Promise<{
@@ -202,9 +207,14 @@ interface AsyncIPCFunctions {
     status: 'done' | 'failed'
     user: NileUserData | undefined
   }>
+  authEA: (data: EARegisterData) => Promise<{
+    status: 'done' | 'failed'
+    user: EAUserData | undefined
+  }>
   authZoom: (url: string) => Promise<{ status: 'done' | 'error' }>
   logoutLegendary: () => Promise<void>
   logoutAmazon: () => Promise<void>
+  logoutEA: () => Promise<void>
   getAlternativeWine: () => Promise<WineInstallation[]>
   readConfig: (config_class: 'library' | 'user') => Promise<GameInfo[] | string>
   requestAppSettings: () => AppSettings
@@ -304,6 +314,7 @@ interface AsyncIPCFunctions {
     appName: string
   ) => Promise<number | undefined>
   getAmazonLoginData: () => Promise<NileLoginData>
+  getEALoginData: () => Promise<EALoginData>
   hasExecutable: (executable: string) => Promise<boolean>
 
   setPrivateBranchPassword: (appName: string, password: string) => void

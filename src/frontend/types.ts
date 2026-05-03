@@ -17,6 +17,7 @@ import {
   InstallInfo
 } from 'common/types'
 import { NileLoginData, NileRegisterData } from 'common/types/nile'
+import { EALoginData, EARegisterData } from 'common/types/ea'
 
 export type Category =
   | 'all'
@@ -25,6 +26,7 @@ export type Category =
   | 'sideload'
   | 'nile'
   | 'zoom'
+  | 'ea'
 
 export interface ContextType {
   error: boolean
@@ -87,6 +89,15 @@ export interface ContextType {
     getLoginData: () => Promise<NileLoginData>
     login: (data: NileRegisterData) => Promise<string>
     logout: () => Promise<void>
+  }
+  ea: {
+    library: GameInfo[]
+    user_id?: string
+    username?: string
+    getLoginData: () => Promise<EALoginData>
+    login: (data: EARegisterData) => Promise<string>
+    logout: () => Promise<void>
+    enabled: boolean
   }
   zoom: {
     library: GameInfo[]
@@ -212,6 +223,7 @@ export interface StoresFilters {
   nile: boolean
   sideload: boolean
   zoom: boolean
+  ea: boolean
 }
 
 export interface PlatformsFilters {

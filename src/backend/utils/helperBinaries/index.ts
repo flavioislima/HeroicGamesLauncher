@@ -1,6 +1,7 @@
 import { runRunnerCommand as runLegendaryCommand } from '../../storeManagers/legendary/library'
 import { runRunnerCommand as runGogdlCommand } from '../../storeManagers/gog/library'
 import { runRunnerCommand as runNileCommand } from '../../storeManagers/nile/library'
+import { runRunnerCommand as runEACommand } from '../../storeManagers/ea/library'
 import { spawnSync } from 'node:child_process'
 import { getCometBin } from 'backend/utils'
 import { join } from 'path'
@@ -57,4 +58,20 @@ async function getNileVersion(): Promise<string> {
   return stdout
 }
 
-export { getLegendaryVersion, getGogdlVersion, getNileVersion, getCometVersion }
+async function getEAVersion(): Promise<string> {
+  const { stdout, error } = await runEACommand(['--version'], {
+    abortId: 'ea-version'
+  })
+
+  if (error) return 'invalid'
+
+  return stdout
+}
+
+export {
+  getLegendaryVersion,
+  getGogdlVersion,
+  getNileVersion,
+  getCometVersion,
+  getEAVersion
+}

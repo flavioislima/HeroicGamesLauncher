@@ -36,6 +36,7 @@ import { LegendaryUser } from 'backend/storeManagers/legendary/user'
 import { GOGUser } from './storeManagers/gog/user'
 import gogPresence from './storeManagers/gog/presence'
 import { NileUser } from './storeManagers/nile/user'
+import { EAUser } from './storeManagers/ea/user'
 import { ZoomUser } from './storeManagers/zoom/user'
 import {
   clearCache,
@@ -804,6 +805,8 @@ addHandler('getUserInfo', async () => {
 
 addHandler('getAmazonUserInfo', async () => NileUser.getUserData())
 
+addHandler('getEAUserInfo', async () => EAUser.getUserData())
+
 // Checks if the user have logged in with Legendary already
 addHandler('isLoggedIn', LegendaryUser.isLoggedIn)
 
@@ -815,6 +818,10 @@ addListener('logoutGOG', GOGUser.logout)
 addHandler('getAmazonLoginData', NileUser.getLoginData)
 addHandler('authAmazon', async (event, data) => NileUser.login(data))
 addHandler('logoutAmazon', NileUser.logout)
+
+addHandler('getEALoginData', EAUser.getLoginData)
+addHandler('authEA', async (event, data) => EAUser.login(data))
+addHandler('logoutEA', EAUser.logout)
 
 addHandler('authZoom', async (event, url) => {
   const login = await ZoomUser.login(url)

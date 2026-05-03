@@ -9,6 +9,7 @@ import GOGLogo from 'frontend/assets/gog-logo.svg?react'
 import HeroicLogo from 'frontend/assets/heroic-icon.svg?react'
 import AmazonLogo from 'frontend/assets/amazon-logo.svg?react'
 import ZoomLogo from 'frontend/assets/zoom-logo.svg?react'
+import EALogo from 'frontend/assets/ea-logo.svg?react'
 
 import { LanguageSelector, UpdateComponent } from '../../components/UI'
 import { FlagPosition } from '../../components/UI/LanguageSelector'
@@ -21,9 +22,10 @@ export const epicLoginPath = '/loginweb/legendary'
 export const gogLoginPath = '/loginweb/gog'
 export const amazonLoginPath = '/loginweb/nile'
 export const zoomLoginPath = '/loginweb/zoom'
+export const eaLoginPath = '/loginweb/ea'
 
 export default React.memo(function NewLogin() {
-  const { epic, gog, amazon, zoom, refreshLibrary } =
+  const { epic, gog, amazon, zoom, ea, refreshLibrary } =
     useContext(ContextProvider)
   const { t } = useTranslation()
 
@@ -42,6 +44,7 @@ export default React.memo(function NewLogin() {
     Boolean(amazon.user_id)
   )
   const [isZoomLoggedIn, setIsZoomLoggedIn] = useState(Boolean(zoom.username))
+  const [isEALoggedIn, setIsEALoggedIn] = useState(Boolean(ea.user_id))
 
   const systemInfo = useAwaited(window.api.systemInfo.get)
 
@@ -73,7 +76,15 @@ export default React.memo(function NewLogin() {
     setIsGogLoggedIn(Boolean(gog.username))
     setIsAmazonLoggedIn(Boolean(amazon.user_id))
     setIsZoomLoggedIn(Boolean(zoom.username))
-  }, [epic.username, gog.username, amazon.user_id, zoom.username, t])
+    setIsEALoggedIn(Boolean(ea.user_id))
+  }, [
+    epic.username,
+    gog.username,
+    amazon.user_id,
+    zoom.username,
+    ea.user_id,
+    t
+  ])
 
   async function handleLibraryClick() {
     await refreshLibrary({ runInBackground: false })
@@ -158,6 +169,18 @@ export default React.memo(function NewLogin() {
                 isLoggedIn={isZoomLoggedIn}
                 user={zoom.username}
                 logoutAction={zoom.logout}
+                disabled={oldMac}
+              />
+            )}
+            {ea.enabled && (
+              <Runner
+                class="ea"
+                buttonText={t('login.ea', 'EA Login (Maxima)')}
+                icon={() => <EALogo />}
+                loginUrl={eaLoginPath}
+                isLoggedIn={isEALoggedIn}
+                user={ea.username}
+                logoutAction={ea.logout}
                 disabled={oldMac}
               />
             )}

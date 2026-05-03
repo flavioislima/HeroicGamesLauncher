@@ -9,6 +9,7 @@ import { GameInfo } from 'common/types'
 import { LegendaryInstallInfo } from 'common/types/legendary'
 import { GogInstallInfo } from 'common/types/gog'
 import { NileInstallInfo } from 'common/types/nile'
+import { EAInstallInfo } from 'common/types/ea'
 import { ZoomInstallInfo, ZoomInstalledInfo } from 'common/types/zoom'
 import { useTranslation } from 'react-i18next'
 import LegendaryModifyInstallModal from './Legendary'
@@ -22,6 +23,7 @@ interface ModifyInstallProps {
     | NileInstallInfo
     | ZoomInstalledInfo
     | ZoomInstallInfo
+    | EAInstallInfo
     | null
   onClose: () => void
 }

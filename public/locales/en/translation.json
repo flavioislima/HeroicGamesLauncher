@@ -48,6 +48,7 @@
         },
         "changelog": "Changelog",
         "choose": "Choose",
+        "choose-ea-binary": "Select Maxima Binary (needs restart)",
         "choose-egs-prefix": "Choose Prefix where EGS is installed",
         "choose-gogdl-binary": "Select GOGDL Binary (needs restart)",
         "choose-legendary-binary": "Select Legendary binary",
@@ -569,6 +570,7 @@
     "login": {
         "alternative_method": "Alternative Login Method",
         "amazon": "Amazon Login",
+        "ea": "EA Login (Maxima)",
         "epic": "Epic Games Login",
         "gog": "GOG Login",
         "message": "Login with your platform. You can login to more than one platform at the same time.",
@@ -687,6 +689,7 @@
         }
     },
     "other": {
+        "ea-version": "Maxima Version: ",
         "gogdl-version": "GOGDL Version: ",
         "legendary-version": "Legendary Version: ",
         "nile-version": "Nile Version: ",
@@ -694,6 +697,7 @@
     },
     "Other": "Other",
     "placeholder": {
+        "alt-ea-bin": "Maxima binary not bundled — supply a path to maxima-cli...",
         "alt-gogdl-bin": "Using built-in GOGDL binary...",
         "alt-legendary-bin": "Using built-in Legendary binary...",
         "alt-nile-bin": "Using built-in Nile binary...",
@@ -736,6 +740,7 @@
             },
             "label": "Allow installation of games with broken or denied anticheat"
         },
+        "alt-ea-bin": "Choose an Alternative EA (Maxima) Binary (needs restart) to use",
         "alt-gogdl-bin": "Choose an Alternative GOGDL Binary to use",
         "alt-legendary-bin": "Choose an Alternative Legendary Binary",
         "alt-nile-bin": "Choose an Alternative Nile Binary",
@@ -794,6 +799,7 @@
         "exit-to-tray": "Exit to System Tray",
         "experimental_features": {
             "cometSupport": "Comet support",
+            "eaSupport": "EA games support via Maxima (pre-alpha; supply maxima-cli path)",
             "enableHelp": "Help component",
             "enableNewDesign": "New design",
             "zoomPlatform": "Zoom Platform support (only Linux)"

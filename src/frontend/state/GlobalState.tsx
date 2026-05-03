@@ -32,6 +32,8 @@ import {
   libraryStore,
   nileConfigStore,
   nileLibraryStore,
+  eaConfigStore,
+  eaLibraryStore,
   wineDownloaderInfoStore,
   sideloadLibrary,
   zoomConfigStore,
@@ -40,6 +42,7 @@ import {
 } from '../helpers/electronStores'
 import { IpcRendererEvent } from 'electron'
 import { NileRegisterData } from 'common/types/nile'
+import { EARegisterData } from 'common/types/ea'
 
 const storage: Storage = window.localStorage
 const globalSettings = configStore.get_nodefault('settings')
@@ -67,6 +70,12 @@ interface StateProps {
     library: GameInfo[]
     user_id?: string
     username?: string
+  }
+  ea: {
+    library: GameInfo[]
+    user_id?: string
+    username?: string
+    enabled: boolean
   }
   zoom: {
     library: GameInfo[]
@@ -152,6 +161,10 @@ class GlobalState extends PureComponent<Props> {
     return games
   }
 
+  loadEALibrary = (): Array<GameInfo> => {
+    return eaLibraryStore.get('library', [])
+  }
+
   loadZoomLibrary = (): Array<GameInfo> => {
     const games = zoomLibraryStore.get('games', [])
     const installedGames = zoomInstalledGamesStore.get('installed', [])
@@ -180,6 +193,12 @@ class GlobalState extends PureComponent<Props> {
       library: this.loadAmazonLibrary(),
       user_id: nileConfigStore.get_nodefault('userData.user_id'),
       username: nileConfigStore.get_nodefault('userData.name')
+    },
+    ea: {
+      library: this.loadEALibrary(),
+      user_id: eaConfigStore.get_nodefault('userData.user_id'),
+      username: eaConfigStore.get_nodefault('userData.name'),
+      enabled: !!globalSettings?.experimentalFeatures?.eaSupport
     },
     zoom: {
       library: this.loadZoomLibrary(),
@@ -237,6 +256,7 @@ class GlobalState extends PureComponent<Props> {
       enableHelp: false,
       cometSupport: true,
       zoomPlatform: false,
+      eaSupport: false,
       ...(globalSettings?.experimentalFeatures || {})
     },
     disableDialogBackdropClose: configStore.get(
@@ -497,7 +517,8 @@ class GlobalState extends PureComponent<Props> {
   handleExperimentalFeatures = (value: ExperimentalFeatures) => {
     this.setState({
       experimentalFeatures: value,
-      zoom: { ...this.state.zoom, enabled: value }
+      zoom: { ...this.state.zoom, enabled: !!value.zoomPlatform },
+      ea: { ...this.state.ea, enabled: !!value.eaSupport }
     })
   }
 
@@ -606,6 +627,42 @@ class GlobalState extends PureComponent<Props> {
 
   getAmazonLoginData = async () => window.api.getAmazonLoginData()
 
+  eaLogin = async (data: EARegisterData) => {
+    console.log('logging ea')
+    const response = await window.api.authEA(data)
+
+    if (response.status === 'done') {
+      this.setState({
+        ea: {
+          library: [],
+          user_id: response.user?.user_id,
+          username: response.user?.name,
+          enabled: true
+        }
+      })
+
+      this.handleSuccessfulLogin('ea')
+    }
+
+    return response.status
+  }
+
+  eaLogout = async () => {
+    await window.api.logoutEA()
+    this.setState({
+      ea: {
+        library: [],
+        user_id: null,
+        username: null,
+        enabled: this.state.ea.enabled
+      }
+    })
+    console.log('Logging out from ea')
+    window.location.reload()
+  }
+
+  getEALoginData = async () => window.api.getEALoginData()
+
   zoomLogin = async (url: string) => {
     console.log('logging zoom')
     const response = await window.api.authZoom(url)
@@ -645,7 +702,7 @@ class GlobalState extends PureComponent<Props> {
   ): Promise<void> => {
     console.log('refreshing')
 
-    const { epic, gog, amazon, zoom, gameUpdates } = this.state
+    const { epic, gog, amazon, zoom, ea, gameUpdates } = this.state
 
     let updates = gameUpdates
     if (checkUpdates) {
@@ -689,6 +746,16 @@ class GlobalState extends PureComponent<Props> {
       amazonLibrary = this.loadAmazonLibrary()
     }
 
+    let eaLibrary: GameInfo[] = []
+    if (ea.enabled) {
+      eaLibrary = this.loadEALibrary()
+      if (ea.user_id && (!eaLibrary.length || !ea.library.length)) {
+        window.api.logInfo('No cache found, getting data from ea...')
+        await window.api.refreshLibrary('ea')
+        eaLibrary = this.loadEALibrary()
+      }
+    }
+
     const updatedSideload = sideloadLibrary.get('games', [])
 
     this.setState({
@@ -709,6 +776,12 @@ class GlobalState extends PureComponent<Props> {
         library: amazonLibrary,
         user_id: amazon.user_id,
         username: amazon.username
+      },
+      ea: {
+        library: eaLibrary,
+        user_id: ea.user_id,
+        username: ea.username,
+        enabled: ea.enabled
       },
       gameUpdates: updates,
       refreshing: false,
@@ -924,6 +997,8 @@ class GlobalState extends PureComponent<Props> {
     const gogUser = gogConfigStore.has('userData')
     const amazonUser = nileConfigStore.has('userData')
     const zoomUser = zoomConfigStore.has('isLoggedIn')
+    const eaUser = eaConfigStore.has('userData')
+    const { ea } = this.state
 
     if (legendaryUser) {
       await window.api.getUserInfo()
@@ -937,19 +1012,30 @@ class GlobalState extends PureComponent<Props> {
       await window.api.getZoomUserInfo()
     }
 
+    if (ea.enabled && eaUser) {
+      await window.api.getEAUserInfo()
+    }
+
     if (!gameUpdates.length) {
       const storedGameUpdates = JSON.parse(storage.getItem('updates') || '[]')
       this.setState({ gameUpdates: storedGameUpdates })
     }
 
-    if (legendaryUser || gogUser || amazonUser || (zoom.enabled && zoomUser)) {
+    if (
+      legendaryUser ||
+      gogUser ||
+      amazonUser ||
+      (zoom.enabled && zoomUser) ||
+      (ea.enabled && eaUser)
+    ) {
       this.refreshLibrary({
         checkForUpdates: true,
         runInBackground:
           epic.library.length !== 0 ||
           gog.library.length !== 0 ||
           amazon.library.length !== 0 ||
-          ((this.state.zoom.enabled && zoom.library) || []).length !== 0
+          ((this.state.zoom.enabled && zoom.library) || []).length !== 0 ||
+          ((this.state.ea.enabled && ea.library) || []).length !== 0
       })
     }
 
@@ -1083,6 +1169,15 @@ class GlobalState extends PureComponent<Props> {
             getLoginData: this.getAmazonLoginData,
             login: this.amazonLogin,
             logout: this.amazonLogout
+          },
+          ea: {
+            library: this.state.ea.enabled ? this.state.ea.library : [],
+            user_id: this.state.ea.user_id,
+            username: this.state.ea.username,
+            getLoginData: this.getEALoginData,
+            login: this.eaLogin,
+            logout: this.eaLogout,
+            enabled: this.state.ea.enabled
           },
           zoom: {
             library: this.state.zoom.enabled ? zoom.library : [],

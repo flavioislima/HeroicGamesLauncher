@@ -19,6 +19,7 @@ import {
 import { UserData } from 'common/types/gog'
 import { NileUserData } from './nile'
 import { ZoomCredentials } from './zoom'
+import { EAUserData } from './ea'
 
 export interface StoreStructure {
   configStore: {
@@ -82,6 +83,9 @@ export interface StoreStructure {
   }
   nileConfigStore: {
     userData?: NileUserData
+  }
+  eaConfigStore: {
+    userData?: EAUserData
   }
   sideloadedStore: {
     games: GameInfo[]

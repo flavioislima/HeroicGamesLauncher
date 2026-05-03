@@ -2,12 +2,14 @@ import * as SideloadGameManager from 'backend/storeManagers/sideload/games'
 import * as GOGGameManager from 'backend/storeManagers/gog/games'
 import * as LegendaryGameManager from 'backend/storeManagers/legendary/games'
 import * as NileGameManager from 'backend/storeManagers/nile/games'
+import * as EAGameManager from 'backend/storeManagers/ea/games'
 import * as ZoomGameManager from 'backend/storeManagers/zoom/games'
 
 import * as SideloadLibraryManager from 'backend/storeManagers/sideload/library'
 import * as GOGLibraryManager from 'backend/storeManagers/gog/library'
 import * as LegendaryLibraryManager from 'backend/storeManagers/legendary/library'
 import * as NileLibraryManager from 'backend/storeManagers/nile/library'
+import * as EALibraryManager from 'backend/storeManagers/ea/library'
 import * as ZoomLibraryManager from 'backend/storeManagers/zoom/library'
 import { GameManager, LibraryManager } from 'common/types/game_manager'
 
@@ -25,6 +27,7 @@ export const gameManagerMap: GameManagerMap = {
   gog: GOGGameManager,
   legendary: LegendaryGameManager,
   nile: NileGameManager,
+  ea: EAGameManager,
   zoom: ZoomGameManager
 }
 
@@ -37,6 +40,7 @@ export const libraryManagerMap: LibraryManagerMap = {
   gog: GOGLibraryManager,
   legendary: LegendaryLibraryManager,
   nile: NileLibraryManager,
+  ea: EALibraryManager,
   zoom: ZoomLibraryManager
 }
 
@@ -86,6 +90,8 @@ export async function initStoreManagers() {
   await LegendaryLibraryManager.initLegendaryLibraryManager()
   await GOGLibraryManager.initGOGLibraryManager()
   await NileLibraryManager.initNileLibraryManager()
+  if (GlobalConfig.get().getSettings().experimentalFeatures?.eaSupport)
+    await EALibraryManager.initEALibraryManager()
   if (GlobalConfig.get().getSettings().experimentalFeatures?.zoomPlatform)
     await ZoomLibraryManager.initZoomLibraryManager()
 }

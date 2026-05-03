@@ -26,6 +26,7 @@ import {
   gogCategories,
   sideloadedCategories,
   zoomCategories,
+  eaCategories,
   normalizeTitle
 } from 'frontend/helpers/library'
 import RecentlyPlayed from './components/RecentlyPlayed'
@@ -57,6 +58,7 @@ export default React.memo(function Library(): JSX.Element {
     gog,
     amazon,
     zoom,
+    ea,
     sideloadedLibrary,
     favouriteGames,
     libraryTopSection,
@@ -93,7 +95,8 @@ export default React.memo(function Library(): JSX.Element {
       gog: gogCategories.includes(storedCategory),
       nile: amazonCategories.includes(storedCategory),
       sideload: sideloadedCategories.includes(storedCategory),
-      zoom: zoom.enabled && zoomCategories.includes(storedCategory)
+      zoom: zoom.enabled && zoomCategories.includes(storedCategory),
+      ea: ea.enabled && eaCategories.includes(storedCategory)
     }
   }
 

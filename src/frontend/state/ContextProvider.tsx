@@ -25,6 +25,19 @@ const initialContext: ContextType = {
     login: async () => Promise.resolve(''),
     logout: async () => Promise.resolve()
   },
+  ea: {
+    library: [],
+    getLoginData: async () =>
+      Promise.resolve({
+        client_id: '',
+        code_verifier: '',
+        callback_port: 0,
+        url: ''
+      }),
+    login: async () => Promise.resolve(''),
+    logout: async () => Promise.resolve(),
+    enabled: false
+  },
   zoom: {
     library: [],
     login: async () => Promise.resolve(''),
@@ -101,7 +114,8 @@ const initialContext: ContextType = {
   experimentalFeatures: {
     enableHelp: false,
     cometSupport: true,
-    zoomPlatform: false
+    zoomPlatform: false,
+    eaSupport: false
   },
   handleExperimentalFeatures: () => null,
   disableDialogBackdropClose: false,
