@@ -9,7 +9,7 @@ export const SIDEBAR_TOUR_ID = 'sidebar-tour'
 const SidebarTour: React.FC = () => {
   const { t } = useTranslation()
   const { isTourActive } = useTour()
-  const { epic, gog, amazon, zoom, platform, isRTL } =
+  const { epic, gog, amazon, zoom, humble, platform, isRTL } =
     useContext(ContextProvider)
 
   // Check if the user is logged into any store
@@ -17,6 +17,7 @@ const SidebarTour: React.FC = () => {
     epic.username ||
     gog.username ||
     amazon.user_id ||
+    humble.user_id ||
     (zoom.enabled && zoom.username)
   )
   const isWin = platform === 'win32'
