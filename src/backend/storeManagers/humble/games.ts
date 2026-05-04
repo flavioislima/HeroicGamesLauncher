@@ -4,6 +4,7 @@ import {
   GameInfo,
   GameSettings,
   InstallArgs,
+  InstallPlatform,
   LaunchOption
 } from 'common/types'
 import { InstallResult, RemoveArgs } from 'common/types/game_manager'
@@ -93,14 +94,52 @@ export async function getExtraInfo(appName: string): Promise<ExtraInfo> {
 }
 
 export async function importGame(
+  appName: string,
+  path: string,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _appName: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _path: string
+  _platform: InstallPlatform
 ): Promise<ExecResult> {
-  // Importing existing Humble installs is not supported in v1; users can
-  // re-install through the launcher instead.
-  return { stdout: '', stderr: 'Importing Humble games is not supported yet' }
+  const entry = getCachedSubproduct(appName)
+  if (!entry) {
+    const error = `Humble subproduct ${appName} not found in cached library — log in and refresh first`
+    logError(error, LogPrefix.Humble)
+    return { stdout: '', stderr: error, error }
+  }
+  if (!existsSync(path)) {
+    const error = `Import path does not exist: ${path}`
+    logError(error, LogPrefix.Humble)
+    return { stdout: '', stderr: error, error }
+  }
+  // Pull the manifest so we can record version/md5/size against what's
+  // currently published — a best-effort match since we can't rehash the
+  // user's existing files. Falls back gracefully if unavailable.
+  const installInfo = await getInstallInfo(appName).catch(() => undefined)
+  const discoveredExe = findGameExecutable(path, entry.subproduct.human_name)
+  if (!discoveredExe) {
+    logWarning(
+      `Imported ${appName} but no executable found under ${path}; user must set targetExe`,
+      LogPrefix.Humble
+    )
+  }
+  const installed: HumbleInstalledInfo = {
+    app_name: appName,
+    gamekey: entry.order.gamekey,
+    subproduct_machine_name: entry.subproduct.machine_name,
+    install_path: path,
+    platform: installInfo?.game.platform ?? 'windows',
+    executable: discoveredExe,
+    md5: installInfo?.manifest.md5 ?? '',
+    version: installInfo?.game.version ?? '',
+    install_size: installInfo?.manifest.disk_size ?? 0
+  }
+  persistInstalled(installed)
+  installState(appName, true)
+  sendFrontendMessage('refreshLibrary', 'humble')
+  logInfo(
+    [`Imported ${appName} from ${path}; executable=${discoveredExe ?? '<unset>'}`],
+    LogPrefix.Humble
+  )
+  return { stdout: 'Imported', stderr: '' }
 }
 
 export function onInstallOrUpdateOutput(
