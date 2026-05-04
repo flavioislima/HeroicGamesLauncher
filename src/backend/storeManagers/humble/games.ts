@@ -140,18 +140,19 @@ export async function importGame(
   installState(appName, true)
   sendFrontendMessage('refreshLibrary', 'humble')
   logInfo(
-    [`Imported ${appName} from ${path}; executable=${discoveredExe ?? '<unset>'}`],
+    [
+      `Imported ${appName} from ${path}; executable=${discoveredExe ?? '<unset>'}`
+    ],
     LogPrefix.Humble
   )
   return { stdout: 'Imported', stderr: '' }
 }
 
 export function onInstallOrUpdateOutput(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _appName: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   _action: 'installing' | 'updating',
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   _data: string,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _totalDownloadSize = -1
@@ -334,7 +335,7 @@ export async function removeShortcuts(appName: string) {
 export async function launch(
   appName: string,
   logWriter: LogWriter,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   _launchArguments?: LaunchOption,
   args: string[] = []
 ): Promise<boolean> {

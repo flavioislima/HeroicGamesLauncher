@@ -9,7 +9,7 @@ import { join } from 'path'
 // returns a single image URL (typically 600×900 grid art) suitable for
 // both the library card and the game-page hero.
 
-export interface HumbleArtwork {
+interface HumbleArtwork {
   // Bottles only gives us one image, so all three slots share it.
   url?: string
   fetchedAt: number
@@ -76,12 +76,10 @@ async function searchBottles(title: string): Promise<string | undefined> {
   }
 }
 
-/**
- * Idempotent: returns the cached entry if we've already tried, regardless
- * of whether the lookup succeeded — re-asking on every refresh would be
- * wasteful.
- */
-export async function discoverArtwork(
+// Idempotent: returns the cached entry if we've already tried, regardless
+// of whether the lookup succeeded — re-asking on every refresh would be
+// wasteful.
+async function discoverArtwork(
   machineName: string,
   humanName: string
 ): Promise<HumbleArtwork> {
@@ -119,9 +117,4 @@ export async function discoverArtworkForMany(
     // everything we already learned.
     saveCache()
   }
-}
-
-export function clearArtworkCache() {
-  cache = {}
-  saveCache()
 }

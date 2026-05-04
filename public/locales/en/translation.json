@@ -518,6 +518,7 @@
     "humble": {
         "no_executable": "Heroic could not auto-detect a launcher for this Humble game. Set the target executable in game settings."
     },
+    "humble-store": "Humble Bundle",
     "info": {
         "heroic": {
             "beta": "Beta",

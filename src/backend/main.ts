@@ -104,7 +104,8 @@ import {
   getBranchPassword,
   setBranchPassword,
   getGOGPlaytime,
-  syncQueuedPlaytimeGOG
+  syncQueuedPlaytimeGOG,
+  getAchievements as getAchievementsGOG
 } from 'backend/storeManagers/gog/games'
 import { playtimeSyncQueue } from './storeManagers/gog/electronStores'
 import * as LegendaryLibraryManager from 'backend/storeManagers/legendary/library'
@@ -158,7 +159,6 @@ import {
 } from './constants/paths'
 import { supportedLanguages } from 'common/languages'
 import MigrationSystem from './migration'
-import { getAchievements as getAchievementsGOG } from './storeManagers/gog/games'
 
 if (isLinux) app.commandLine?.appendSwitch('--gtk-version', '3')
 

@@ -49,7 +49,7 @@ export interface HumbleSubproduct {
   library_family_name?: string
 }
 
-export interface HumbleTpkd {
+interface HumbleTpkd {
   machine_name: string
   human_name: string
   key_type: string

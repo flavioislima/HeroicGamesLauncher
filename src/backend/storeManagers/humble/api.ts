@@ -71,7 +71,7 @@ export async function validateSession(cookieValue: string): Promise<boolean> {
   }
 }
 
-export async function getOrderKeys(): Promise<string[]> {
+async function getOrderKeys(): Promise<string[]> {
   const res = await axios.get<{ gamekey: string }[]>(
     `${HUMBLE_API_BASE}/api/v1/user/order`,
     { headers: buildHeaders() }
@@ -79,7 +79,7 @@ export async function getOrderKeys(): Promise<string[]> {
   return res.data.map((o) => o.gamekey)
 }
 
-export async function getOrder(gamekey: string): Promise<HumbleOrder> {
+async function getOrder(gamekey: string): Promise<HumbleOrder> {
   const res = await axios.get<HumbleOrder>(
     `${HUMBLE_API_BASE}/api/v1/order/${gamekey}?all_tpkds=true`,
     { headers: buildHeaders() }

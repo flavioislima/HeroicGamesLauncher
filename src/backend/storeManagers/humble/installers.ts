@@ -19,14 +19,14 @@ import { runWineCommand } from 'backend/launcher'
 import { extractFiles, spawnAsync } from 'backend/utils'
 import { GameSettings } from 'common/types'
 
-export interface DownloadProgress {
+interface DownloadProgress {
   bytesDownloaded: number
   totalBytes: number
   percent: number
   speedBytesPerSecond: number
 }
 
-export type ProgressCallback = (progress: DownloadProgress) => void
+type ProgressCallback = (progress: DownloadProgress) => void
 
 export async function downloadToTempFile(
   url: string,
@@ -392,9 +392,7 @@ async function moveDirIntoPlace(src: string, dest: string) {
   mkdirSync(dest, { recursive: true })
   const { code, stderr } = await spawnAsync('cp', ['-a', `${src}/.`, dest])
   if (code !== 0) {
-    throw new Error(
-      `cp -a ${src}/. ${dest} failed: ${stderr || code}`
-    )
+    throw new Error(`cp -a ${src}/. ${dest} failed: ${stderr || code}`)
   }
   rmSync(src, { recursive: true, force: true })
 }
@@ -404,7 +402,9 @@ async function runShell(cmd: string, args: string[]): Promise<void> {
   const { code, stderr } = await spawnAsync(cmd, args, { stdio: 'inherit' })
   if (code !== 0) {
     logError([cmd, 'exited with code', `${code}`], LogPrefix.Humble)
-    throw new Error(`${cmd} exited with code ${code}${stderr ? `: ${stderr}` : ''}`)
+    throw new Error(
+      `${cmd} exited with code ${code}${stderr ? `: ${stderr}` : ''}`
+    )
   }
 }
 
