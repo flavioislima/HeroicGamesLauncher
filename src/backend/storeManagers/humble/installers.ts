@@ -187,14 +187,19 @@ async function runWindowsInstaller(
   ctx: ExtractContext
 ): Promise<{ executable?: string }> {
   if (isWindows) {
-    const args = ['/SILENT', `/DIR=${ctx.installPath}`, '/NOICONS']
+    // Don't pass /SILENT here. Many Humble installers (Aquaria for instance)
+    //  hard-code their target dir and silently install
+    // somewhere other than `/DIR=`, leaving Heroic with an empty install
+    // folder. Showing the installer UI lets the user pick the matching
+    // folder; if they can't, the post-install warning shown by the frontend
+    // tells them how to recover via "Change install path".
+    const args = [`/DIR=${ctx.installPath}`, '/NOICONS']
     try {
       await runShell(ctx.archivePath, args)
     } catch (err) {
-      // Inno Setup installers (Aquaria, many older Humble titles) ship with
-      // a `requireAdministrator` manifest. CreateProcess from a non-elevated
-      // parent fails with ERROR_ELEVATION_REQUIRED, which libuv surfaces as
-      // EACCES. Retry through a UAC prompt.
+      // Inno Setup installers with a `requireAdministrator` manifest cause
+      // CreateProcess to fail with ERROR_ELEVATION_REQUIRED, which libuv
+      // surfaces as EACCES. Retry the launch through a UAC prompt.
       if ((err as NodeJS.ErrnoException).code !== 'EACCES') throw err
       logWarning(
         [
@@ -278,7 +283,9 @@ async function runWindowsInstallerElevated(
 ): Promise<void> {
   // Build the Inno Setup command line as one string so paths with spaces
   // survive intact through PowerShell -> ShellExecuteEx -> the installer.
-  const cmdLine = `/SILENT /DIR="${installPath}" /NOICONS`
+  // No /SILENT here: we want the installer wizard so the user can pick the
+  // matching install folder (see the Windows branch of runWindowsInstaller).
+  const cmdLine = `/DIR="${installPath}" /NOICONS`
   // Single-quoted strings in PowerShell are literal; escape embedded
   // single quotes by doubling them.
   const psQuote = (s: string) => `'${s.replace(/'/g, "''")}'`

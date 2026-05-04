@@ -179,6 +179,15 @@
         },
         "disk-space-left": "Space Available",
         "flatpak-path-not-writtable": "Error: Sandbox access not granted to this path, data loss will occur.",
+        "humble-windows-warning": {
+            "cancel": "Cancel",
+            "continue": "Continue",
+            "dont_show_again": "Don't show this again",
+            "intro": "This Humble Bundle game uses a Windows installer that may show its own setup wizard, or install to its own preset folder, ignoring the path you chose in Heroic.",
+            "pick_folder": "If a folder selection screen appears, please pick this exact path so Heroic can find the game afterwards:",
+            "post_install_fallback": "If the game still does not appear after installation, you can fix the executable path later via \"Change install path\" in the game's settings menu.",
+            "title": "About to install a Humble Bundle game"
+        },
         "not-enough-disk-space": "Not enough disk space",
         "path": "Select Install Path",
         "path-not-writtable": "Warning: path might not be writable.",

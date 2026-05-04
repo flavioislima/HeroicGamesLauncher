@@ -22,6 +22,7 @@ import { BuildItem, DLCInfo as GOGDLCInfo } from 'common/types/gog'
 import { PathSelectionBox, ToggleSwitch } from 'frontend/components/UI'
 import Anticheat from 'frontend/components/UI/Anticheat'
 import {
+  Dialog,
   DialogHeader,
   DialogFooter,
   DialogContent
@@ -75,6 +76,7 @@ type DiskSpaceInfo = {
 }
 
 const storage: Storage = window.localStorage
+const HUMBLE_WIN_WARNING_HIDDEN_KEY = 'humble-windows-install-warning-hidden'
 
 function getUniqueKey(sdl: SelectiveDownload) {
   if (sdl.tags) {
@@ -253,7 +255,32 @@ export default function DownloadDialog({
     }
   }
 
-  async function handleInstall(path?: string, ignoreAnticheat = false) {
+  const [showHumbleWinWarning, setShowHumbleWinWarning] = useState(false)
+  const [pendingHumbleWinPath, setPendingHumbleWinPath] = useState<
+    string | undefined
+  >(undefined)
+  const [humbleWinDontShowAgain, setHumbleWinDontShowAgain] = useState(false)
+
+  function cancelHumbleWindowsInstall() {
+    setShowHumbleWinWarning(false)
+    setPendingHumbleWinPath(undefined)
+    setHumbleWinDontShowAgain(false)
+  }
+
+  function confirmHumbleWindowsInstall() {
+    if (humbleWinDontShowAgain) {
+      storage.setItem(HUMBLE_WIN_WARNING_HIDDEN_KEY, 'true')
+    }
+    const path = pendingHumbleWinPath
+    cancelHumbleWindowsInstall()
+    handleInstall(path, false, true)
+  }
+
+  async function handleInstall(
+    path?: string,
+    ignoreAnticheat = false,
+    skipHumbleWindowsWarning = false
+  ) {
     if (
       anticheatInfo &&
       ['Denied', 'Broken', 'Unknown'].includes(anticheatInfo.status)
@@ -262,6 +289,18 @@ export default function DownloadDialog({
         confirmInstallBrokenAnticheat(path)
         return
       }
+    }
+
+    if (
+      !skipHumbleWindowsWarning &&
+      runner === 'humble' &&
+      isWin &&
+      storage.getItem(HUMBLE_WIN_WARNING_HIDDEN_KEY) !== 'true'
+    ) {
+      setPendingHumbleWinPath(path)
+      setHumbleWinDontShowAgain(false)
+      setShowHumbleWinWarning(true)
+      return
     }
 
     backdropClick()
@@ -797,6 +836,68 @@ export default function DownloadDialog({
           {getInstallLabel()}
         </button>
       </DialogFooter>
+      {showHumbleWinWarning && (
+        <Dialog
+          onClose={cancelHumbleWindowsInstall}
+          showCloseButton={false}
+          className="humbleWindowsWarningDialog"
+        >
+          <DialogHeader onClose={cancelHumbleWindowsInstall}>
+            {t(
+              'install.humble-windows-warning.title',
+              'About to install a Humble Bundle game'
+            )}
+          </DialogHeader>
+          <DialogContent>
+            <p>
+              {t(
+                'install.humble-windows-warning.intro',
+                'This Humble Bundle game uses a Windows installer that may show its own setup wizard, or install to its own preset folder, ignoring the path you chose in Heroic.'
+              )}
+            </p>
+            <p>
+              {t(
+                'install.humble-windows-warning.pick_folder',
+                'If a folder selection screen appears, please pick this exact path so Heroic can find the game afterwards:'
+              )}
+            </p>
+            <p>
+              <code>{pendingHumbleWinPath || installFolder}</code>
+            </p>
+            <p>
+              {t(
+                'install.humble-windows-warning.post_install_fallback',
+                'If the game still does not appear after installation, you can fix the executable path later via "Change install path" in the game\'s settings menu.'
+              )}
+            </p>
+            <ToggleSwitch
+              htmlId="humbleWindowsWarningDontShow"
+              value={humbleWinDontShowAgain}
+              handleChange={() =>
+                setHumbleWinDontShowAgain(!humbleWinDontShowAgain)
+              }
+              title={t(
+                'install.humble-windows-warning.dont_show_again',
+                "Don't show this again"
+              )}
+            />
+          </DialogContent>
+          <DialogFooter>
+            <button
+              onClick={confirmHumbleWindowsInstall}
+              className="button is-primary"
+            >
+              {t('install.humble-windows-warning.continue', 'Continue')}
+            </button>
+            <button
+              onClick={cancelHumbleWindowsInstall}
+              className="button is-secondary"
+            >
+              {t('install.humble-windows-warning.cancel', 'Cancel')}
+            </button>
+          </DialogFooter>
+        </Dialog>
+      )}
     </>
   )
 }
