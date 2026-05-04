@@ -107,8 +107,6 @@ interface ExtractContext {
   // ignores /DIR= and silently drops the game inside the Wine prefix.
   title?: string
   gameSettings?: GameSettings
-  // 'osx' downloads on macOS are extracted/mounted natively; 'windows' goes
-  // through the existing InnoSetup-on-Wine path.
   platform?: HumbleInstallPlatform
 }
 
@@ -193,10 +191,6 @@ async function runShellInstaller(
   return {}
 }
 
-// Humble distributes most native Mac titles as a DMG containing a single
-// .app bundle; mount it read-only, copy everything to the install folder,
-// then detach. We deliberately use `cp -R` (not rsync) to avoid pulling in
-// extra dependencies on a stock macOS install.
 async function mountAndCopyDmg(
   ctx: ExtractContext
 ): Promise<{ executable?: string }> {
@@ -209,9 +203,6 @@ async function mountAndCopyDmg(
   )
   mkdirSync(mountPoint, { recursive: true })
 
-  // -nobrowse keeps the volume out of Finder; -noverify skips the slow
-  // checksum pass (we already validated md5 in downloadToTempFile);
-  // -noautoopen prevents Installer.app from popping up for hybrid DMGs.
   await runShell('hdiutil', [
     'attach',
     ctx.archivePath,
@@ -229,9 +220,6 @@ async function mountAndCopyDmg(
     if (!entries.length) {
       throw new Error(`Mounted DMG ${ctx.archivePath} contained no entries`)
     }
-    // Copy the entire DMG contents (preserving symlinks/permissions); some
-    // games ship support folders next to the .app and the launcher won't
-    // work without them.
     const { code, stderr } = await spawnAsync('cp', [
       '-R',
       ...entries.map((e) => join(mountPoint, e)),
@@ -244,15 +232,13 @@ async function mountAndCopyDmg(
     try {
       await runShell('hdiutil', ['detach', mountPoint, '-quiet'])
     } catch (error) {
-      // Force-detach is best-effort; a stuck volume still won't block the
-      // install from succeeding, just leaves an empty mountpoint.
       logWarning(
         [`Failed to detach ${mountPoint}; trying force:`, error],
         LogPrefix.Humble
       )
-      await runShell('hdiutil', ['detach', mountPoint, '-force']).catch(() => {
-        // ignore — we'll just leak the mountpoint
-      })
+      await runShell('hdiutil', ['detach', mountPoint, '-force']).catch(
+        () => {}
+      )
     }
     try {
       rmSync(mountPoint, { recursive: true, force: true })
@@ -270,9 +256,7 @@ async function runMacPkgInstaller(
   if (!isMac) {
     throw new Error('Cannot run a .pkg installer on non-macOS hosts')
   }
-  // Expand the pkg in place rather than running `installer` — the latter
-  // requires sudo and writes to system locations, which is exactly what we
-  // *don't* want for a per-user game library.
+  // pkgutil expand avoids the sudo + system-write side effects of `installer`.
   const expanded = join(
     tmpdir(),
     `heroic-humble-pkg-${Date.now()}-${ctx.appName}`
@@ -308,8 +292,6 @@ async function runMacPkgInstaller(
 }
 
 function findPkgPayloadRoot(root: string): string | undefined {
-  // pkgutil --expand-full lays out one Payload dir per component pkg; for a
-  // simple flat pkg there's a single Payload at the top level.
   let entries: string[]
   try {
     entries = readdirSync(root)
@@ -343,21 +325,17 @@ async function runWindowsInstaller(
     ])
     return {}
   }
-  if (isMac) {
-    throw new Error(
-      'Running .exe installers on macOS requires CrossOver or Wine; not yet supported'
-    )
-  }
   if (!ctx.gameSettings) {
     throw new Error('Wine settings missing for .exe install')
   }
 
-  // Some Humble installers (Aquaria's is the common offender) hard-code
-  // their `DefaultDirName` and ignore `/DIR=`, so the game ends up at e.g.
-  // `<prefix>/drive_c/Program Files/Aquaria` and Heroic's chosen install
-  // folder stays empty. Snapshot first so we can detect this and move it.
+  // Some InnoSetup installers hard-code DefaultDirName and ignore /DIR=, so
+  // the game ends up under <prefix>/drive_c/Program Files/<title>. Snapshot
+  // first so we can detect that and move it.
   const driveCPath = wineDriveCPath(ctx.gameSettings)
-  const beforeSnapshot = snapshotInstallDirs(driveCPath)
+  const beforeSnapshot = driveCPath
+    ? snapshotInstallDirs(driveCPath)
+    : new Set<string>()
 
   // Use the Wine-translated `Z:\` form for /DIR — most installers that
   // *do* honour /DIR insist on a Windows-style path with a drive letter.
@@ -381,6 +359,13 @@ async function runWindowsInstaller(
     return {}
   }
 
+  if (!driveCPath) {
+    throw new Error(
+      `Installer for ${ctx.appName} did not write to ${ctx.installPath} and Heroic ` +
+        `cannot inspect this Wine prefix layout (likely a CrossOver bottle). ` +
+        `Locate the installed folder inside the bottle and move it to ${ctx.installPath} manually.`
+    )
+  }
   const afterSnapshot = snapshotInstallDirs(driveCPath)
   const candidate = pickGameInstallDir(beforeSnapshot, afterSnapshot, ctx.title)
   if (!candidate) {
@@ -408,17 +393,19 @@ async function runWindowsInstaller(
   return {}
 }
 
-// Wine maps the Z: drive to the Linux root by default, so any Linux
-// path can be reached as `Z:\some\absolute\path`. InnoSetup parses
-// `/DIR=` strictly and rejects `/home/...` style values.
+// InnoSetup rejects POSIX paths in /DIR=; remap to wine's Z: drive root.
 function toWineZPath(linuxPath: string): string {
   const trimmed = linuxPath.replace(/^\/+/, '')
   return 'Z:\\' + trimmed.replace(/\//g, '\\')
 }
 
-function wineDriveCPath(gameSettings: GameSettings): string {
-  const isProton = gameSettings.wineVersion?.type === 'proton'
-  return isProton
+// Undefined for CrossOver bottles — those resolve drive_c asynchronously,
+// so the caller skips the recovery snapshot.
+function wineDriveCPath(gameSettings: GameSettings): string | undefined {
+  const type = gameSettings.wineVersion?.type
+  if (type === 'crossover') return undefined
+  if (!gameSettings.winePrefix) return undefined
+  return type === 'proton'
     ? join(gameSettings.winePrefix, 'pfx', 'drive_c')
     : join(gameSettings.winePrefix, 'drive_c')
 }
@@ -640,9 +627,8 @@ function tokensFromTitle(title: string): string[] {
     .filter((t) => t.length > 2)
 }
 
-// Walks up to two levels deep — most macOS games ship as either
-// `<install>/Game.app` or `<install>/Game/Game.app`. Going deeper risks
-// picking up bundled crash reporters, autoupdaters, etc.
+// Skip recursing into .app bundles — their Contents/ holds Sparkle/
+// Steamworks helpers we never want to launch.
 function findMacAppBundles(
   root: string,
   out: string[],
@@ -661,8 +647,6 @@ function findMacAppBundles(
     const full = join(root, entry.name)
     if (entry.name.toLowerCase().endsWith('.app')) {
       out.push(full)
-      // Don't recurse into a .app — its Contents/ has nested bundles
-      // (Sparkle, Steamworks, etc.) that we never want to launch.
       continue
     }
     findMacAppBundles(full, out, depth + 1, maxDepth)
@@ -678,8 +662,6 @@ function pickMacApp(bundles: string[], title?: string): string | undefined {
     )
     if (matched) return matched
   }
-  // Prefer shallower paths — those are typically the main game bundle,
-  // while nested ones tend to be helper apps.
   return bundles
     .slice()
     .sort((a, b) => a.split('/').length - b.split('/').length)[0]
@@ -709,9 +691,8 @@ export function findGameExecutable(
       )
       return undefined
     }
-    // Resolve to the inner Mach-O binary. launchGame chmods/exec's the
-    // executable directly, and macOS .app bundles aren't directly
-    // executable — only their Contents/MacOS/<binary> is.
+    // launchGame spawns the executable directly; .app bundles aren't
+    // exec()able, only Contents/MacOS/<binary> is.
     const macOsDir = join(picked, 'Contents', 'MacOS')
     try {
       const inner = readdirSync(macOsDir).filter((n) => !n.startsWith('.'))

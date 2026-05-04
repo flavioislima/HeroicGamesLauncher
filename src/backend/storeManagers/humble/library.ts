@@ -22,12 +22,8 @@ import { discoverArtworkForMany, getCachedArtwork } from './artwork'
 import { sendFrontendMessage } from '../../ipc'
 import { getFileSize } from 'backend/utils'
 
-// Humble's macOS catalog is overwhelmingly x86_64-only; trying to launch
-// those binaries on Apple Silicon trips EBADARCH and Node's spawn() doesn't
-// trigger Rosetta. Until Humble's manifest exposes per-binary architecture,
-// the safe default is to hide the macOS option on Apple Silicon entirely
-// and let those users install via Wine/CrossOver instead. Intel Macs see
-// the macOS option as normal.
+// Most of Humble's mac catalog is x86_64-only and Node's spawn() won't
+// trigger Rosetta, so hide mac downloads on Apple Silicon entirely.
 const hideMacBecauseAppleSilicon =
   process.platform === 'darwin' && process.arch === 'arm64'
 
@@ -77,8 +73,6 @@ function isWindowsDownload(d: HumbleDownload): boolean {
   return d.platform === 'windows' && Boolean(d.download_struct?.length)
 }
 
-// Humble tags macOS downloads as either "mac" or "osx" depending on when the
-// product was uploaded — accept both.
 function isMacDownload(d: HumbleDownload): boolean {
   return (
     (d.platform === 'mac' || d.platform === 'osx') &&
@@ -91,9 +85,6 @@ function hasMacDownload(subproduct: HumbleSubproduct): boolean {
 }
 
 function hasInstallableDownload(subproduct: HumbleSubproduct): boolean {
-  // On Apple Silicon a mac-only subproduct has no path to launch (the binary
-  // would be x86_64 and Node's spawn won't auto-translate via Rosetta), so
-  // hide it instead of leaving a broken entry in the library.
   if (hideMacBecauseAppleSilicon) {
     return Boolean(subproduct.downloads?.some(isWindowsDownload))
   }
@@ -129,9 +120,8 @@ function pickPreferredDownload(
     preferredPlatform === 'osx' ? isMacDownload : isWindowsDownload
   const dl = subproduct.downloads?.find(matcher)
   if (!dl) {
-    // Fall back to whatever installable platform we *do* have so that a stale
-    // platform request (e.g. the cached install record says "windows" but the
-    // user only owns the mac build) still returns something usable.
+    // Fall back to the other platform so a stale install record still
+    // resolves to something usable.
     if (preferredPlatform === 'osx') {
       return pickPreferredDownload(subproduct, 'windows')
     }
@@ -272,8 +262,6 @@ export async function getInstallInfo(
   installPlatform?: string
 ): Promise<HumbleInstallInfo | undefined> {
   const requestedPlatform = normalizePlatform(installPlatform) ?? 'windows'
-  // Cache per-platform so switching between Windows/Mac in the install dialog
-  // doesn't return a stale entry.
   const cacheKey = `${appName}__${requestedPlatform}`
   const cached = installStore.get(cacheKey)
   if (cached) return cached
@@ -413,10 +401,8 @@ export function installState(appName: string, state: boolean) {
   persistLibraryStore()
 }
 
-// `library` is the in-memory authoritative copy; the renderer reads its
-// snapshot from electron-store directly on refresh, so we must mirror any
-// install/uninstall mutation back to disk or the library list keeps showing
-// stale state until the next full re-fetch.
+// Renderer reads the library snapshot from electron-store on refresh, so
+// every install/uninstall mutation has to be mirrored to disk.
 function persistLibraryStore() {
   libraryStore.set('library', Array.from(library.values()))
 }

@@ -61,9 +61,6 @@ import {
 import { HumbleInstalledInfo, HumbleInstallPlatform } from 'common/types/humble'
 import { launchGame } from 'backend/storeManagers/storeManagerCommon/games'
 
-// Frontend uses 'Mac'/'Windows' (capitalised) while the Humble manifest uses
-// 'osx'/'windows'. Convert here so the rest of the runner only deals with one
-// vocabulary.
 function toHumblePlatform(
   platform: InstallPlatform | undefined
 ): HumbleInstallPlatform {
@@ -344,9 +341,6 @@ export async function update(appName: string): Promise<InstallResult> {
   )
 }
 
-// A Humble install is "native" when it matches the current host OS — Windows
-// download on Windows, macOS .app on macOS. Anything else (e.g. a Windows
-// download on Linux/macOS) goes through Wine/Proton/CrossOver.
 export function isNative(appName?: string): boolean {
   if (!appName) return isWindows
   const installed = getInstalled(appName)
