@@ -22,6 +22,15 @@ import { discoverArtworkForMany, getCachedArtwork } from './artwork'
 import { sendFrontendMessage } from '../../ipc'
 import { getFileSize } from 'backend/utils'
 
+// Humble's macOS catalog is overwhelmingly x86_64-only; trying to launch
+// those binaries on Apple Silicon trips EBADARCH and Node's spawn() doesn't
+// trigger Rosetta. Until Humble's manifest exposes per-binary architecture,
+// the safe default is to hide the macOS option on Apple Silicon entirely
+// and let those users install via Wine/CrossOver instead. Intel Macs see
+// the macOS option as normal.
+const hideMacBecauseAppleSilicon =
+  process.platform === 'darwin' && process.arch === 'arm64'
+
 const installedGames: Map<string, HumbleInstalledInfo> = new Map()
 const library: Map<string, GameInfo> = new Map()
 
@@ -63,28 +72,78 @@ function cacheOrders(orders: HumbleOrder[]) {
 }
 
 // Humble's Linux downloads are a mix of .deb/.rpm/.sh — no portable install
-// strategy across distros, so the runner is Windows-only and goes through
-// Wine/Proton on Linux/Mac.
+// strategy across distros, so Linux still goes through Wine/Proton.
 function isWindowsDownload(d: HumbleDownload): boolean {
   return d.platform === 'windows' && Boolean(d.download_struct?.length)
 }
 
-function hasInstallableDownload(subproduct: HumbleSubproduct): boolean {
-  return Boolean(subproduct.downloads?.some(isWindowsDownload))
+// Humble tags macOS downloads as either "mac" or "osx" depending on when the
+// product was uploaded — accept both.
+function isMacDownload(d: HumbleDownload): boolean {
+  return (
+    (d.platform === 'mac' || d.platform === 'osx') &&
+    Boolean(d.download_struct?.length)
+  )
 }
 
-function pickPreferredDownload(subproduct: HumbleSubproduct):
+function hasMacDownload(subproduct: HumbleSubproduct): boolean {
+  return Boolean(subproduct.downloads?.some(isMacDownload))
+}
+
+function hasInstallableDownload(subproduct: HumbleSubproduct): boolean {
+  // On Apple Silicon a mac-only subproduct has no path to launch (the binary
+  // would be x86_64 and Node's spawn won't auto-translate via Rosetta), so
+  // hide it instead of leaving a broken entry in the library.
+  if (hideMacBecauseAppleSilicon) {
+    return Boolean(subproduct.downloads?.some(isWindowsDownload))
+  }
+  return Boolean(
+    subproduct.downloads?.some(
+      (d) => isWindowsDownload(d) || isMacDownload(d)
+    )
+  )
+}
+
+function normalizePlatform(
+  platform?: string
+): HumbleInstallPlatform | undefined {
+  if (!platform) return undefined
+  const lower = platform.toLowerCase()
+  if (lower === 'windows' || lower === 'win32') return 'windows'
+  if (lower === 'mac' || lower === 'osx' || lower === 'darwin') return 'osx'
+  if (lower === 'linux') return 'linux'
+  return undefined
+}
+
+function pickPreferredDownload(
+  subproduct: HumbleSubproduct,
+  preferredPlatform: HumbleInstallPlatform = 'windows'
+):
   | {
       download: HumbleDownload
       struct: HumbleDownloadStruct
       platform: HumbleInstallPlatform
     }
   | undefined {
-  const dl = subproduct.downloads?.find(isWindowsDownload)
-  if (!dl) return undefined
+  const matcher =
+    preferredPlatform === 'osx' ? isMacDownload : isWindowsDownload
+  const dl = subproduct.downloads?.find(matcher)
+  if (!dl) {
+    // Fall back to whatever installable platform we *do* have so that a stale
+    // platform request (e.g. the cached install record says "windows" but the
+    // user only owns the mac build) still returns something usable.
+    if (preferredPlatform === 'osx') {
+      return pickPreferredDownload(subproduct, 'windows')
+    }
+    const macDl = subproduct.downloads?.find(isMacDownload)
+    if (!macDl) return undefined
+    const macStruct = macDl.download_struct.find((s) => s.url?.web)
+    if (!macStruct) return undefined
+    return { download: macDl, struct: macStruct, platform: 'osx' }
+  }
   const struct = dl.download_struct.find((s) => s.url?.web)
   if (!struct) return undefined
-  return { download: dl, struct, platform: 'windows' }
+  return { download: dl, struct, platform: preferredPlatform }
 }
 
 function subproductToGameInfo(
@@ -110,7 +169,8 @@ function subproductToGameInfo(
     is_installed: Boolean(installed),
     canRunOffline: true,
     is_linux_native: false,
-    is_mac_native: false,
+    is_mac_native:
+      !hideMacBecauseAppleSilicon && hasMacDownload(subproduct),
     developer: subproduct.payee?.human_name,
     description: subproduct.human_name,
     folder_name: subproduct.machine_name,
@@ -208,9 +268,14 @@ export function getGameInfo(
 }
 
 export async function getInstallInfo(
-  appName: string
+  appName: string,
+  installPlatform?: string
 ): Promise<HumbleInstallInfo | undefined> {
-  const cached = installStore.get(appName)
+  const requestedPlatform = normalizePlatform(installPlatform) ?? 'windows'
+  // Cache per-platform so switching between Windows/Mac in the install dialog
+  // doesn't return a stale entry.
+  const cacheKey = `${appName}__${requestedPlatform}`
+  const cached = installStore.get(cacheKey)
   if (cached) return cached
 
   const entry = cachedSubproducts.get(appName)
@@ -218,7 +283,7 @@ export async function getInstallInfo(
     logError(['Could not find Humble subproduct', appName], LogPrefix.Humble)
     return undefined
   }
-  const preferred = pickPreferredDownload(entry.subproduct)
+  const preferred = pickPreferredDownload(entry.subproduct, requestedPlatform)
   if (!preferred) return undefined
   const info: HumbleInstallInfo = {
     game: {
@@ -236,7 +301,7 @@ export async function getInstallInfo(
       download_url: preferred.struct.url.web
     }
   }
-  installStore.set(appName, info)
+  installStore.set(cacheKey, info)
   return info
 }
 
@@ -246,7 +311,10 @@ export async function listUpdateableGames(): Promise<string[]> {
   for (const [appName, installed] of installedGames.entries()) {
     const entry = cachedSubproducts.get(appName)
     if (!entry) continue
-    const preferred = pickPreferredDownload(entry.subproduct)
+    const preferred = pickPreferredDownload(
+      entry.subproduct,
+      installed.platform
+    )
     if (!preferred) continue
     if (preferred.struct.md5 && preferred.struct.md5 !== installed.md5) {
       updates.push(appName)
@@ -289,7 +357,8 @@ export function persistInstalled(info: HumbleInstalledInfo) {
 
 export function removeInstalled(appName: string) {
   installedGames.delete(appName)
-  installStore.delete(appName)
+  installStore.delete(`${appName}__windows`)
+  installStore.delete(`${appName}__osx`)
   writeAllInstalled()
 }
 

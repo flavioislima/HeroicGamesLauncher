@@ -18,6 +18,7 @@ import { isWindows, isMac } from 'backend/constants/environment'
 import { runWineCommand } from 'backend/launcher'
 import { extractFiles, spawnAsync } from 'backend/utils'
 import { GameSettings } from 'common/types'
+import { HumbleInstallPlatform } from 'common/types/humble'
 
 interface DownloadProgress {
   bytesDownloaded: number
@@ -106,13 +107,25 @@ interface ExtractContext {
   // ignores /DIR= and silently drops the game inside the Wine prefix.
   title?: string
   gameSettings?: GameSettings
+  // 'osx' downloads on macOS are extracted/mounted natively; 'windows' goes
+  // through the existing InnoSetup-on-Wine path.
+  platform?: HumbleInstallPlatform
 }
 
 export async function runInstaller(
   ctx: ExtractContext
 ): Promise<{ executable?: string }> {
+  const lowerPath = ctx.archivePath.toLowerCase()
   const ext = extname(ctx.archivePath).toLowerCase()
   mkdirSync(ctx.installPath, { recursive: true })
+
+  if (ext === '.dmg') {
+    return mountAndCopyDmg(ctx)
+  }
+
+  if (ext === '.pkg' || ext === '.mpkg') {
+    return runMacPkgInstaller(ctx)
+  }
 
   if (ext === '.zip') {
     await extractZip(ctx.archivePath, ctx.installPath)
@@ -124,9 +137,9 @@ export async function runInstaller(
     ext === '.bz2' ||
     ext === '.xz' ||
     ext === '.tar' ||
-    ctx.archivePath.endsWith('.tar.gz') ||
-    ctx.archivePath.endsWith('.tar.bz2') ||
-    ctx.archivePath.endsWith('.tar.xz')
+    lowerPath.endsWith('.tar.gz') ||
+    lowerPath.endsWith('.tar.bz2') ||
+    lowerPath.endsWith('.tar.xz')
   ) {
     const result = await extractFiles({
       path: ctx.archivePath,
@@ -178,6 +191,145 @@ async function runShellInstaller(
     ctx.installPath
   ])
   return {}
+}
+
+// Humble distributes most native Mac titles as a DMG containing a single
+// .app bundle; mount it read-only, copy everything to the install folder,
+// then detach. We deliberately use `cp -R` (not rsync) to avoid pulling in
+// extra dependencies on a stock macOS install.
+async function mountAndCopyDmg(
+  ctx: ExtractContext
+): Promise<{ executable?: string }> {
+  if (!isMac) {
+    throw new Error('Cannot mount a .dmg on non-macOS hosts')
+  }
+  const mountPoint = join(
+    tmpdir(),
+    `heroic-humble-mount-${Date.now()}-${ctx.appName}`
+  )
+  mkdirSync(mountPoint, { recursive: true })
+
+  // -nobrowse keeps the volume out of Finder; -noverify skips the slow
+  // checksum pass (we already validated md5 in downloadToTempFile);
+  // -noautoopen prevents Installer.app from popping up for hybrid DMGs.
+  await runShell('hdiutil', [
+    'attach',
+    ctx.archivePath,
+    '-mountpoint',
+    mountPoint,
+    '-nobrowse',
+    '-noverify',
+    '-noautoopen'
+  ])
+
+  try {
+    const entries = readdirSync(mountPoint).filter(
+      (name) => !name.startsWith('.') && name !== 'Applications'
+    )
+    if (!entries.length) {
+      throw new Error(`Mounted DMG ${ctx.archivePath} contained no entries`)
+    }
+    // Copy the entire DMG contents (preserving symlinks/permissions); some
+    // games ship support folders next to the .app and the launcher won't
+    // work without them.
+    const { code, stderr } = await spawnAsync('cp', [
+      '-R',
+      ...entries.map((e) => join(mountPoint, e)),
+      ctx.installPath
+    ])
+    if (code !== 0) {
+      throw new Error(`cp from DMG failed: ${stderr || code}`)
+    }
+  } finally {
+    try {
+      await runShell('hdiutil', ['detach', mountPoint, '-quiet'])
+    } catch (error) {
+      // Force-detach is best-effort; a stuck volume still won't block the
+      // install from succeeding, just leaves an empty mountpoint.
+      logWarning(
+        [`Failed to detach ${mountPoint}; trying force:`, error],
+        LogPrefix.Humble
+      )
+      await runShell('hdiutil', ['detach', mountPoint, '-force']).catch(() => {
+        // ignore — we'll just leak the mountpoint
+      })
+    }
+    try {
+      rmSync(mountPoint, { recursive: true, force: true })
+    } catch {
+      // ignore
+    }
+  }
+
+  return {}
+}
+
+async function runMacPkgInstaller(
+  ctx: ExtractContext
+): Promise<{ executable?: string }> {
+  if (!isMac) {
+    throw new Error('Cannot run a .pkg installer on non-macOS hosts')
+  }
+  // Expand the pkg in place rather than running `installer` — the latter
+  // requires sudo and writes to system locations, which is exactly what we
+  // *don't* want for a per-user game library.
+  const expanded = join(
+    tmpdir(),
+    `heroic-humble-pkg-${Date.now()}-${ctx.appName}`
+  )
+  await runShell('pkgutil', ['--expand-full', ctx.archivePath, expanded])
+  try {
+    const payloadRoot = findPkgPayloadRoot(expanded)
+    if (!payloadRoot) {
+      throw new Error(
+        `Could not find a Payload directory inside expanded pkg ${ctx.archivePath}`
+      )
+    }
+    const entries = readdirSync(payloadRoot)
+    if (!entries.length) {
+      throw new Error(`Empty Payload in ${ctx.archivePath}`)
+    }
+    const { code, stderr } = await spawnAsync('cp', [
+      '-R',
+      ...entries.map((e) => join(payloadRoot, e)),
+      ctx.installPath
+    ])
+    if (code !== 0) {
+      throw new Error(`cp from pkg payload failed: ${stderr || code}`)
+    }
+  } finally {
+    try {
+      rmSync(expanded, { recursive: true, force: true })
+    } catch {
+      // ignore
+    }
+  }
+  return {}
+}
+
+function findPkgPayloadRoot(root: string): string | undefined {
+  // pkgutil --expand-full lays out one Payload dir per component pkg; for a
+  // simple flat pkg there's a single Payload at the top level.
+  let entries: string[]
+  try {
+    entries = readdirSync(root)
+  } catch {
+    return undefined
+  }
+  for (const entry of entries) {
+    const full = join(root, entry)
+    let st
+    try {
+      st = statSync(full)
+    } catch {
+      continue
+    }
+    if (!st.isDirectory()) continue
+    if (entry === 'Payload') return full
+    const nested = findPkgPayloadRoot(full)
+    if (nested) return nested
+  }
+  return undefined
 }
 
 async function runWindowsInstaller(
@@ -488,9 +640,55 @@ function tokensFromTitle(title: string): string[] {
     .filter((t) => t.length > 2)
 }
 
+// Walks up to two levels deep — most macOS games ship as either
+// `<install>/Game.app` or `<install>/Game/Game.app`. Going deeper risks
+// picking up bundled crash reporters, autoupdaters, etc.
+function findMacAppBundles(
+  root: string,
+  out: string[],
+  depth = 0,
+  maxDepth = 2
+) {
+  if (depth > maxDepth) return
+  let entries
+  try {
+    entries = readdirSync(root, { withFileTypes: true })
+  } catch {
+    return
+  }
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue
+    const full = join(root, entry.name)
+    if (entry.name.toLowerCase().endsWith('.app')) {
+      out.push(full)
+      // Don't recurse into a .app — its Contents/ has nested bundles
+      // (Sparkle, Steamworks, etc.) that we never want to launch.
+      continue
+    }
+    findMacAppBundles(full, out, depth + 1, maxDepth)
+  }
+}
+
+function pickMacApp(bundles: string[], title?: string): string | undefined {
+  if (!bundles.length) return undefined
+  if (bundles.length === 1) return bundles[0]
+  if (title) {
+    const matched = bundles.find((p) =>
+      dirNameMatchesTitle(basename(p, '.app'), title)
+    )
+    if (matched) return matched
+  }
+  // Prefer shallower paths — those are typically the main game bundle,
+  // while nested ones tend to be helper apps.
+  return bundles
+    .slice()
+    .sort((a, b) => a.split('/').length - b.split('/').length)[0]
+}
+
 export function findGameExecutable(
   installPath: string,
-  title?: string
+  title?: string,
+  platform: HumbleInstallPlatform = 'windows'
 ): string | undefined {
   if (!existsSync(installPath)) {
     logError(
@@ -498,6 +696,45 @@ export function findGameExecutable(
       LogPrefix.Humble
     )
     return undefined
+  }
+
+  if (platform === 'osx') {
+    const bundles: string[] = []
+    findMacAppBundles(installPath, bundles)
+    const picked = pickMacApp(bundles, title)
+    if (!picked) {
+      logError(
+        `findGameExecutable: no .app bundle found under ${installPath}`,
+        LogPrefix.Humble
+      )
+      return undefined
+    }
+    // Resolve to the inner Mach-O binary. launchGame chmods/exec's the
+    // executable directly, and macOS .app bundles aren't directly
+    // executable — only their Contents/MacOS/<binary> is.
+    const macOsDir = join(picked, 'Contents', 'MacOS')
+    try {
+      const inner = readdirSync(macOsDir).filter((n) => !n.startsWith('.'))
+      if (inner.length) {
+        const resolved = join(macOsDir, inner[0])
+        logInfo(
+          [
+            `Picked .app bundle ${picked} from ${bundles.length} candidate(s); launching ${resolved}`
+          ],
+          LogPrefix.Humble
+        )
+        return resolved
+      }
+    } catch (error) {
+      logWarning(
+        [
+          `Could not read Contents/MacOS in ${picked}; falling back to bundle path:`,
+          error
+        ],
+        LogPrefix.Humble
+      )
+    }
+    return picked
   }
 
   const candidates: ExeCandidate[] = []
