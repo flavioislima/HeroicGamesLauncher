@@ -5,14 +5,16 @@ import {
   existsSync,
   mkdirSync,
   readdirSync,
+  renameSync,
+  rmSync,
   statSync,
   unlinkSync,
   chmodSync
 } from 'graceful-fs'
-import { spawn } from 'child_process'
+import { spawn, spawnSync } from 'child_process'
 import { basename, extname, join } from 'path'
 import { tmpdir } from 'os'
-import { LogPrefix, logError, logInfo } from 'backend/logger'
+import { LogPrefix, logError, logInfo, logWarning } from 'backend/logger'
 import { isWindows, isMac } from 'backend/constants/environment'
 import { runWineCommand } from 'backend/launcher'
 import { GameSettings } from 'common/types'
@@ -93,6 +95,9 @@ interface ExtractContext {
   appName: string
   archivePath: string
   installPath: string
+  // Used to disambiguate the installed folder when an InnoSetup installer
+  // ignores /DIR= and silently drops the game inside the Wine prefix.
+  title?: string
   gameSettings?: GameSettings
 }
 
@@ -194,16 +199,222 @@ async function runWindowsInstaller(
   if (!ctx.gameSettings) {
     throw new Error('Wine settings missing for .exe install')
   }
+
+  // Some Humble installers (Aquaria's is the common offender) hard-code
+  // their `DefaultDirName` and ignore `/DIR=`, so the game ends up at e.g.
+  // `<prefix>/drive_c/Program Files/Aquaria` and Heroic's chosen install
+  // folder stays empty. Snapshot the standard install roots before the
+  // installer runs so we can detect this and move the game folder.
+  const driveCPath = wineDriveCPath(ctx.gameSettings)
+  const beforeSnapshot = snapshotInstallDirs(driveCPath)
+
+  // Use the Wine-translated `Z:\` form for /DIR — most installers that
+  // *do* honour /DIR insist on a Windows-style path with a drive letter.
+  const wineDirArg = toWineZPath(ctx.installPath)
   const result = await runWineCommand({
     gameSettings: ctx.gameSettings,
-    commandParts: [ctx.archivePath, '/SILENT', `/DIR=${ctx.installPath}`],
+    commandParts: [
+      ctx.archivePath,
+      '/SILENT',
+      `/DIR=${wineDirArg}`,
+      '/NOICONS'
+    ],
     wait: true,
     protonVerb: 'run'
   })
   if (result.code && result.code !== 0) {
     throw new Error(`Wine installer exited with code ${result.code}`)
   }
+
+  if (installPathHasContent(ctx.installPath)) {
+    return {}
+  }
+
+  // /DIR was ignored. Identify the new game folder under the prefix.
+  const afterSnapshot = snapshotInstallDirs(driveCPath)
+  const candidate = pickGameInstallDir(beforeSnapshot, afterSnapshot, ctx.title)
+  if (!candidate) {
+    const newDirs = Array.from(afterSnapshot)
+      .filter((p) => !beforeSnapshot.has(p))
+      .map((p) => p)
+    throw new Error(
+      `Installer for ${ctx.appName} ignored /DIR= and we could not unambiguously identify the game folder. ` +
+        `New directories under the Wine prefix: [${newDirs.join(', ')}]. ` +
+        `Move the right one to ${ctx.installPath} manually.`
+    )
+  }
+  logWarning(
+    [
+      `Installer ignored /DIR= for ${ctx.appName}; game landed at ${candidate}`,
+      `— moving to ${ctx.installPath}`
+    ],
+    LogPrefix.Humble
+  )
+  moveDirIntoPlace(candidate, ctx.installPath)
+  logInfo(
+    [`Moved ${ctx.appName} from ${candidate} to ${ctx.installPath}`],
+    LogPrefix.Humble
+  )
   return {}
+}
+
+// Wine maps the Z: drive to the Linux root by default, so any Linux
+// path can be reached as `Z:\some\absolute\path`. InnoSetup parses
+// `/DIR=` strictly and rejects `/home/...` style values.
+function toWineZPath(linuxPath: string): string {
+  const trimmed = linuxPath.replace(/^\/+/, '')
+  return 'Z:\\' + trimmed.replace(/\//g, '\\')
+}
+
+function wineDriveCPath(gameSettings: GameSettings): string {
+  // Proton stashes the prefix one level deeper, under `pfx/`.
+  const isProton = gameSettings.wineVersion?.type === 'proton'
+  return isProton
+    ? join(gameSettings.winePrefix, 'pfx', 'drive_c')
+    : join(gameSettings.winePrefix, 'drive_c')
+}
+
+// Standard locations InnoSetup-style installers default to. We could
+// scan the whole prefix but these three cover the overwhelming majority
+// and avoid false positives from Wine's own `users/<name>/AppData`
+// activity.
+const PREFIX_INSTALL_ROOTS = ['Program Files', 'Program Files (x86)', 'Games']
+
+// Wine populates these the first time *any* installer runs against a
+// fresh prefix (MS shared DLLs, default IE/Windows folders, etc.). They
+// look like brand-new dirs in the snapshot diff but are never the game.
+const SYSTEM_DIR_PATTERNS: RegExp[] = [
+  /^common files( |$)/i,
+  /^internet explorer$/i,
+  /^windows( |$)/i,
+  /^windowsapps$/i,
+  /^windowspowershell$/i,
+  /^microsoft( |\.|$)/i,
+  /^reference assemblies$/i,
+  /^uninstall information$/i,
+  /^msbuild$/i
+]
+
+function isSystemDirName(name: string): boolean {
+  return SYSTEM_DIR_PATTERNS.some((re) => re.test(name))
+}
+
+function normalizeForMatch(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, '')
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function dirNameMatchesTitle(dirName: string, title: string): boolean {
+  const a = normalizeForMatch(dirName)
+  const b = normalizeForMatch(title)
+  if (!a || !b) return false
+  if (a === b || a.includes(b) || b.includes(a)) return true
+  const tokens = b.split(' ').filter((t) => t.length > 2)
+  return tokens.some((tok) => a.includes(tok))
+}
+
+function dirContainsLikelyGameExe(dir: string): boolean {
+  const candidates: ExeCandidate[] = []
+  walkExes(dir, candidates, 0, 3)
+  return candidates.some((c) => isLikelyGameExe(c.path))
+}
+
+function snapshotInstallDirs(driveCPath: string): Set<string> {
+  const result = new Set<string>()
+  for (const root of PREFIX_INSTALL_ROOTS) {
+    const full = join(driveCPath, root)
+    if (!existsSync(full)) continue
+    let entries: string[]
+    try {
+      entries = readdirSync(full)
+    } catch {
+      continue
+    }
+    for (const entry of entries) {
+      const sub = join(full, entry)
+      try {
+        if (statSync(sub).isDirectory()) result.add(sub)
+      } catch {
+        // ignore stale symlinks etc.
+      }
+    }
+  }
+  return result
+}
+
+function pickGameInstallDir(
+  before: Set<string>,
+  after: Set<string>,
+  title?: string
+): string | undefined {
+  const newDirs: string[] = []
+  for (const path of after) {
+    if (!before.has(path)) newDirs.push(path)
+  }
+  if (!newDirs.length) return undefined
+
+  // Drop Wine's auto-created system dirs. On a fresh prefix every
+  // top-level Program Files entry shows up as "new" — Common Files,
+  // Internet Explorer, Windows NT, Microsoft.NET — and confusing one of
+  // those for the game folder is exactly the bug we're guarding against.
+  const filtered = newDirs.filter((p) => !isSystemDirName(basename(p)))
+  if (!filtered.length) return undefined
+
+  // Prefer dirs that actually contain a plausible game executable.
+  const withGameExe = filtered.filter(dirContainsLikelyGameExe)
+  const candidates = withGameExe.length ? withGameExe : filtered
+
+  // Prefer dirs whose name fuzzy-matches the game title.
+  if (title) {
+    const titleMatched = candidates.find((p) =>
+      dirNameMatchesTitle(basename(p), title)
+    )
+    if (titleMatched) return titleMatched
+  }
+
+  // Single survivor — safe to move it.
+  if (candidates.length === 1) return candidates[0]
+
+  // Ambiguous: refuse to guess and let the user resolve manually.
+  return undefined
+}
+
+function installPathHasContent(installPath: string): boolean {
+  try {
+    return readdirSync(installPath).length > 0
+  } catch {
+    return false
+  }
+}
+
+// Move `src` so its contents end up at `dest`. `dest` is expected to
+// exist (it's the install folder Heroic created up-front) and be empty;
+// we remove it and rename so we don't end up with
+// `<dest>/<src basename>/...` accidentally. Falls back to a recursive
+// copy when `src` and `dest` are on different filesystems (EXDEV).
+function moveDirIntoPlace(src: string, dest: string) {
+  try {
+    rmSync(dest, { recursive: true, force: true })
+    renameSync(src, dest)
+    return
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code
+    if (code !== 'EXDEV') throw error
+    mkdirSync(dest, { recursive: true })
+    const result = spawnSync('cp', ['-a', `${src}/.`, dest], {
+      stdio: 'inherit'
+    })
+    if (result.status !== 0) {
+      throw new Error(
+        `cp -a ${src}/. ${dest} failed with status ${result.status}`
+      )
+    }
+    rmSync(src, { recursive: true, force: true })
+  }
 }
 
 function runShell(cmd: string, args: string[]): Promise<void> {

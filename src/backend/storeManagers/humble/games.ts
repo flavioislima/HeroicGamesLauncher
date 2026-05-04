@@ -189,6 +189,7 @@ async function runDownloadAndInstall(
       appName,
       archivePath: tempFile,
       installPath,
+      title: entry.subproduct.human_name,
       gameSettings
     })
 
