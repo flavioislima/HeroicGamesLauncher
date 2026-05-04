@@ -11,12 +11,12 @@ import {
   unlinkSync,
   chmodSync
 } from 'graceful-fs'
-import { spawn, spawnSync } from 'child_process'
 import { basename, extname, join } from 'path'
 import { tmpdir } from 'os'
 import { LogPrefix, logError, logInfo, logWarning } from 'backend/logger'
 import { isWindows, isMac } from 'backend/constants/environment'
 import { runWineCommand } from 'backend/launcher'
+import { extractFiles, spawnAsync } from 'backend/utils'
 import { GameSettings } from 'common/types'
 
 export interface DownloadProgress {
@@ -34,61 +34,68 @@ export async function downloadToTempFile(
   abortSignal: AbortSignal | undefined,
   onProgress: ProgressCallback
 ): Promise<string> {
-  if (!existsSync(tmpdir())) mkdirSync(tmpdir(), { recursive: true })
   const filename = basename(new URL(url).pathname) || 'humble-download'
   const tempPath = join(tmpdir(), `heroic-humble-${Date.now()}-${filename}`)
-
-  const response = await axios.get(url, {
-    responseType: 'stream',
-    signal: abortSignal
-  })
-
-  const totalBytes = Number(response.headers['content-length'] ?? 0)
-  const writer = createWriteStream(tempPath)
-  const md5 = createHash('md5')
-
-  let bytesDownloaded = 0
-  let lastTick = Date.now()
-  let lastBytes = 0
-
-  await new Promise<void>((resolve, reject) => {
-    response.data.on('data', (chunk: Buffer) => {
-      bytesDownloaded += chunk.length
-      md5.update(chunk)
-      const now = Date.now()
-      if (now - lastTick >= 500) {
-        const elapsed = (now - lastTick) / 1000
-        onProgress({
-          bytesDownloaded,
-          totalBytes,
-          percent: totalBytes ? (bytesDownloaded / totalBytes) * 100 : 0,
-          speedBytesPerSecond: (bytesDownloaded - lastBytes) / elapsed
-        })
-        lastTick = now
-        lastBytes = bytesDownloaded
-      }
-    })
-    response.data.on('error', reject)
-    response.data.pipe(writer)
-    writer.on('finish', () => resolve())
-    writer.on('error', reject)
-  })
-
-  if (expectedMd5) {
-    const actual = md5.digest('hex')
-    if (actual.toLowerCase() !== expectedMd5.toLowerCase()) {
-      try {
-        unlinkSync(tempPath)
-      } catch {
-        // ignore
-      }
-      throw new Error(
-        `Humble download MD5 mismatch (expected ${expectedMd5}, got ${actual})`
-      )
+  const cleanup = () => {
+    try {
+      unlinkSync(tempPath)
+    } catch {
+      // ignore
     }
   }
 
-  return tempPath
+  try {
+    const response = await axios.get(url, {
+      responseType: 'stream',
+      signal: abortSignal
+    })
+
+    const totalBytes = Number(response.headers['content-length'] ?? 0)
+    const writer = createWriteStream(tempPath)
+    const md5 = createHash('md5')
+
+    let bytesDownloaded = 0
+    let lastTick = Date.now()
+    let lastBytes = 0
+
+    await new Promise<void>((resolve, reject) => {
+      response.data.on('data', (chunk: Buffer) => {
+        bytesDownloaded += chunk.length
+        md5.update(chunk)
+        const now = Date.now()
+        if (now - lastTick >= 500) {
+          const elapsed = (now - lastTick) / 1000
+          onProgress({
+            bytesDownloaded,
+            totalBytes,
+            percent: totalBytes ? (bytesDownloaded / totalBytes) * 100 : 0,
+            speedBytesPerSecond: (bytesDownloaded - lastBytes) / elapsed
+          })
+          lastTick = now
+          lastBytes = bytesDownloaded
+        }
+      })
+      response.data.on('error', reject)
+      response.data.pipe(writer)
+      writer.on('finish', () => resolve())
+      writer.on('error', reject)
+    })
+
+    if (expectedMd5) {
+      const actual = md5.digest('hex')
+      if (actual.toLowerCase() !== expectedMd5.toLowerCase()) {
+        cleanup()
+        throw new Error(
+          `Humble download MD5 mismatch (expected ${expectedMd5}, got ${actual})`
+        )
+      }
+    }
+
+    return tempPath
+  } catch (error) {
+    cleanup()
+    throw error
+  }
 }
 
 interface ExtractContext {
@@ -101,18 +108,11 @@ interface ExtractContext {
   gameSettings?: GameSettings
 }
 
-/**
- * Run an installer or extract an archive depending on the file extension.
- * Returns the path to the extracted/installed game folder and (if known) the
- * primary executable.
- */
 export async function runInstaller(
   ctx: ExtractContext
 ): Promise<{ executable?: string }> {
   const ext = extname(ctx.archivePath).toLowerCase()
-  if (!existsSync(ctx.installPath)) {
-    mkdirSync(ctx.installPath, { recursive: true })
-  }
+  mkdirSync(ctx.installPath, { recursive: true })
 
   if (ext === '.zip') {
     await extractZip(ctx.archivePath, ctx.installPath)
@@ -128,7 +128,14 @@ export async function runInstaller(
     ctx.archivePath.endsWith('.tar.bz2') ||
     ctx.archivePath.endsWith('.tar.xz')
   ) {
-    await extractTar(ctx.archivePath, ctx.installPath)
+    const result = await extractFiles({
+      path: ctx.archivePath,
+      destination: ctx.installPath,
+      strip: 0
+    })
+    if (result.status === 'error') {
+      throw new Error(`tar extraction failed: ${result.error}`)
+    }
     return {}
   }
 
@@ -157,10 +164,6 @@ async function extractZip(archivePath: string, dest: string) {
   }
 }
 
-async function extractTar(archivePath: string, dest: string) {
-  await runShell('tar', ['-xf', archivePath, '-C', dest])
-}
-
 async function runShellInstaller(
   ctx: ExtractContext
 ): Promise<{ executable?: string }> {
@@ -168,7 +171,6 @@ async function runShellInstaller(
     throw new Error('Cannot run a .sh installer on Windows')
   }
   chmodSync(ctx.archivePath, 0o755)
-  // MojoSetup-style flags accepted by most Humble Linux installers
   await runShell(ctx.archivePath, [
     '--noprompt',
     '--i-agree-to-all-licenses',
@@ -182,7 +184,6 @@ async function runWindowsInstaller(
   ctx: ExtractContext
 ): Promise<{ executable?: string }> {
   if (isWindows) {
-    // Most Humble Windows installers are InnoSetup; default to silent mode
     await runShell(ctx.archivePath, [
       '/SILENT',
       `/DIR=${ctx.installPath}`,
@@ -195,7 +196,6 @@ async function runWindowsInstaller(
       'Running .exe installers on macOS requires CrossOver or Wine; not yet supported'
     )
   }
-  // Linux: run the installer through the game's Wine prefix
   if (!ctx.gameSettings) {
     throw new Error('Wine settings missing for .exe install')
   }
@@ -203,8 +203,7 @@ async function runWindowsInstaller(
   // Some Humble installers (Aquaria's is the common offender) hard-code
   // their `DefaultDirName` and ignore `/DIR=`, so the game ends up at e.g.
   // `<prefix>/drive_c/Program Files/Aquaria` and Heroic's chosen install
-  // folder stays empty. Snapshot the standard install roots before the
-  // installer runs so we can detect this and move the game folder.
+  // folder stays empty. Snapshot first so we can detect this and move it.
   const driveCPath = wineDriveCPath(ctx.gameSettings)
   const beforeSnapshot = snapshotInstallDirs(driveCPath)
 
@@ -230,7 +229,6 @@ async function runWindowsInstaller(
     return {}
   }
 
-  // /DIR was ignored. Identify the new game folder under the prefix.
   const afterSnapshot = snapshotInstallDirs(driveCPath)
   const candidate = pickGameInstallDir(beforeSnapshot, afterSnapshot, ctx.title)
   if (!candidate) {
@@ -250,7 +248,7 @@ async function runWindowsInstaller(
     ],
     LogPrefix.Humble
   )
-  moveDirIntoPlace(candidate, ctx.installPath)
+  await moveDirIntoPlace(candidate, ctx.installPath)
   logInfo(
     [`Moved ${ctx.appName} from ${candidate} to ${ctx.installPath}`],
     LogPrefix.Humble
@@ -267,22 +265,17 @@ function toWineZPath(linuxPath: string): string {
 }
 
 function wineDriveCPath(gameSettings: GameSettings): string {
-  // Proton stashes the prefix one level deeper, under `pfx/`.
   const isProton = gameSettings.wineVersion?.type === 'proton'
   return isProton
     ? join(gameSettings.winePrefix, 'pfx', 'drive_c')
     : join(gameSettings.winePrefix, 'drive_c')
 }
 
-// Standard locations InnoSetup-style installers default to. We could
-// scan the whole prefix but these three cover the overwhelming majority
-// and avoid false positives from Wine's own `users/<name>/AppData`
-// activity.
 const PREFIX_INSTALL_ROOTS = ['Program Files', 'Program Files (x86)', 'Games']
 
 // Wine populates these the first time *any* installer runs against a
-// fresh prefix (MS shared DLLs, default IE/Windows folders, etc.). They
-// look like brand-new dirs in the snapshot diff but are never the game.
+// fresh prefix (MS shared DLLs, IE/Windows folders, etc.) — they look
+// like brand-new dirs in the snapshot diff but are never the game.
 const SYSTEM_DIR_PATTERNS: RegExp[] = [
   /^common files( |$)/i,
   /^internet explorer$/i,
@@ -357,18 +350,15 @@ function pickGameInstallDir(
   }
   if (!newDirs.length) return undefined
 
-  // Drop Wine's auto-created system dirs. On a fresh prefix every
-  // top-level Program Files entry shows up as "new" — Common Files,
-  // Internet Explorer, Windows NT, Microsoft.NET — and confusing one of
-  // those for the game folder is exactly the bug we're guarding against.
+  // Drop Wine's auto-created system dirs — confusing one of them (Common
+  // Files, Internet Explorer, Microsoft.NET) for the game folder is
+  // exactly the bug we're guarding against.
   const filtered = newDirs.filter((p) => !isSystemDirName(basename(p)))
   if (!filtered.length) return undefined
 
-  // Prefer dirs that actually contain a plausible game executable.
   const withGameExe = filtered.filter(dirContainsLikelyGameExe)
   const candidates = withGameExe.length ? withGameExe : filtered
 
-  // Prefer dirs whose name fuzzy-matches the game title.
   if (title) {
     const titleMatched = candidates.find((p) =>
       dirNameMatchesTitle(basename(p), title)
@@ -376,7 +366,6 @@ function pickGameInstallDir(
     if (titleMatched) return titleMatched
   }
 
-  // Single survivor — safe to move it.
   if (candidates.length === 1) return candidates[0]
 
   // Ambiguous: refuse to guess and let the user resolve manually.
@@ -391,49 +380,34 @@ function installPathHasContent(installPath: string): boolean {
   }
 }
 
-// Move `src` so its contents end up at `dest`. `dest` is expected to
-// exist (it's the install folder Heroic created up-front) and be empty;
-// we remove it and rename so we don't end up with
-// `<dest>/<src basename>/...` accidentally. Falls back to a recursive
-// copy when `src` and `dest` are on different filesystems (EXDEV).
-function moveDirIntoPlace(src: string, dest: string) {
+// EXDEV fallback uses cp -a since renameSync can't cross filesystems.
+async function moveDirIntoPlace(src: string, dest: string) {
   try {
     rmSync(dest, { recursive: true, force: true })
     renameSync(src, dest)
     return
   } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code
-    if (code !== 'EXDEV') throw error
-    mkdirSync(dest, { recursive: true })
-    const result = spawnSync('cp', ['-a', `${src}/.`, dest], {
-      stdio: 'inherit'
-    })
-    if (result.status !== 0) {
-      throw new Error(
-        `cp -a ${src}/. ${dest} failed with status ${result.status}`
-      )
-    }
-    rmSync(src, { recursive: true, force: true })
+    if ((error as NodeJS.ErrnoException).code !== 'EXDEV') throw error
+  }
+  mkdirSync(dest, { recursive: true })
+  const { code, stderr } = await spawnAsync('cp', ['-a', `${src}/.`, dest])
+  if (code !== 0) {
+    throw new Error(
+      `cp -a ${src}/. ${dest} failed: ${stderr || code}`
+    )
+  }
+  rmSync(src, { recursive: true, force: true })
+}
+
+async function runShell(cmd: string, args: string[]): Promise<void> {
+  logInfo(['Running:', cmd, args.join(' ')], LogPrefix.Humble)
+  const { code, stderr } = await spawnAsync(cmd, args, { stdio: 'inherit' })
+  if (code !== 0) {
+    logError([cmd, 'exited with code', `${code}`], LogPrefix.Humble)
+    throw new Error(`${cmd} exited with code ${code}${stderr ? `: ${stderr}` : ''}`)
   }
 }
 
-function runShell(cmd: string, args: string[]): Promise<void> {
-  return new Promise((resolve, reject) => {
-    logInfo(['Running:', cmd, args.join(' ')], LogPrefix.Humble)
-    const child = spawn(cmd, args, { stdio: 'inherit' })
-    child.on('error', reject)
-    child.on('exit', (code) => {
-      if (code === 0) resolve()
-      else {
-        logError([cmd, 'exited with code', `${code}`], LogPrefix.Humble)
-        reject(new Error(`${cmd} exited with code ${code}`))
-      }
-    })
-  })
-}
-
-// Patterns of .exe files that are clearly NOT the game launcher: bundled
-// redistributables, uninstallers, crash reporters, etc.
 const EXE_BLOCKLIST = [
   /^unins\d*\.exe$/i,
   /^vc_redist[^/]*\.exe$/i,
@@ -452,7 +426,6 @@ const EXE_BLOCKLIST = [
   /^setup\.exe$/i
 ]
 
-// Subdirectory name fragments that contain dependencies, not the game.
 const DIR_BLOCKLIST = [
   '_commonredist',
   'redist',
@@ -484,24 +457,25 @@ interface ExeCandidate {
 
 function walkExes(dir: string, out: ExeCandidate[], depth = 0, maxDepth = 5) {
   if (depth > maxDepth) return
-  let entries: string[]
+  let entries
   try {
-    entries = readdirSync(dir)
+    entries = readdirSync(dir, { withFileTypes: true })
   } catch {
     return
   }
   for (const entry of entries) {
-    const full = join(dir, entry)
-    let stat
-    try {
-      stat = statSync(full)
-    } catch {
-      continue
-    }
-    if (stat.isDirectory()) {
+    const full = join(dir, entry.name)
+    if (entry.isDirectory()) {
+      // Skip dependency folders entirely — saves a lot of stat calls on
+      // Unreal/Unity titles that ship full _CommonRedist trees.
+      if (DIR_BLOCKLIST.includes(entry.name.toLowerCase())) continue
       walkExes(full, out, depth + 1, maxDepth)
-    } else if (entry.toLowerCase().endsWith('.exe')) {
-      out.push({ path: full, size: stat.size, depth })
+    } else if (entry.isFile() && entry.name.toLowerCase().endsWith('.exe')) {
+      try {
+        out.push({ path: full, size: statSync(full).size, depth })
+      } catch {
+        // ignore stale symlinks etc.
+      }
     }
   }
 }
@@ -514,20 +488,6 @@ function tokensFromTitle(title: string): string[] {
     .filter((t) => t.length > 2)
 }
 
-/**
- * Scan an install folder for the most likely game executable. InnoSetup and
- * other Humble installers run silently and don't tell us where the launcher
- * landed, so we walk the tree and apply a few heuristics:
- *
- *  1. Filter out known redistributable / uninstaller / setup names.
- *  2. Prefer files at shallow depth (top-level "GameName.exe" beats
- *     `Engine/Binaries/Win64/...UnrealLauncher.exe`).
- *  3. Prefer names that share tokens with the game title.
- *  4. Break remaining ties by file size (game launchers are usually >1MB).
- *
- * Returns undefined if no plausible candidate exists; the caller should then
- * surface the "set the target executable" dialog.
- */
 export function findGameExecutable(
   installPath: string,
   title?: string

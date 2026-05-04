@@ -1,14 +1,13 @@
 import axios from 'axios'
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'graceful-fs'
+import { readFileSync, writeFileSync, mkdirSync } from 'graceful-fs'
 import { LogPrefix, logDebug, logInfo, logWarning } from 'backend/logger'
 import { humbleConfigPath } from './constants'
 import { join } from 'path'
 
-// Humble's API only exposes a small `subproduct.icon` per game, so we
-// look the title up against the Bottles-hosted SteamGridDB proxy that's
-// already used by Heroic's sideloaded-games dialog. It needs no API key
-// and returns a single image URL (typically 600×900 grid art) suitable
-// for both the library card and the game-page hero.
+// Look titles up via the Bottles SteamGridDB proxy — same one the
+// sideloaded-games dialog uses, no API key required. The endpoint
+// returns a single image URL (typically 600×900 grid art) suitable for
+// both the library card and the game-page hero.
 
 export interface HumbleArtwork {
   // Bottles only gives us one image, so all three slots share it.
@@ -25,20 +24,18 @@ let cache: ArtworkCache | undefined
 
 function loadCache(): ArtworkCache {
   if (cache) return cache
-  if (!existsSync(ARTWORK_CACHE_PATH)) {
-    cache = {}
-    return cache
-  }
   try {
     cache = JSON.parse(
       readFileSync(ARTWORK_CACHE_PATH, 'utf-8')
     ) as ArtworkCache
     return cache
   } catch (error) {
-    logWarning(
-      ['Could not parse Humble artwork cache, resetting:', error],
-      LogPrefix.Humble
-    )
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      logWarning(
+        ['Could not parse Humble artwork cache, resetting:', error],
+        LogPrefix.Humble
+      )
+    }
     cache = {}
     return cache
   }
@@ -46,10 +43,8 @@ function loadCache(): ArtworkCache {
 
 function saveCache() {
   if (!cache) return
-  if (!existsSync(humbleConfigPath)) {
-    mkdirSync(humbleConfigPath, { recursive: true })
-  }
-  writeFileSync(ARTWORK_CACHE_PATH, JSON.stringify(cache, null, 2), 'utf-8')
+  mkdirSync(humbleConfigPath, { recursive: true })
+  writeFileSync(ARTWORK_CACHE_PATH, JSON.stringify(cache), 'utf-8')
 }
 
 export function getCachedArtwork(
@@ -82,10 +77,9 @@ async function searchBottles(title: string): Promise<string | undefined> {
 }
 
 /**
- * Look up better artwork for a single subproduct. Idempotent: returns the
- * cached entry if we've already tried, regardless of whether the lookup
- * succeeded — the Bottles endpoint doesn't have every Humble title and
- * re-asking on every refresh would be wasteful.
+ * Idempotent: returns the cached entry if we've already tried, regardless
+ * of whether the lookup succeeded — re-asking on every refresh would be
+ * wasteful.
  */
 export async function discoverArtwork(
   machineName: string,
@@ -100,19 +94,14 @@ export async function discoverArtwork(
     logInfo([`Found SGDB artwork for "${humanName}"`], LogPrefix.Humble)
   }
   loadCache()[machineName] = entry
-  saveCache()
   return entry
 }
 
-/**
- * Enrich every subproduct that doesn't have a cached artwork entry yet.
- * Runs in parallel with a small concurrency window so we don't hammer
- * the proxy (or block the rest of the refresh).
- */
 export async function discoverArtworkForMany(
   subproducts: { machine_name: string; human_name: string }[]
 ): Promise<void> {
-  const uncached = subproducts.filter((s) => !loadCache()[s.machine_name])
+  const c = loadCache()
+  const uncached = subproducts.filter((s) => !c[s.machine_name])
   if (!uncached.length) return
   logInfo(
     [`Looking up artwork for ${uncached.length} new Humble title(s)`],
@@ -126,6 +115,9 @@ export async function discoverArtworkForMany(
         discoverArtwork(s.machine_name, s.human_name).catch(() => undefined)
       )
     )
+    // Persist after each batch so a crash mid-enrichment doesn't lose
+    // everything we already learned.
+    saveCache()
   }
 }
 

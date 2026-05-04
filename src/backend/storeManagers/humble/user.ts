@@ -54,11 +54,6 @@ async function readSessionCookieFromPartition(): Promise<string | undefined> {
 }
 
 export class HumbleUser {
-  /**
-   * Called by the renderer once the login webview navigated to /home/library.
-   * Reads the session cookie from the webview partition, validates it against
-   * the Humble API, and persists user info if successful.
-   */
   static async login(): Promise<{
     status: 'done' | 'failed'
     user: HumbleUserData | undefined

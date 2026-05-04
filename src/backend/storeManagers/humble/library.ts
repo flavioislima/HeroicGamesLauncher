@@ -20,42 +20,41 @@ import { HumbleUser } from './user'
 import { getAllOrders, isUnauthorized } from './api'
 import { discoverArtworkForMany, getCachedArtwork } from './artwork'
 import { sendFrontendMessage } from '../../ipc'
+import { getFileSize } from 'backend/utils'
 
 const installedGames: Map<string, HumbleInstalledInfo> = new Map()
 const library: Map<string, GameInfo> = new Map()
 
 export async function initHumbleLibraryManager() {
-  if (!existsSync(humbleConfigPath)) {
+  return await new Promise<void>((resolve) => {
     mkdirSync(humbleConfigPath, { recursive: true })
-  }
-  refreshInstalled()
-  loadOrdersFromDisk()
-  rebuildLibrary()
+    refreshInstalled()
+    loadOrdersFromDisk()
+    rebuildLibrary()
+    resolve()
+  })
 }
 
 function loadOrdersFromDisk() {
-  if (!existsSync(humbleOrdersCachePath)) return
   try {
     const orders = JSON.parse(
       readFileSync(humbleOrdersCachePath, 'utf-8')
     ) as HumbleOrder[]
     cacheOrders(orders)
   } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
     logError(['Could not parse cached orders.json:', error], LogPrefix.Humble)
   }
 }
 
-const cachedOrders: Map<string, HumbleOrder> = new Map()
 const cachedSubproducts: Map<
   string,
   { order: HumbleOrder; subproduct: HumbleSubproduct }
 > = new Map()
 
 function cacheOrders(orders: HumbleOrder[]) {
-  cachedOrders.clear()
   cachedSubproducts.clear()
   for (const order of orders) {
-    cachedOrders.set(order.gamekey, order)
     for (const subproduct of order.subproducts ?? []) {
       if (!hasInstallableDownload(subproduct)) continue
       cachedSubproducts.set(subproduct.machine_name, { order, subproduct })
@@ -63,12 +62,9 @@ function cacheOrders(orders: HumbleOrder[]) {
   }
 }
 
-// MVP scope: only Windows DRM-free downloads are supported. On Linux/Mac
-// the game runs through Wine/Proton like every other Heroic runner. Native
-// Linux installers were dropped because Humble distributes a mix of .deb,
-// .rpm, .sh (MojoSetup) and bare archives — there's no portable install
-// strategy across distros, and many "Linux" entries on Humble are actually
-// .deb files that fail outright on Arch/Fedora/etc.
+// Humble's Linux downloads are a mix of .deb/.rpm/.sh — no portable install
+// strategy across distros, so the runner is Windows-only and goes through
+// Wine/Proton on Linux/Mac.
 function isWindowsDownload(d: HumbleDownload): boolean {
   return d.platform === 'windows' && Boolean(d.download_struct?.length)
 }
@@ -121,7 +117,7 @@ function subproductToGameInfo(
     install: installed
       ? {
           install_path: installed.install_path,
-          install_size: humanSize(installed.install_size),
+          install_size: getFileSize(installed.install_size),
           version: installed.version,
           platform: installed.platform as InstallPlatform,
           executable: installed.executable
@@ -133,18 +129,6 @@ function subproductToGameInfo(
       releaseDate: order.created
     }
   }
-}
-
-function humanSize(bytes: number): string {
-  if (!bytes) return '0 B'
-  const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
-  let value = bytes
-  let unit = 0
-  while (value >= 1024 && unit < units.length - 1) {
-    value /= 1024
-    unit++
-  }
-  return `${value.toFixed(unit === 0 ? 0 : 2)} ${units[unit]}`
 }
 
 function rebuildLibrary() {
@@ -166,9 +150,6 @@ export async function refresh(): Promise<ExecResult | null> {
     writeFileSync(humbleOrdersCachePath, JSON.stringify(orders), 'utf-8')
     cacheOrders(orders)
     refreshInstalled()
-    // First pass with whatever artwork we already have cached, so the user
-    // sees their library immediately. Then look up Steam artwork for any
-    // new titles in the background and rebuild once done.
     rebuildLibrary()
     logInfo(
       ['Loaded', `${library.size}`, 'Humble DRM-free games'],
@@ -184,8 +165,8 @@ export async function refresh(): Promise<ExecResult | null> {
     discoverArtworkForMany(subproductsToEnrich)
       .then(() => {
         rebuildLibrary()
-        // Tell the renderer to re-read the cache, otherwise users keep
-        // staring at the small Humble icons until the next manual refresh.
+        // Force the renderer to re-read artwork; otherwise users keep seeing
+        // the small Humble icons until the next manual refresh.
         sendFrontendMessage('refreshLibrary', 'humble')
       })
       .catch((error) => {
@@ -218,9 +199,12 @@ export function getGameInfo(
     const cached = library.get(appName)
     if (cached) return cached
   }
+  const entry = cachedSubproducts.get(appName)
+  if (!entry) return undefined
   refreshInstalled()
-  rebuildLibrary()
-  return library.get(appName)
+  const info = subproductToGameInfo(entry.order, entry.subproduct)
+  if (info) library.set(appName, info)
+  return info
 }
 
 export async function getInstallInfo(
@@ -310,9 +294,7 @@ export function removeInstalled(appName: string) {
 }
 
 function writeAllInstalled() {
-  if (!existsSync(humbleConfigPath)) {
-    mkdirSync(humbleConfigPath, { recursive: true })
-  }
+  mkdirSync(humbleConfigPath, { recursive: true })
   writeFileSync(
     humbleInstalledPath,
     JSON.stringify(Array.from(installedGames.values())),
@@ -352,7 +334,7 @@ export function installState(appName: string, state: boolean) {
     game.is_installed = true
     game.install = {
       install_path: installed.install_path,
-      install_size: humanSize(installed.install_size),
+      install_size: getFileSize(installed.install_size),
       version: installed.version,
       platform: installed.platform as InstallPlatform,
       executable: installed.executable

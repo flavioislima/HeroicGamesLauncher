@@ -30,6 +30,8 @@ import { GameConfig } from 'backend/game_config'
 import { existsSync, rmSync } from 'graceful-fs'
 import { isWindows } from 'backend/constants/environment'
 import {
+  calculateEta,
+  getFileSize,
   killPattern,
   moveOnUnix,
   moveOnWindows,
@@ -37,6 +39,11 @@ import {
   sendProgressUpdate,
   shutdownWine
 } from 'backend/utils'
+import {
+  createAbortController,
+  deleteAbortController,
+  callAbortController
+} from 'backend/utils/aborthandler/aborthandler'
 import {
   addShortcuts as addShortcutsUtil,
   removeShortcuts as removeShortcutsUtil
@@ -110,9 +117,6 @@ export async function importGame(
     logError(error, LogPrefix.Humble)
     return { stdout: '', stderr: error, error }
   }
-  // Pull the manifest so we can record version/md5/size against what's
-  // currently published — a best-effort match since we can't rehash the
-  // user's existing files. Falls back gracefully if unavailable.
   const installInfo = await getInstallInfo(appName).catch(() => undefined)
   const discoveredExe = findGameExecutable(path, entry.subproduct.human_name)
   if (!discoveredExe) {
@@ -152,12 +156,8 @@ export function onInstallOrUpdateOutput(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _totalDownloadSize = -1
 ) {
-  // Humble's installer is run in-process; progress is dispatched directly
-  // from `runDownload` via `sendProgressUpdate`. This stub satisfies the
-  // GameManager interface.
+  // Stub: progress is dispatched directly from runDownload via sendProgressUpdate.
 }
-
-const abortControllers = new Map<string, AbortController>()
 
 async function runDownloadAndInstall(
   appName: string,
@@ -179,8 +179,7 @@ async function runDownloadAndInstall(
     }
   }
 
-  const abort = new AbortController()
-  abortControllers.set(appName, abort)
+  const abort = createAbortController(appName)
   const gameSettings = await getSettings(appName)
 
   try {
@@ -196,14 +195,14 @@ async function runDownloadAndInstall(
       installInfo.manifest.md5,
       abort.signal,
       ({ percent, bytesDownloaded, totalBytes, speedBytesPerSecond }) => {
-        // Round to one decimal place — the raw float ends up rendered
-        // verbatim in the progress UI, so 90.0849633855638% leaks through
-        // unless we trim it here. Mirror Nile's format for the log line so
-        // anyone tailing the runner log gets the same shape across stores.
+        // Round percent to one decimal — the raw float renders verbatim in
+        // the progress UI otherwise (e.g. "90.0849633855638%").
         const progress = {
           percent: Number(percent.toFixed(1)),
-          bytes: humanBytes(bytesDownloaded),
-          eta: estimateEta(bytesDownloaded, totalBytes, speedBytesPerSecond),
+          bytes: getFileSize(bytesDownloaded),
+          eta:
+            calculateEta(bytesDownloaded, speedBytesPerSecond, totalBytes) ??
+            '',
           downSpeed: Number((speedBytesPerSecond / (1024 * 1024)).toFixed(2))
         }
         logInfo(
@@ -231,8 +230,8 @@ async function runDownloadAndInstall(
       gameSettings
     })
 
-    // The InnoSetup / MojoSetup runs are silent and don't tell us what the
-    // game's main executable is, so scan the install folder ourselves.
+    // InnoSetup / MojoSetup runs are silent and don't tell us where the
+    // launcher landed, so scan the install folder ourselves.
     const discoveredExe = findGameExecutable(
       installPath,
       entry.subproduct.human_name
@@ -280,7 +279,7 @@ async function runDownloadAndInstall(
     )
     return { status: 'error', error: `${error}` }
   } finally {
-    abortControllers.delete(appName)
+    deleteAbortController(appName)
   }
 }
 
@@ -303,7 +302,7 @@ export async function update(appName: string): Promise<InstallResult> {
   if (!installed) {
     return { status: 'error', error: 'Game is not installed' }
   }
-  // Humble has no patching, so updates re-download the full archive
+  // Humble has no patching, so updates re-download the full archive.
   try {
     if (existsSync(installed.install_path)) {
       rmSync(installed.install_path, { recursive: true, force: true })
@@ -317,11 +316,10 @@ export async function update(appName: string): Promise<InstallResult> {
   return runDownloadAndInstall(appName, installed.install_path, 'updating')
 }
 
+// Humble installs only the Windows download, so the game is "native" only
+// on Windows hosts. Linux/Mac always go through Wine/Proton/CrossOver.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function isNative(_appName?: string): boolean {
-  // MVP: Humble runner only ever installs the Windows download, so the
-  // game is "native" only on Windows hosts. On Linux/Mac it always runs
-  // through the configured Wine/Proton/CrossOver prefix.
   return isWindows
 }
 
@@ -340,11 +338,6 @@ export async function launch(
   _launchArguments?: LaunchOption,
   args: string[] = []
 ): Promise<boolean> {
-  // Delegate to the same launcher Sideload uses: it handles
-  // prepareLaunch / prepareWineLaunch / wrappers / proton verbs / target
-  // exe override, all in one place. The Humble-specific work (download,
-  // install, exe discovery) is already done by `install()`, which sets
-  // gameInfo.install.executable so this lookup succeeds.
   const gameInfo = getGameInfo(appName)
   const settings = await getSettings(appName)
   const resolvedExe = settings.targetExe?.length
@@ -414,7 +407,7 @@ export async function moveInstall(
 }
 
 export async function repair(appName: string): Promise<ExecResult> {
-  // No manifest support — fall back to a fresh download
+  // No manifest support — fall back to a fresh download.
   const result = await update(appName)
   return {
     stdout: '',
@@ -445,9 +438,6 @@ export async function uninstall({ appName }: RemoveArgs): Promise<ExecResult> {
     try {
       rmSync(installPath, { recursive: true, force: true })
     } catch (error) {
-      // rmSync without `force` would throw on missing files; with force it
-      // only throws on real errors (EPERM, EBUSY, etc). Log and surface so
-      // the user sees the failure instead of a silent half-uninstall.
       logError(
         [`Failed to remove install folder ${installPath}:`, error],
         LogPrefix.Humble
@@ -487,8 +477,7 @@ export async function forceUninstall(appName: string) {
 
 export async function stop(appName: string, stopWine = true) {
   const installed = getInstalled(appName)
-  const ctrl = abortControllers.get(appName)
-  if (ctrl) ctrl.abort()
+  callAbortController(appName)
   if (installed?.executable) {
     killPattern(installed.executable.split(/[\\/]/).pop() ?? appName)
   } else {
@@ -503,31 +492,4 @@ export async function stop(appName: string, stopWine = true) {
 export async function isGameAvailable(appName: string): Promise<boolean> {
   const installed = getInstalled(appName)
   return Boolean(installed && existsSync(installed.install_path))
-}
-
-function humanBytes(bytes: number): string {
-  if (!bytes) return '0 B'
-  const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
-  let value = bytes
-  let unit = 0
-  while (value >= 1024 && unit < units.length - 1) {
-    value /= 1024
-    unit++
-  }
-  return `${value.toFixed(unit === 0 ? 0 : 1)} ${units[unit]}`
-}
-
-function estimateEta(
-  downloaded: number,
-  total: number,
-  speedBytesPerSecond: number
-): string {
-  if (!total || speedBytesPerSecond <= 0) return ''
-  const remaining = (total - downloaded) / speedBytesPerSecond
-  const hours = Math.floor(remaining / 3600)
-  const minutes = Math.floor((remaining % 3600) / 60)
-  const seconds = Math.floor(remaining % 60)
-  return [hours, minutes, seconds]
-    .map((v) => v.toString().padStart(2, '0'))
-    .join(':')
 }

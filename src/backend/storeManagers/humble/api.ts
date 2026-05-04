@@ -90,7 +90,6 @@ export async function getOrder(gamekey: string): Promise<HumbleOrder> {
 export async function getAllOrders(): Promise<HumbleOrder[]> {
   const keys = await getOrderKeys()
   const orders: HumbleOrder[] = []
-  // Fetch with limited concurrency to avoid hammering the API
   const concurrency = 6
   for (let i = 0; i < keys.length; i += concurrency) {
     const batch = keys.slice(i, i + concurrency)

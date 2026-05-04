@@ -154,11 +154,9 @@ export default function WebView() {
     navigate('/login')
   }
 
-  // Humble has no OAuth code or token in the URL — login success is just
-  // "the session cookie now exists in the webview partition." Skip while
-  // we're still on the login page itself; on every other humblebundle.com
-  // page, ask the backend to read the cookie and validate it. The IPC is
-  // a no-op when no cookie exists, so it's safe to call repeatedly.
+  // Humble has no OAuth code in the URL — login success is just "the
+  // session cookie now exists in the webview partition", so we poll the
+  // backend on every humblebundle.com navigation that isn't /login.
   const humbleLoginAttemptedRef = useRef(false)
   const tryHumbleLogin = (pageURL: string) => {
     if (humbleLoginAttemptedRef.current) return
@@ -175,8 +173,6 @@ export default function WebView() {
         if (status === 'done') {
           handleSuccessfulLogin()
         } else {
-          // Cookie wasn't there yet (or the request failed); reset so the
-          // next navigation can retry.
           humbleLoginAttemptedRef.current = false
           setLoading({ refresh: false, message: '' })
         }
@@ -427,7 +423,7 @@ export default function WebView() {
         partition={`persist:${
           startUrl === epicLoginUrl
             ? 'epicstore'
-            : runner === 'humble' || store === 'humble'
+            : runner === 'humble'
               ? 'humble'
               : store
         }`}
