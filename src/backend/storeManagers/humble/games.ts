@@ -28,7 +28,7 @@ import {
 } from 'backend/logger'
 import { GameConfig } from 'backend/game_config'
 import { existsSync, rmSync } from 'graceful-fs'
-import { isWindows } from 'backend/constants/environment'
+import { isMac, isWindows } from 'backend/constants/environment'
 import {
   calculateEta,
   getFileSize,
@@ -58,8 +58,16 @@ import {
   findGameExecutable,
   runInstaller
 } from './installers'
-import { HumbleInstalledInfo } from 'common/types/humble'
+import { HumbleInstalledInfo, HumbleInstallPlatform } from 'common/types/humble'
 import { launchGame } from 'backend/storeManagers/storeManagerCommon/games'
+
+function toHumblePlatform(
+  platform: InstallPlatform | undefined
+): HumbleInstallPlatform {
+  const lower = `${platform ?? ''}`.toLowerCase()
+  if (lower === 'mac' || lower === 'osx' || lower === 'darwin') return 'osx'
+  return 'windows'
+}
 
 import type LogWriter from 'backend/logger/log_writer'
 
@@ -103,8 +111,7 @@ export async function getExtraInfo(appName: string): Promise<ExtraInfo> {
 export async function importGame(
   appName: string,
   path: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _platform: InstallPlatform
+  platform: InstallPlatform
 ): Promise<ExecResult> {
   const entry = getCachedSubproduct(appName)
   if (!entry) {
@@ -117,8 +124,15 @@ export async function importGame(
     logError(error, LogPrefix.Humble)
     return { stdout: '', stderr: error, error }
   }
-  const installInfo = await getInstallInfo(appName).catch(() => undefined)
-  const discoveredExe = findGameExecutable(path, entry.subproduct.human_name)
+  const humblePlatform = toHumblePlatform(platform)
+  const installInfo = await getInstallInfo(appName, humblePlatform).catch(
+    () => undefined
+  )
+  const discoveredExe = findGameExecutable(
+    path,
+    entry.subproduct.human_name,
+    humblePlatform
+  )
   if (!discoveredExe) {
     logWarning(
       `Imported ${appName} but no executable found under ${path}; user must set targetExe`,
@@ -130,7 +144,7 @@ export async function importGame(
     gamekey: entry.order.gamekey,
     subproduct_machine_name: entry.subproduct.machine_name,
     install_path: path,
-    platform: installInfo?.game.platform ?? 'windows',
+    platform: installInfo?.game.platform ?? humblePlatform,
     executable: discoveredExe,
     md5: installInfo?.manifest.md5 ?? '',
     version: installInfo?.game.version ?? '',
@@ -163,7 +177,8 @@ export function onInstallOrUpdateOutput(
 async function runDownloadAndInstall(
   appName: string,
   installPath: string,
-  action: 'installing' | 'updating'
+  action: 'installing' | 'updating',
+  platform: HumbleInstallPlatform
 ): Promise<InstallResult> {
   const entry = getCachedSubproduct(appName)
   if (!entry) {
@@ -172,7 +187,7 @@ async function runDownloadAndInstall(
       error: `Humble subproduct ${appName} not found in cached library`
     }
   }
-  const installInfo = await getInstallInfo(appName)
+  const installInfo = await getInstallInfo(appName, platform)
   if (!installInfo) {
     return {
       status: 'error',
@@ -228,14 +243,16 @@ async function runDownloadAndInstall(
       archivePath: tempFile,
       installPath,
       title: entry.subproduct.human_name,
-      gameSettings
+      gameSettings,
+      platform: installInfo.game.platform
     })
 
     // InnoSetup / MojoSetup runs are silent and don't tell us where the
     // launcher landed, so scan the install folder ourselves.
     const discoveredExe = findGameExecutable(
       installPath,
-      entry.subproduct.human_name
+      entry.subproduct.human_name,
+      installInfo.game.platform
     )
     if (!discoveredExe) {
       logWarning(
@@ -262,6 +279,7 @@ async function runDownloadAndInstall(
     }
     persistInstalled(installed)
     installState(appName, true)
+    sendFrontendMessage('refreshLibrary', 'humble')
 
     sendGameStatusUpdate({
       appName,
@@ -286,16 +304,17 @@ async function runDownloadAndInstall(
 
 export async function install(
   appName: string,
-  { path }: InstallArgs
+  { path, platformToInstall }: InstallArgs
 ): Promise<InstallResult> {
   const installLogWriter = await createGameLogWriter(
     appName,
     'humble',
     'install'
   )
-  installLogWriter.logInfo(`Installing ${appName} to ${path}`)
+  const platform = toHumblePlatform(platformToInstall)
+  installLogWriter.logInfo(`Installing ${appName} (${platform}) to ${path}`)
   const installPath = join(path, getGameInfo(appName).folder_name ?? appName)
-  return runDownloadAndInstall(appName, installPath, 'installing')
+  return runDownloadAndInstall(appName, installPath, 'installing', platform)
 }
 
 export async function update(appName: string): Promise<InstallResult> {
@@ -314,13 +333,19 @@ export async function update(appName: string): Promise<InstallResult> {
       LogPrefix.Humble
     )
   }
-  return runDownloadAndInstall(appName, installed.install_path, 'updating')
+  return runDownloadAndInstall(
+    appName,
+    installed.install_path,
+    'updating',
+    installed.platform
+  )
 }
 
-// Humble installs only the Windows download, so the game is "native" only
-// on Windows hosts. Linux/Mac always go through Wine/Proton/CrossOver.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function isNative(_appName?: string): boolean {
+export function isNative(appName?: string): boolean {
+  if (!appName) return isWindows
+  const installed = getInstalled(appName)
+  if (installed?.platform === 'osx') return isMac
+  if (installed?.platform === 'windows') return isWindows
   return isWindows
 }
 

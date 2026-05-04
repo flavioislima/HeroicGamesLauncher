@@ -18,6 +18,7 @@ import { isWindows, isMac } from 'backend/constants/environment'
 import { runWineCommand } from 'backend/launcher'
 import { extractFiles, spawnAsync } from 'backend/utils'
 import { GameSettings } from 'common/types'
+import { HumbleInstallPlatform } from 'common/types/humble'
 
 interface DownloadProgress {
   bytesDownloaded: number
@@ -109,13 +110,23 @@ interface ExtractContext {
   // ignores /DIR= and silently drops the game inside the Wine prefix.
   title?: string
   gameSettings?: GameSettings
+  platform?: HumbleInstallPlatform
 }
 
 export async function runInstaller(
   ctx: ExtractContext
 ): Promise<{ executable?: string }> {
+  const lowerPath = ctx.archivePath.toLowerCase()
   const ext = extname(ctx.archivePath).toLowerCase()
   mkdirSync(ctx.installPath, { recursive: true })
+
+  if (ext === '.dmg') {
+    return mountAndCopyDmg(ctx)
+  }
+
+  if (ext === '.pkg' || ext === '.mpkg') {
+    return runMacPkgInstaller(ctx)
+  }
 
   if (ext === '.zip') {
     await extractZip(ctx.archivePath, ctx.installPath)
@@ -127,9 +138,9 @@ export async function runInstaller(
     ext === '.bz2' ||
     ext === '.xz' ||
     ext === '.tar' ||
-    ctx.archivePath.endsWith('.tar.gz') ||
-    ctx.archivePath.endsWith('.tar.bz2') ||
-    ctx.archivePath.endsWith('.tar.xz')
+    lowerPath.endsWith('.tar.gz') ||
+    lowerPath.endsWith('.tar.bz2') ||
+    lowerPath.endsWith('.tar.xz')
   ) {
     const result = await extractFiles({
       path: ctx.archivePath,
@@ -183,6 +194,129 @@ async function runShellInstaller(
   return {}
 }
 
+async function mountAndCopyDmg(
+  ctx: ExtractContext
+): Promise<{ executable?: string }> {
+  if (!isMac) {
+    throw new Error('Cannot mount a .dmg on non-macOS hosts')
+  }
+  const mountPoint = join(
+    tmpdir(),
+    `heroic-humble-mount-${Date.now()}-${ctx.appName}`
+  )
+  mkdirSync(mountPoint, { recursive: true })
+
+  await runShell('hdiutil', [
+    'attach',
+    ctx.archivePath,
+    '-mountpoint',
+    mountPoint,
+    '-nobrowse',
+    '-noverify',
+    '-noautoopen'
+  ])
+
+  try {
+    const entries = readdirSync(mountPoint).filter(
+      (name) => !name.startsWith('.') && name !== 'Applications'
+    )
+    if (!entries.length) {
+      throw new Error(`Mounted DMG ${ctx.archivePath} contained no entries`)
+    }
+    const { code, stderr } = await spawnAsync('cp', [
+      '-R',
+      ...entries.map((e) => join(mountPoint, e)),
+      ctx.installPath
+    ])
+    if (code !== 0) {
+      throw new Error(`cp from DMG failed: ${stderr || code}`)
+    }
+  } finally {
+    try {
+      await runShell('hdiutil', ['detach', mountPoint, '-quiet'])
+    } catch (error) {
+      logWarning(
+        [`Failed to detach ${mountPoint}; trying force:`, error],
+        LogPrefix.Humble
+      )
+      await runShell('hdiutil', ['detach', mountPoint, '-force']).catch(
+        () => {}
+      )
+    }
+    try {
+      rmSync(mountPoint, { recursive: true, force: true })
+    } catch {
+      // ignore
+    }
+  }
+
+  return {}
+}
+
+async function runMacPkgInstaller(
+  ctx: ExtractContext
+): Promise<{ executable?: string }> {
+  if (!isMac) {
+    throw new Error('Cannot run a .pkg installer on non-macOS hosts')
+  }
+  // pkgutil expand avoids the sudo + system-write side effects of `installer`.
+  const expanded = join(
+    tmpdir(),
+    `heroic-humble-pkg-${Date.now()}-${ctx.appName}`
+  )
+  await runShell('pkgutil', ['--expand-full', ctx.archivePath, expanded])
+  try {
+    const payloadRoot = findPkgPayloadRoot(expanded)
+    if (!payloadRoot) {
+      throw new Error(
+        `Could not find a Payload directory inside expanded pkg ${ctx.archivePath}`
+      )
+    }
+    const entries = readdirSync(payloadRoot)
+    if (!entries.length) {
+      throw new Error(`Empty Payload in ${ctx.archivePath}`)
+    }
+    const { code, stderr } = await spawnAsync('cp', [
+      '-R',
+      ...entries.map((e) => join(payloadRoot, e)),
+      ctx.installPath
+    ])
+    if (code !== 0) {
+      throw new Error(`cp from pkg payload failed: ${stderr || code}`)
+    }
+  } finally {
+    try {
+      rmSync(expanded, { recursive: true, force: true })
+    } catch {
+      // ignore
+    }
+  }
+  return {}
+}
+
+function findPkgPayloadRoot(root: string): string | undefined {
+  let entries: string[]
+  try {
+    entries = readdirSync(root)
+  } catch {
+    return undefined
+  }
+  for (const entry of entries) {
+    const full = join(root, entry)
+    let st
+    try {
+      st = statSync(full)
+    } catch {
+      continue
+    }
+    if (!st.isDirectory()) continue
+    if (entry === 'Payload') return full
+    const nested = findPkgPayloadRoot(full)
+    if (nested) return nested
+  }
+  return undefined
+}
+
 async function runWindowsInstaller(
   ctx: ExtractContext
 ): Promise<{ executable?: string }> {
@@ -212,21 +346,17 @@ async function runWindowsInstaller(
     }
     return {}
   }
-  if (isMac) {
-    throw new Error(
-      'Running .exe installers on macOS requires CrossOver or Wine; not yet supported'
-    )
-  }
   if (!ctx.gameSettings) {
     throw new Error('Wine settings missing for .exe install')
   }
 
-  // Some Humble installers (Aquaria's is the common offender) hard-code
-  // their `DefaultDirName` and ignore `/DIR=`, so the game ends up at e.g.
-  // `<prefix>/drive_c/Program Files/Aquaria` and Heroic's chosen install
-  // folder stays empty. Snapshot first so we can detect this and move it.
+  // Some InnoSetup installers hard-code DefaultDirName and ignore /DIR=, so
+  // the game ends up under <prefix>/drive_c/Program Files/<title>. Snapshot
+  // first so we can detect that and move it.
   const driveCPath = wineDriveCPath(ctx.gameSettings)
-  const beforeSnapshot = snapshotInstallDirs(driveCPath)
+  const beforeSnapshot = driveCPath
+    ? snapshotInstallDirs(driveCPath)
+    : new Set<string>()
 
   // Use the Wine-translated `Z:\` form for /DIR — most installers that
   // *do* honour /DIR insist on a Windows-style path with a drive letter.
@@ -250,6 +380,13 @@ async function runWindowsInstaller(
     return {}
   }
 
+  if (!driveCPath) {
+    throw new Error(
+      `Installer for ${ctx.appName} did not write to ${ctx.installPath} and Heroic ` +
+        `cannot inspect this Wine prefix layout (likely a CrossOver bottle). ` +
+        `Locate the installed folder inside the bottle and move it to ${ctx.installPath} manually.`
+    )
+  }
   const afterSnapshot = snapshotInstallDirs(driveCPath)
   const candidate = pickGameInstallDir(beforeSnapshot, afterSnapshot, ctx.title)
   if (!candidate) {
@@ -299,14 +436,19 @@ async function runWindowsInstallerElevated(
 // Wine maps the Z: drive to the Linux root by default, so any Linux
 // path can be reached as `Z:\some\absolute\path`. InnoSetup parses
 // `/DIR=` strictly and rejects `/home/...` style values.
+// InnoSetup rejects POSIX paths in /DIR=; remap to wine's Z: drive root.
 function toWineZPath(linuxPath: string): string {
   const trimmed = linuxPath.replace(/^\/+/, '')
   return 'Z:\\' + trimmed.replace(/\//g, '\\')
 }
 
-function wineDriveCPath(gameSettings: GameSettings): string {
-  const isProton = gameSettings.wineVersion?.type === 'proton'
-  return isProton
+// Undefined for CrossOver bottles — those resolve drive_c asynchronously,
+// so the caller skips the recovery snapshot.
+function wineDriveCPath(gameSettings: GameSettings): string | undefined {
+  const type = gameSettings.wineVersion?.type
+  if (type === 'crossover') return undefined
+  if (!gameSettings.winePrefix) return undefined
+  return type === 'proton'
     ? join(gameSettings.winePrefix, 'pfx', 'drive_c')
     : join(gameSettings.winePrefix, 'drive_c')
 }
@@ -528,9 +670,50 @@ function tokensFromTitle(title: string): string[] {
     .filter((t) => t.length > 2)
 }
 
+// Skip recursing into .app bundles — their Contents/ holds Sparkle/
+// Steamworks helpers we never want to launch.
+function findMacAppBundles(
+  root: string,
+  out: string[],
+  depth = 0,
+  maxDepth = 2
+) {
+  if (depth > maxDepth) return
+  let entries
+  try {
+    entries = readdirSync(root, { withFileTypes: true })
+  } catch {
+    return
+  }
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue
+    const full = join(root, entry.name)
+    if (entry.name.toLowerCase().endsWith('.app')) {
+      out.push(full)
+      continue
+    }
+    findMacAppBundles(full, out, depth + 1, maxDepth)
+  }
+}
+
+function pickMacApp(bundles: string[], title?: string): string | undefined {
+  if (!bundles.length) return undefined
+  if (bundles.length === 1) return bundles[0]
+  if (title) {
+    const matched = bundles.find((p) =>
+      dirNameMatchesTitle(basename(p, '.app'), title)
+    )
+    if (matched) return matched
+  }
+  return bundles
+    .slice()
+    .sort((a, b) => a.split('/').length - b.split('/').length)[0]
+}
+
 export function findGameExecutable(
   installPath: string,
-  title?: string
+  title?: string,
+  platform: HumbleInstallPlatform = 'windows'
 ): string | undefined {
   if (!existsSync(installPath)) {
     logError(
@@ -538,6 +721,44 @@ export function findGameExecutable(
       LogPrefix.Humble
     )
     return undefined
+  }
+
+  if (platform === 'osx') {
+    const bundles: string[] = []
+    findMacAppBundles(installPath, bundles)
+    const picked = pickMacApp(bundles, title)
+    if (!picked) {
+      logError(
+        `findGameExecutable: no .app bundle found under ${installPath}`,
+        LogPrefix.Humble
+      )
+      return undefined
+    }
+    // launchGame spawns the executable directly; .app bundles aren't
+    // exec()able, only Contents/MacOS/<binary> is.
+    const macOsDir = join(picked, 'Contents', 'MacOS')
+    try {
+      const inner = readdirSync(macOsDir).filter((n) => !n.startsWith('.'))
+      if (inner.length) {
+        const resolved = join(macOsDir, inner[0])
+        logInfo(
+          [
+            `Picked .app bundle ${picked} from ${bundles.length} candidate(s); launching ${resolved}`
+          ],
+          LogPrefix.Humble
+        )
+        return resolved
+      }
+    } catch (error) {
+      logWarning(
+        [
+          `Could not read Contents/MacOS in ${picked}; falling back to bundle path:`,
+          error
+        ],
+        LogPrefix.Humble
+      )
+    }
+    return picked
   }
 
   const candidates: ExeCandidate[] = []
