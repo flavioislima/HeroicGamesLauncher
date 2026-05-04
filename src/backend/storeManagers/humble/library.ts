@@ -89,9 +89,7 @@ function hasInstallableDownload(subproduct: HumbleSubproduct): boolean {
     return Boolean(subproduct.downloads?.some(isWindowsDownload))
   }
   return Boolean(
-    subproduct.downloads?.some(
-      (d) => isWindowsDownload(d) || isMacDownload(d)
-    )
+    subproduct.downloads?.some((d) => isWindowsDownload(d) || isMacDownload(d))
   )
 }
 
@@ -159,8 +157,7 @@ function subproductToGameInfo(
     is_installed: Boolean(installed),
     canRunOffline: true,
     is_linux_native: false,
-    is_mac_native:
-      !hideMacBecauseAppleSilicon && hasMacDownload(subproduct),
+    is_mac_native: !hideMacBecauseAppleSilicon && hasMacDownload(subproduct),
     developer: subproduct.payee?.human_name,
     description: subproduct.human_name,
     folder_name: subproduct.machine_name,
