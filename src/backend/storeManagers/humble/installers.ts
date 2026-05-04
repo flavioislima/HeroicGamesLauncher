@@ -77,7 +77,10 @@ export async function downloadToTempFile(
       })
       response.data.on('error', reject)
       response.data.pipe(writer)
-      writer.on('finish', () => resolve())
+      // Wait for `close` (fd released), not `finish` (data flushed). On
+      // Windows, spawning the .exe while the writer's fd is still open
+      // produces a sharing violation that surfaces as `spawn EACCES`.
+      writer.on('close', () => resolve())
       writer.on('error', reject)
     })
 
@@ -184,11 +187,24 @@ async function runWindowsInstaller(
   ctx: ExtractContext
 ): Promise<{ executable?: string }> {
   if (isWindows) {
-    await runShell(ctx.archivePath, [
-      '/SILENT',
-      `/DIR=${ctx.installPath}`,
-      '/NOICONS'
-    ])
+    const args = ['/SILENT', `/DIR=${ctx.installPath}`, '/NOICONS']
+    try {
+      await runShell(ctx.archivePath, args)
+    } catch (err) {
+      // Inno Setup installers (Aquaria, many older Humble titles) ship with
+      // a `requireAdministrator` manifest. CreateProcess from a non-elevated
+      // parent fails with ERROR_ELEVATION_REQUIRED, which libuv surfaces as
+      // EACCES. Retry through a UAC prompt.
+      if ((err as NodeJS.ErrnoException).code !== 'EACCES') throw err
+      logWarning(
+        [
+          `Installer for ${ctx.appName} requires elevation;`,
+          'requesting UAC prompt'
+        ],
+        LogPrefix.Humble
+      )
+      await runWindowsInstallerElevated(ctx.archivePath, ctx.installPath)
+    }
     return {}
   }
   if (isMac) {
@@ -254,6 +270,23 @@ async function runWindowsInstaller(
     LogPrefix.Humble
   )
   return {}
+}
+
+async function runWindowsInstallerElevated(
+  exe: string,
+  installPath: string
+): Promise<void> {
+  // Build the Inno Setup command line as one string so paths with spaces
+  // survive intact through PowerShell -> ShellExecuteEx -> the installer.
+  const cmdLine = `/SILENT /DIR="${installPath}" /NOICONS`
+  // Single-quoted strings in PowerShell are literal; escape embedded
+  // single quotes by doubling them.
+  const psQuote = (s: string) => `'${s.replace(/'/g, "''")}'`
+  const psCmd =
+    `$p = Start-Process -FilePath ${psQuote(exe)} ` +
+    `-ArgumentList ${psQuote(cmdLine)} -Verb RunAs -Wait -PassThru; ` +
+    `exit $p.ExitCode`
+  await runShell('powershell.exe', ['-NoProfile', '-Command', psCmd])
 }
 
 // Wine maps the Z: drive to the Linux root by default, so any Linux
