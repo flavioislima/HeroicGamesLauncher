@@ -395,6 +395,7 @@ export function installState(appName: string, state: boolean) {
       game.is_installed = false
       game.install = {}
     }
+    persistLibraryStore()
     return
   }
   const installed = installedGames.get(appName)
@@ -409,6 +410,15 @@ export function installState(appName: string, state: boolean) {
       executable: installed.executable
     }
   }
+  persistLibraryStore()
+}
+
+// `library` is the in-memory authoritative copy; the renderer reads its
+// snapshot from electron-store directly on refresh, so we must mirror any
+// install/uninstall mutation back to disk or the library list keeps showing
+// stale state until the next full re-fetch.
+function persistLibraryStore() {
+  libraryStore.set('library', Array.from(library.values()))
 }
 
 export const getLaunchOptions = () => []

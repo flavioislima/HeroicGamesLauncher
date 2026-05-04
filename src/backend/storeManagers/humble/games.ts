@@ -282,6 +282,7 @@ async function runDownloadAndInstall(
     }
     persistInstalled(installed)
     installState(appName, true)
+    sendFrontendMessage('refreshLibrary', 'humble')
 
     sendGameStatusUpdate({
       appName,
