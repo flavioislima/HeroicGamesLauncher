@@ -39,8 +39,7 @@ const MainButton = ({ gameInfo, handlePlay, handleInstall }: Props) => {
     is.syncing ||
     is.launching ||
     is.installingWinetricksPackages ||
-    is.installingRedist ||
-    is.playing
+    is.installingRedist
 
   const disabledInstallButtons =
     is.playing ||
