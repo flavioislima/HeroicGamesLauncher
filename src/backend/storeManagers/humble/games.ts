@@ -26,8 +26,7 @@ import {
   createGameLogWriter
 } from 'backend/logger'
 import { GameConfig } from 'backend/game_config'
-import { existsSync } from 'graceful-fs'
-import { rm } from 'fs/promises'
+import { existsSync, rmSync } from 'graceful-fs'
 import { isWindows } from 'backend/constants/environment'
 import {
   killPattern,
@@ -268,7 +267,7 @@ export async function update(appName: string): Promise<InstallResult> {
   // Humble has no patching, so updates re-download the full archive
   try {
     if (existsSync(installed.install_path)) {
-      await rm(installed.install_path, { recursive: true, force: true })
+      rmSync(installed.install_path, { recursive: true, force: true })
     }
   } catch (error) {
     logWarning(
@@ -392,18 +391,46 @@ export async function syncSaves(): Promise<string> {
 export async function uninstall({ appName }: RemoveArgs): Promise<ExecResult> {
   const installed = getInstalled(appName)
   if (!installed) {
-    return { stdout: '', stderr: 'Game is not installed' }
-  }
-  try {
-    if (existsSync(installed.install_path)) {
-      await rm(installed.install_path, { recursive: true, force: true })
-    }
-  } catch (error) {
-    logError(
-      [`Failed to remove install folder for ${appName}:`, error],
+    logWarning(
+      `Uninstall called for ${appName} but no install record exists`,
       LogPrefix.Humble
     )
-    return { stdout: '', stderr: `${error}` }
+    return { stdout: '', stderr: 'Game is not installed' }
+  }
+  const installPath = installed.install_path
+  logInfo(
+    [`Uninstalling ${appName} — removing install folder ${installPath}`],
+    LogPrefix.Humble
+  )
+  if (installPath && existsSync(installPath)) {
+    try {
+      rmSync(installPath, { recursive: true, force: true })
+    } catch (error) {
+      // rmSync without `force` would throw on missing files; with force it
+      // only throws on real errors (EPERM, EBUSY, etc). Log and surface so
+      // the user sees the failure instead of a silent half-uninstall.
+      logError(
+        [`Failed to remove install folder ${installPath}:`, error],
+        LogPrefix.Humble
+      )
+      return { stdout: '', stderr: `${error}` }
+    }
+    if (existsSync(installPath)) {
+      logError(
+        [`rmSync returned but ${installPath} still exists`],
+        LogPrefix.Humble
+      )
+    } else {
+      logInfo([`Removed ${installPath}`], LogPrefix.Humble)
+    }
+  } else {
+    logWarning(
+      [
+        `Install folder ${installPath || '<empty>'} did not exist;`,
+        `proceeding with metadata cleanup only`
+      ],
+      LogPrefix.Humble
+    )
   }
   const gameInfo = getGameInfo(appName)
   await removeShortcutsUtil(gameInfo)
