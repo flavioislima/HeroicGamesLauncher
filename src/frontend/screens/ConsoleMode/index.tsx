@@ -51,6 +51,7 @@ export default function ConsoleMode() {
     gog,
     amazon,
     zoom,
+    humble,
     sideloadedLibrary,
     showDialogModal,
     refreshLibrary,
@@ -81,7 +82,8 @@ export default function ConsoleMode() {
       epic.library.length === 0 &&
       gog.library.length === 0 &&
       amazon.library.length === 0 &&
-      zoom.library.length === 0
+      zoom.library.length === 0 &&
+      humble.library.length === 0
     ) {
       void refreshLibrary({ runInBackground: true })
     }
@@ -97,6 +99,7 @@ export default function ConsoleMode() {
       ...gog.library,
       ...amazon.library,
       ...zoom.library,
+      ...humble.library,
       ...sideloadedLibrary
     ]
     return all.filter(
@@ -107,6 +110,7 @@ export default function ConsoleMode() {
     gog.library,
     amazon.library,
     zoom.library,
+    humble.library,
     sideloadedLibrary
   ])
 
@@ -143,6 +147,11 @@ export default function ConsoleMode() {
       },
       { key: 'gog', label: 'GOG', enabled: storesWithGames.has('gog') },
       { key: 'nile', label: 'Amazon', enabled: storesWithGames.has('nile') },
+      {
+        key: 'humble',
+        label: 'Humble',
+        enabled: storesWithGames.has('humble')
+      },
       {
         key: 'sideload',
         label: t('console.filter.sideload', 'Other'),
