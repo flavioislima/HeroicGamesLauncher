@@ -24,6 +24,8 @@ const validStoredUrl = (url: string, store: string) => {
       return url.includes('gaming.amazon.com')
     case 'zoom':
       return url.includes('zoom-platform.com')
+    case 'itchio':
+      return url.includes('itch.io')
     default:
       return false
   }
@@ -62,6 +64,7 @@ export default function WebView() {
   const epicStore = `https://www.epicgames.com/store/${lang}/`
   const gogStore = `https://af.gog.com?as=1838482841`
   const amazonStore = `https://gaming.amazon.com`
+  const itchioStore = `https://itch.io`
   const zoomStore = `https://www.zoom-platform.com`
   const wikiURL =
     'https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/wiki'
@@ -77,6 +80,7 @@ export default function WebView() {
     '/store/epic': epicStore,
     '/store/gog': gogStore,
     '/store/amazon': amazonStore,
+    '/store/itchio': itchioStore,
     '/store/zoom': zoomStore,
     '/wiki': wikiURL,
     '/loginEpic': epicLoginUrl,
