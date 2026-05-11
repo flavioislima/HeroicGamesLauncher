@@ -21,6 +21,7 @@ export const epicLoginPath = '/loginweb/legendary'
 export const gogLoginPath = '/loginweb/gog'
 export const amazonLoginPath = '/loginweb/nile'
 export const zoomLoginPath = '/loginweb/zoom'
+export const itchioLoginPath = '/loginweb/itchio'
 
 export default React.memo(function NewLogin() {
   const { epic, gog, amazon, zoom, refreshLibrary } =

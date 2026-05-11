@@ -36,6 +36,7 @@ import { LegendaryUser } from 'backend/storeManagers/legendary/user'
 import { GOGUser } from './storeManagers/gog/user'
 import gogPresence from './storeManagers/gog/presence'
 import { NileUser } from './storeManagers/nile/user'
+import { ItchioUser } from './storeManagers/itchio/user'
 import { ZoomUser } from './storeManagers/zoom/user'
 import {
   clearCache,
@@ -815,6 +816,11 @@ addListener('logoutGOG', GOGUser.logout)
 addHandler('getAmazonLoginData', NileUser.getLoginData)
 addHandler('authAmazon', async (event, data) => NileUser.login(data))
 addHandler('logoutAmazon', NileUser.logout)
+
+addHandler('getItchioUserInfo', async () => ItchioUser.getUserData())
+addHandler('getItchioLoginData', ItchioUser.getLoginData)
+addHandler('authItchio', async (event, data) => ItchioUser.login(data))
+addHandler('logoutItchio', ItchioUser.logout)
 
 addHandler('authZoom', async (event, url) => {
   const login = await ZoomUser.login(url)

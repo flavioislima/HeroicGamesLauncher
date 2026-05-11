@@ -3,12 +3,14 @@ import * as GOGGameManager from 'backend/storeManagers/gog/games'
 import * as LegendaryGameManager from 'backend/storeManagers/legendary/games'
 import * as NileGameManager from 'backend/storeManagers/nile/games'
 import * as ZoomGameManager from 'backend/storeManagers/zoom/games'
+import * as ItchioGameManager from 'backend/storeManagers/itchio/games'
 
 import * as SideloadLibraryManager from 'backend/storeManagers/sideload/library'
 import * as GOGLibraryManager from 'backend/storeManagers/gog/library'
 import * as LegendaryLibraryManager from 'backend/storeManagers/legendary/library'
 import * as NileLibraryManager from 'backend/storeManagers/nile/library'
 import * as ZoomLibraryManager from 'backend/storeManagers/zoom/library'
+import * as ItchioLibraryManager from 'backend/storeManagers/itchio/library'
 import { GameManager, LibraryManager } from 'common/types/game_manager'
 
 import { logInfo, RunnerToLogPrefixMap } from 'backend/logger'
@@ -25,7 +27,8 @@ export const gameManagerMap: GameManagerMap = {
   gog: GOGGameManager,
   legendary: LegendaryGameManager,
   nile: NileGameManager,
-  zoom: ZoomGameManager
+  zoom: ZoomGameManager,
+  itchio: ItchioGameManager
 }
 
 type LibraryManagerMap = {
@@ -37,7 +40,8 @@ export const libraryManagerMap: LibraryManagerMap = {
   gog: GOGLibraryManager,
   legendary: LegendaryLibraryManager,
   nile: NileLibraryManager,
-  zoom: ZoomLibraryManager
+  zoom: ZoomLibraryManager,
+  itchio: ItchioLibraryManager
 }
 
 function getDMElement(gameInfo: GameInfo, appName: string) {
@@ -86,6 +90,7 @@ export async function initStoreManagers() {
   await LegendaryLibraryManager.initLegendaryLibraryManager()
   await GOGLibraryManager.initGOGLibraryManager()
   await NileLibraryManager.initNileLibraryManager()
+  await ItchioLibraryManager.initItchioLibraryManager()
   if (GlobalConfig.get().getSettings().experimentalFeatures?.zoomPlatform)
     await ZoomLibraryManager.initZoomLibraryManager()
 }

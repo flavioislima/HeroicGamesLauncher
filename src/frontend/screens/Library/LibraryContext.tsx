@@ -9,7 +9,8 @@ const initialContext: LibraryContextType = {
     gog: true,
     nile: true,
     sideload: true,
-    zoom: true
+    zoom: true,
+    itchio: true
   },
   platformsFilters: { win: true, linux: true, mac: true, browser: true },
   filterText: '',

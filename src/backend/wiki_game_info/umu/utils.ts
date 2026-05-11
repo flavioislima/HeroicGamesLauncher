@@ -11,15 +11,16 @@ const storeMapping: Record<Runner, string> = {
   legendary: 'egs',
   nile: 'amazon',
   sideload: 'sideload',
-  zoom: 'zoomplatform'
+  zoom: 'zoomplatform',
+  itchio: 'itchio'
 }
 
 export async function getUmuId(
   appName: string,
   runner: Runner
 ): Promise<string | null> {
-  // if it's a sideload, there won't be any umu id
-  if (runner === 'sideload') {
+  // sideload and itchio aren't tracked in umu's database
+  if (runner === 'sideload' || runner === 'itchio') {
     return null
   }
 

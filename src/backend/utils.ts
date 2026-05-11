@@ -505,6 +505,18 @@ function getNileBin(): { dir: string; bin: string } {
   return splitPathAndName(fixAsarPath(defaultNilePath))
 }
 
+let defaultButlerPath: string | undefined = undefined
+function getButlerBin(): { dir: string; bin: string } {
+  const settings = GlobalConfig.get().getSettings()
+  if (settings?.altButlerBin) {
+    return splitPathAndName(settings.altButlerBin)
+  }
+
+  if (!defaultButlerPath) defaultButlerPath = archSpecificBinary('butler')
+
+  return splitPathAndName(fixAsarPath(defaultButlerPath))
+}
+
 export function createNecessaryFolders() {
   const defaultFolders = [gamesConfigPath, heroicIconFolder]
 
@@ -1693,6 +1705,7 @@ export {
   getGOGdlBin,
   getCometBin,
   getNileBin,
+  getButlerBin,
   formatEpicStoreUrl,
   getSteamRuntime,
   constructAndUpdateRPC,

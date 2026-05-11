@@ -5,5 +5,6 @@ export const storeMap: { [key in Runner]: string | undefined } = {
   gog: 'gog',
   nile: 'amazon',
   sideload: undefined,
-  zoom: 'zoom'
+  zoom: 'zoom',
+  itchio: 'itchio'
 }

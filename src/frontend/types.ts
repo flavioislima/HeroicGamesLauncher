@@ -25,6 +25,7 @@ export type Category =
   | 'sideload'
   | 'nile'
   | 'zoom'
+  | 'itchio'
 
 export interface ContextType {
   error: boolean
@@ -212,6 +213,7 @@ export interface StoresFilters {
   nile: boolean
   sideload: boolean
   zoom: boolean
+  itchio: boolean
 }
 
 export interface PlatformsFilters {
