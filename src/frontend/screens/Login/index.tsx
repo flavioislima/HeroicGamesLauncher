@@ -9,10 +9,12 @@ import GOGLogo from 'frontend/assets/gog-logo.svg?react'
 import HeroicLogo from 'frontend/assets/heroic-icon.svg?react'
 import AmazonLogo from 'frontend/assets/amazon-logo.svg?react'
 import ZoomLogo from 'frontend/assets/zoom-logo.svg?react'
+import ItchioLogo from 'frontend/assets/itchio-logo.svg?react'
 
 import { LanguageSelector, UpdateComponent } from '../../components/UI'
 import { FlagPosition } from '../../components/UI/LanguageSelector'
 import SIDLogin from './components/SIDLogin'
+import ItchioLogin from './components/ItchioLogin'
 import ContextProvider from '../../state/ContextProvider'
 import { useAwaited } from '../../hooks/useAwaited'
 import { hasHelp } from 'frontend/hooks/hasHelp'
@@ -24,7 +26,7 @@ export const zoomLoginPath = '/loginweb/zoom'
 export const itchioLoginPath = '/loginweb/itchio'
 
 export default React.memo(function NewLogin() {
-  const { epic, gog, amazon, zoom, refreshLibrary } =
+  const { epic, gog, amazon, zoom, itchio, refreshLibrary } =
     useContext(ContextProvider)
   const { t } = useTranslation()
 
@@ -37,12 +39,16 @@ export default React.memo(function NewLogin() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [showSidLogin, setShowSidLogin] = useState(false)
+  const [showItchioLogin, setShowItchioLogin] = useState(false)
   const [isEpicLoggedIn, setIsEpicLoggedIn] = useState(Boolean(epic.username))
   const [isGogLoggedIn, setIsGogLoggedIn] = useState(Boolean(gog.username))
   const [isAmazonLoggedIn, setIsAmazonLoggedIn] = useState(
     Boolean(amazon.user_id)
   )
   const [isZoomLoggedIn, setIsZoomLoggedIn] = useState(Boolean(zoom.username))
+  const [isItchioLoggedIn, setIsItchioLoggedIn] = useState(
+    Boolean(itchio.username)
+  )
 
   const systemInfo = useAwaited(window.api.systemInfo.get)
 
@@ -74,7 +80,15 @@ export default React.memo(function NewLogin() {
     setIsGogLoggedIn(Boolean(gog.username))
     setIsAmazonLoggedIn(Boolean(amazon.user_id))
     setIsZoomLoggedIn(Boolean(zoom.username))
-  }, [epic.username, gog.username, amazon.user_id, zoom.username, t])
+    setIsItchioLoggedIn(Boolean(itchio.username))
+  }, [
+    epic.username,
+    gog.username,
+    amazon.user_id,
+    zoom.username,
+    itchio.username,
+    t
+  ])
 
   async function handleLibraryClick() {
     await refreshLibrary({ runInBackground: false })
@@ -91,6 +105,13 @@ export default React.memo(function NewLogin() {
         <SIDLogin
           backdropClick={() => {
             setShowSidLogin(false)
+          }}
+        />
+      )}
+      {showItchioLogin && (
+        <ItchioLogin
+          backdropClick={() => {
+            setShowItchioLogin(false)
           }}
         />
       )}
@@ -148,6 +169,17 @@ export default React.memo(function NewLogin() {
               isLoggedIn={isAmazonLoggedIn}
               user={amazon.username || 'Unknown'}
               logoutAction={amazon.logout}
+              disabled={oldMac}
+            />
+            <Runner
+              class="itchio"
+              buttonText={t('login.itchio', 'itch.io Login')}
+              icon={() => <ItchioLogo />}
+              loginUrl={itchioLoginPath}
+              loginAction={() => setShowItchioLogin(true)}
+              isLoggedIn={isItchioLoggedIn}
+              user={itchio.username || 'Unknown'}
+              logoutAction={itchio.logout}
               disabled={oldMac}
             />
             {zoom.enabled && (

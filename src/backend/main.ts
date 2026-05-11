@@ -818,9 +818,9 @@ addHandler('authAmazon', async (event, data) => NileUser.login(data))
 addHandler('logoutAmazon', NileUser.logout)
 
 addHandler('getItchioUserInfo', async () => ItchioUser.getUserData())
-addHandler('getItchioLoginData', ItchioUser.getLoginData)
-addHandler('authItchio', async (event, data) => ItchioUser.login(data))
-addHandler('logoutItchio', ItchioUser.logout)
+addHandler('getItchioLoginData', async () => ItchioUser.getLoginData())
+addHandler('authItchio', async (_event, data) => ItchioUser.login(data))
+addHandler('logoutItchio', async () => ItchioUser.logout())
 
 addHandler('authZoom', async (event, url) => {
   const login = await ZoomUser.login(url)

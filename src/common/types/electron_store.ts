@@ -86,6 +86,7 @@ export interface StoreStructure {
   }
   itchioConfigStore: {
     userData?: ItchioUserData
+    profileId?: number
   }
   sideloadedStore: {
     games: GameInfo[]

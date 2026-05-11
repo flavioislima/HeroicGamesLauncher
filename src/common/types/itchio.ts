@@ -23,21 +23,17 @@ export interface ItchioUserData {
   gamer?: boolean
 }
 
-// Data returned to the renderer when starting an OAuth login. The renderer
-// opens `url` in a WebView, the user completes auth, and the callback hands
-// the resulting `code` back via `ItchioRegisterData`.
+// Data returned to the renderer when starting an itch.io login. itch.io
+// doesn't expose a CORS-friendly OAuth flow for desktop clients, so Heroic
+// uses an API-key paste flow: the renderer shows `apiKeysUrl` to the user,
+// they generate a personal API key on the site, and paste it back as
+// `ItchioRegisterData.apiKey`.
 export interface ItchioLoginData {
-  url: string
-  code_verifier: string
-  code_challenge: string
-  state: string
-  client_id: string
+  apiKeysUrl: string
 }
 
 export interface ItchioRegisterData {
-  code: string
-  code_verifier: string
-  state: string
+  apiKey: string
 }
 
 export interface ItchioGameUser {

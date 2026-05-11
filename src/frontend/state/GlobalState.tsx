@@ -32,6 +32,8 @@ import {
   libraryStore,
   nileConfigStore,
   nileLibraryStore,
+  itchioConfigStore,
+  itchioLibraryStore,
   wineDownloaderInfoStore,
   sideloadLibrary,
   zoomConfigStore,
@@ -40,6 +42,7 @@ import {
 } from '../helpers/electronStores'
 import { IpcRendererEvent } from 'electron'
 import { NileRegisterData } from 'common/types/nile'
+import { ItchioRegisterData } from 'common/types/itchio'
 
 const storage: Storage = window.localStorage
 const globalSettings = configStore.get_nodefault('settings')
@@ -72,6 +75,10 @@ interface StateProps {
     library: GameInfo[]
     username?: string
     enabled: boolean
+  }
+  itchio: {
+    library: GameInfo[]
+    username?: string
   }
   wineVersions: WineVersionInfo[]
   error: boolean
@@ -152,6 +159,10 @@ class GlobalState extends PureComponent<Props> {
     return games
   }
 
+  loadItchioLibrary = (): Array<GameInfo> => {
+    return itchioLibraryStore.get('library', [])
+  }
+
   loadZoomLibrary = (): Array<GameInfo> => {
     const games = zoomLibraryStore.get('games', [])
     const installedGames = zoomInstalledGamesStore.get('installed', [])
@@ -185,6 +196,10 @@ class GlobalState extends PureComponent<Props> {
       library: this.loadZoomLibrary(),
       username: zoomConfigStore.get_nodefault('username'),
       enabled: !!globalSettings?.experimentalFeatures?.zoomPlatform
+    },
+    itchio: {
+      library: this.loadItchioLibrary(),
+      username: itchioConfigStore.get_nodefault('userData.username')
     },
     wineVersions: wineDownloaderInfoStore.get('wine-releases', []),
     error: false,
@@ -606,6 +621,38 @@ class GlobalState extends PureComponent<Props> {
 
   getAmazonLoginData = async () => window.api.getAmazonLoginData()
 
+  itchioLogin = async (data: ItchioRegisterData) => {
+    console.log('logging itch.io')
+    const response = await window.api.authItchio(data)
+
+    if (response.status === 'done') {
+      this.setState({
+        itchio: {
+          library: [],
+          username: response.user?.username
+        }
+      })
+
+      this.handleSuccessfulLogin('itchio')
+    }
+
+    return response.status
+  }
+
+  itchioLogout = async () => {
+    await window.api.logoutItchio()
+    this.setState({
+      itchio: {
+        library: [],
+        username: null
+      }
+    })
+    console.log('Logging out from itch.io')
+    window.location.reload()
+  }
+
+  getItchioLoginData = async () => window.api.getItchioLoginData()
+
   zoomLogin = async (url: string) => {
     console.log('logging zoom')
     const response = await window.api.authZoom(url)
@@ -645,7 +692,7 @@ class GlobalState extends PureComponent<Props> {
   ): Promise<void> => {
     console.log('refreshing')
 
-    const { epic, gog, amazon, zoom, gameUpdates } = this.state
+    const { epic, gog, amazon, zoom, itchio, gameUpdates } = this.state
 
     let updates = gameUpdates
     if (checkUpdates) {
@@ -689,6 +736,13 @@ class GlobalState extends PureComponent<Props> {
       amazonLibrary = this.loadAmazonLibrary()
     }
 
+    let itchioLibrary = this.loadItchioLibrary()
+    if (itchio.username && (!itchioLibrary.length || !itchio.library.length)) {
+      window.api.logInfo('No cache found, getting data from itch.io...')
+      await window.api.refreshLibrary('itchio')
+      itchioLibrary = this.loadItchioLibrary()
+    }
+
     const updatedSideload = sideloadLibrary.get('games', [])
 
     this.setState({
@@ -709,6 +763,10 @@ class GlobalState extends PureComponent<Props> {
         library: amazonLibrary,
         user_id: amazon.user_id,
         username: amazon.username
+      },
+      itchio: {
+        library: itchioLibrary,
+        username: itchio.username
       },
       gameUpdates: updates,
       refreshing: false,
@@ -924,6 +982,7 @@ class GlobalState extends PureComponent<Props> {
     const gogUser = gogConfigStore.has('userData')
     const amazonUser = nileConfigStore.has('userData')
     const zoomUser = zoomConfigStore.has('isLoggedIn')
+    const itchioUser = itchioConfigStore.has('userData')
 
     if (legendaryUser) {
       await window.api.getUserInfo()
@@ -937,12 +996,23 @@ class GlobalState extends PureComponent<Props> {
       await window.api.getZoomUserInfo()
     }
 
+    if (itchioUser) {
+      // Re-establish butlerd session and refresh cached profile data
+      await window.api.getItchioUserInfo()
+    }
+
     if (!gameUpdates.length) {
       const storedGameUpdates = JSON.parse(storage.getItem('updates') || '[]')
       this.setState({ gameUpdates: storedGameUpdates })
     }
 
-    if (legendaryUser || gogUser || amazonUser || (zoom.enabled && zoomUser)) {
+    if (
+      legendaryUser ||
+      gogUser ||
+      amazonUser ||
+      (zoom.enabled && zoomUser) ||
+      itchioUser
+    ) {
       this.refreshLibrary({
         checkForUpdates: true,
         runInBackground:
@@ -1047,6 +1117,7 @@ class GlobalState extends PureComponent<Props> {
       gog,
       amazon,
       zoom,
+      itchio,
       favouriteGames,
       customCategories,
       hiddenGames,
@@ -1090,6 +1161,13 @@ class GlobalState extends PureComponent<Props> {
             login: this.zoomLogin,
             logout: this.zoomLogout,
             enabled: this.state.zoom.enabled
+          },
+          itchio: {
+            library: itchio.library,
+            username: itchio.username,
+            getLoginData: this.getItchioLoginData,
+            login: this.itchioLogin,
+            logout: this.itchioLogout
           },
           installingEpicGame,
           setLanguage: this.setLanguage,

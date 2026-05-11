@@ -1,23 +1,30 @@
-import { LogPrefix, logInfo } from 'backend/logger'
+import { existsSync, mkdirSync } from 'graceful-fs'
+
+import { LogPrefix, logError, logInfo } from 'backend/logger'
 
 import { itchioConfigPath } from './constants'
 
 /**
- * Ensure the butler binary and its config directory are available.
+ * Ensure butlerd's writable state directory exists. The daemon stores its
+ * SQLite db under `itchioConfigPath`; without the directory, the very first
+ * `Profile.LoginWithAPIKey` call fails with an obscure sqlite-open error.
  *
- * butler is itch.io's open-source CLI/daemon. In PR #2 this will:
- *  - Resolve the binary from `getButlerBin()` (custom override > bundled
- *    `tools/butler/butler`).
- *  - Download/extract a pinned release from https://broth.itch.zone/butler/
- *    when no binary is present.
- *  - Create `itchioConfigPath` so butlerd can write its SQLite db.
- *
- * For now it just records that itch.io support hasn't initialised any state.
+ * The butler binary itself is resolved via `getButlerBin()` — Heroic ships
+ * one in `tools/butler/<arch>/butler` and falls back to a user-configured
+ * `altButlerBin`. Auto-downloading butler from broth.itch.zone is out of
+ * scope for this MVP.
  */
 export default function setupItchio(): Promise<void> {
-  logInfo(
-    `itch.io setup placeholder; config path will be ${itchioConfigPath}`,
-    LogPrefix.Itchio
-  )
+  if (!existsSync(itchioConfigPath)) {
+    try {
+      mkdirSync(itchioConfigPath, { recursive: true })
+      logInfo(`Created itch.io config dir at ${itchioConfigPath}`, LogPrefix.Itchio)
+    } catch (err) {
+      logError(
+        [`Failed to create ${itchioConfigPath}:`, (err as Error).message],
+        LogPrefix.Itchio
+      )
+    }
+  }
   return Promise.resolve()
 }

@@ -31,6 +31,12 @@ const initialContext: ContextType = {
     logout: async () => Promise.resolve(),
     enabled: false
   },
+  itchio: {
+    library: [],
+    getLoginData: async () => Promise.resolve({ apiKeysUrl: '' }),
+    login: async () => Promise.resolve(''),
+    logout: async () => Promise.resolve()
+  },
   installingEpicGame: false,
   sideloadedLibrary: [],
   error: false,
