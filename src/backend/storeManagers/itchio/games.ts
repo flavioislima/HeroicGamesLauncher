@@ -188,7 +188,7 @@ function resolveAppBundleExecutable(
 // Walked only when butlerd's verdict is empty.
 function scanForExecutable(
   folder: string,
-  platform: InstallPlatform | string
+  platform: InstallPlatform
 ): string | undefined {
   if (!folder || !existsSync(folder)) return undefined
   type Hit = { path: string; size: number }
@@ -246,7 +246,7 @@ const PLATFORM_BY_KEY: Record<'osx' | 'linux' | 'windows', InstallPlatform> = {
 
 function uploadInstalledPlatform(
   upload: ItchioUpload | undefined,
-  requested: InstallPlatform | string
+  requested: InstallPlatform
 ): InstallPlatform {
   if (upload?.platforms?.osx) return PLATFORM_BY_KEY.osx
   if (upload?.platforms?.linux) return PLATFORM_BY_KEY.linux
@@ -262,7 +262,7 @@ const FLAVOR_BY_KEY: Record<'osx' | 'linux' | 'windows', string> = {
 
 function pickLaunchCandidate(
   verdict: ButlerdVerdict | undefined,
-  platform: InstallPlatform | string
+  platform: InstallPlatform
 ): ButlerdVerdictCandidate | undefined {
   const candidates = verdict?.candidates ?? []
   if (candidates.length === 0) return undefined

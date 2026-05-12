@@ -51,7 +51,9 @@ export default function InstallOverlay({
 
       // we're now installing, close modal
       onDismiss()
-    } catch {}
+    } catch {
+      // TODO: show error dialog
+    }
   }
 
   return (

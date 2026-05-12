@@ -158,7 +158,7 @@ export function getGameInfo(appName: string): ItchioGameInfo | undefined {
 // reach non-legendary backends, so we may receive either Heroic's display
 // values ('Mac', 'Windows') or the runner-normalised ones ('osx', 'windows').
 export function butlerdPlatformKey(
-  platform: InstallPlatform | string
+  platform: InstallPlatform
 ): 'windows' | 'linux' | 'osx' | undefined {
   switch (platform) {
     case 'Mac':
