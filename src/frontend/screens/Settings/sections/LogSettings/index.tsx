@@ -82,36 +82,38 @@ export default function LogSettings() {
 
   const { epic, gog, amazon, zoom, itchio, sideloadedLibrary } =
     useContext(ContextProvider)
-  const [installedGames, setInstalledGames] = useState<GameInfo[]>([])
 
-  useEffect(() => {
-    let games: GameInfo[] = []
-    games = games.concat(epic.library.filter((game) => game.is_installed))
-    games = games.concat(gog.library.filter((game) => game.is_installed))
-    games = games.concat(amazon.library.filter((game) => game.is_installed))
-    games = games.concat(zoom.library.filter((game) => game.is_installed))
-    games = games.concat(itchio.library.filter((game) => game.is_installed))
-    games = games.concat(sideloadedLibrary.filter((game) => game.is_installed))
-    games = games.sort((game1, game2) => game1.title.localeCompare(game2.title))
-
-    setInstalledGames(games)
-  }, [
-    epic.library,
-    gog.library,
-    amazon.library,
-    sideloadedLibrary,
-    zoom.library,
-    itchio.library
-  ])
+  const installedGames = useMemo<GameInfo[]>(
+    () =>
+      [
+        ...epic.library,
+        ...gog.library,
+        ...amazon.library,
+        ...zoom.library,
+        ...itchio.library,
+        ...sideloadedLibrary
+      ]
+        .filter((game) => game.is_installed)
+        .sort((a, b) => a.title.localeCompare(b.title)),
+    [
+      epic.library,
+      gog.library,
+      amazon.library,
+      sideloadedLibrary,
+      zoom.library,
+      itchio.library
+    ]
+  )
 
   const getLogContent = () => {
     void window.api.getLogContent(showLogOf).then((content: string) => {
       if (!content) {
-        setLogFileContent(t('setting.log.no-file', 'No log file found.'))
+        const fallback = t('setting.log.no-file', 'No log file found.')
+        setLogFileContent((prev) => (prev === fallback ? prev : fallback))
         setLogFileExist(false)
         return setRefreshing(false)
       }
-      setLogFileContent(content)
+      setLogFileContent((prev) => (prev === content ? prev : content))
       setLogFileExist(true)
       setRefreshing(false)
     })

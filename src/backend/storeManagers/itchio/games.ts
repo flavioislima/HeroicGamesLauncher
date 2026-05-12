@@ -1,9 +1,3 @@
-/**
- * itch.io game manager. Each public function satisfies the `GameManager`
- * contract registered in `storeManagers/index.ts`. Real butlerd calls live
- * here; per-game library metadata comes from `./library`.
- */
-
 import { existsSync, readdirSync, statSync } from 'graceful-fs'
 import { join } from 'path'
 
@@ -27,7 +21,7 @@ import {
   logWarning
 } from 'backend/logger'
 import { GameConfig } from 'backend/game_config'
-import { killPattern, shutdownWine } from 'backend/utils'
+import { killPattern, sendProgressUpdate, shutdownWine } from 'backend/utils'
 import { sendFrontendMessage } from '../../ipc'
 import { launchGame } from 'backend/storeManagers/storeManagerCommon/games'
 import { isLinux, isMac, isWindows } from 'backend/constants/environment'
@@ -35,9 +29,11 @@ import { isLinux, isMac, isWindows } from 'backend/constants/environment'
 import { getClient } from './butlerd'
 import { installStore } from './electronStores'
 import {
+  butlerdPlatformKey,
+  gameIdFromAppName,
   getGameInfo as getItchioLibraryGameInfo,
   getInstallInfo as getItchioLibraryInstallInfo,
-  getStrictInstallInfo as getItchioLibraryStrictInstallInfo,
+  getStrictInstallInfo,
   installState as setLibraryInstallState
 } from './library'
 import { ItchioInstallInfo, ItchioUpload } from 'common/types/itchio'
@@ -111,36 +107,34 @@ interface FetchCavesResult {
   nextCursor?: string
 }
 
-/**
- * butlerd persists caves across Heroic restarts, so if a previous install
- * left a cave around (e.g. uninstalled from Heroic's UI but the cave
- * survived) a fresh Install.Queue with `reason: 'install'` will fail with
- * "That upload is already installed!". Sweep up stale caves for this
- * gameId before queueing so a reinstall just works.
- */
+// butlerd retains caves across Heroic restarts, so a previous uninstall
+// from Heroic's UI may leave a cave behind that makes a fresh
+// Install.Queue fail with "That upload is already installed!".
 async function clearStaleCavesForGame(gameId: number): Promise<void> {
   const client = await getClient()
   try {
     const result = await client.call<FetchCavesResult>('Fetch.Caves', {
       filters: { gameId }
     })
-    for (const cave of result.items ?? []) {
-      try {
-        await client.call('Uninstall.Perform', { caveId: cave.id, hard: true })
-        logInfo(
-          `itch.io: cleared stale cave ${cave.id} for game ${gameId}`,
-          LogPrefix.Itchio
-        )
-      } catch (err) {
-        logWarning(
-          [
-            `itch.io: failed to clear stale cave ${cave.id}:`,
-            (err as Error).message
-          ],
-          LogPrefix.Itchio
-        )
-      }
-    }
+    await Promise.all(
+      (result.items ?? []).map(async (cave) => {
+        try {
+          await client.call('Uninstall.Perform', { caveId: cave.id, hard: true })
+          logInfo(
+            `itch.io: cleared stale cave ${cave.id} for game ${gameId}`,
+            LogPrefix.Itchio
+          )
+        } catch (err) {
+          logWarning(
+            [
+              `itch.io: failed to clear stale cave ${cave.id}:`,
+              (err as Error).message
+            ],
+            LogPrefix.Itchio
+          )
+        }
+      })
+    )
   } catch (err) {
     logWarning(
       ['itch.io: Fetch.Caves failed:', (err as Error).message],
@@ -149,53 +143,35 @@ async function clearStaleCavesForGame(gameId: number): Promise<void> {
   }
 }
 
-/**
- * For a macOS `.app` bundle, find the inner Mach-O executable at
- * `Contents/MacOS/<binary>`. We can't spawn a `.app` directly because it
- * is a directory — `launchGame`/`callRunner` need an actual executable
- * file.
- */
-function resolveAppBundleExecutable(appBundlePath: string): string | undefined {
+// `.app` is a directory; spawn() needs the inner Mach-O at
+// Contents/MacOS/<bin>. Returns the largest executable-bit file there
+// (helpers are usually small).
+function resolveAppBundleExecutable(
+  appBundlePath: string
+): { path: string; size: number } | undefined {
   const macOsDir = join(appBundlePath, 'Contents', 'MacOS')
-  if (!existsSync(macOsDir)) return undefined
   let entries: string[]
   try {
     entries = readdirSync(macOsDir)
   } catch {
     return undefined
   }
-  // Pick the largest executable-bit file in Contents/MacOS — the smaller
-  // ones are usually helpers / launchers.
   let best: { path: string; size: number } | undefined
   for (const name of entries) {
     if (name.startsWith('.')) continue
     const full = join(macOsDir, name)
     try {
       const s = statSync(full)
-      if (!s.isFile()) continue
-      if ((s.mode & 0o111) === 0) continue
+      if (!s.isFile() || (s.mode & 0o111) === 0) continue
       if (!best || s.size > best.size) best = { path: full, size: s.size }
     } catch {
       /* ignore */
     }
   }
-  return best?.path
+  return best
 }
 
-/**
- * butlerd's post-install verdict sometimes ships with zero launch
- * candidates (notably for some itch.io macOS uploads where the .app
- * bundle is the entire payload). Walk the install folder ourselves to
- * find the most plausible executable so the game can still be launched
- * without the user manually setting Target Executable.
- *
- * Heuristics (in order):
- *   - macOS install: prefer the first top-level `.app` bundle, resolved
- *     to its inner `Contents/MacOS/<binary>`.
- *   - Windows install: prefer the largest `.exe` (skips uninstallers via
- *     a name filter).
- *   - Linux install: prefer the largest file with the executable bit.
- */
+// Walked only when butlerd's verdict is empty.
 function scanForExecutable(
   folder: string,
   platform: InstallPlatform | string
@@ -203,9 +179,7 @@ function scanForExecutable(
   if (!folder || !existsSync(folder)) return undefined
   type Hit = { path: string; size: number }
   const hits: Hit[] = []
-  const isMacInstall = platform === 'osx' || platform === 'Mac'
-  const isWinInstall = platform === 'windows' || platform === 'Windows'
-  const isLinuxInstall = platform === 'linux'
+  const key = butlerdPlatformKey(platform)
 
   const walk = (dir: string, depth: number): void => {
     let entries: string[]
@@ -223,19 +197,18 @@ function scanForExecutable(
         continue
       }
       if (s.isDirectory()) {
-        if (isMacInstall && name.endsWith('.app')) {
+        if (key === 'osx' && name.endsWith('.app')) {
           const inner = resolveAppBundleExecutable(full)
-          if (inner) hits.push({ path: inner, size: statSync(inner).size })
+          if (inner) hits.push(inner)
           continue
         }
-        // Don't recurse forever; itch.io archives are usually 1–3 deep.
         if (depth < 4) walk(full, depth + 1)
         continue
       }
-      if (isWinInstall && name.toLowerCase().endsWith('.exe')) {
+      if (key === 'windows' && name.toLowerCase().endsWith('.exe')) {
         if (/uninst|crash.?report|setup/i.test(name)) continue
         hits.push({ path: full, size: s.size })
-      } else if (isLinuxInstall) {
+      } else if (key === 'linux') {
         if (name.startsWith('.')) continue
         if ((s.mode & 0o111) !== 0) hits.push({ path: full, size: s.size })
       }
@@ -248,65 +221,43 @@ function scanForExecutable(
   return hits[0].path
 }
 
-/**
- * Translate butlerd's upload `platforms` map (`windows` / `linux` / `osx`)
- * into the lowercase value Heroic's frontend stores in
- * `GameInfo.install.platform`. We use the same convention as the GOG
- * runner so `handleRunnersPlatforms` in `frontend/helpers/index.ts`
- * round-trips cleanly (frontend display 'Mac' → backend 'osx' → stored
- * 'osx' → next page-open passes 'osx' straight through).
- */
+// Lowercase, GOG-style: matches what `handleRunnersPlatforms` in
+// `frontend/helpers/index.ts` produces, so install.platform round-trips
+// cleanly through the frontend on later page opens.
+const PLATFORM_BY_KEY: Record<'osx' | 'linux' | 'windows', InstallPlatform> = {
+  osx: 'osx',
+  linux: 'linux',
+  windows: 'windows'
+}
+
 function uploadInstalledPlatform(
   upload: ItchioUpload | undefined,
   requested: InstallPlatform | string
 ): InstallPlatform {
-  if (upload?.platforms?.osx) return 'osx'
-  if (upload?.platforms?.linux) return 'linux'
-  if (upload?.platforms?.windows) return 'windows'
-  switch (requested) {
-    case 'Mac':
-    case 'osx':
-      return 'osx'
-    case 'Windows':
-    case 'windows':
-      return 'windows'
-    case 'linux':
-      return 'linux'
-    default:
-      return requested as InstallPlatform
-  }
+  if (upload?.platforms?.osx) return PLATFORM_BY_KEY.osx
+  if (upload?.platforms?.linux) return PLATFORM_BY_KEY.linux
+  if (upload?.platforms?.windows) return PLATFORM_BY_KEY.windows
+  return PLATFORM_BY_KEY[butlerdPlatformKey(requested) ?? 'windows']
 }
 
-/**
- * Pick the best launchable candidate from butlerd's verdict. Prefers
- * native-flavor candidates (a Mac install should run the macos
- * candidate, a Windows install should run the windows candidate); then
- * picks the largest binary, which is usually the main executable rather
- * than a redistributable or helper.
- */
+const FLAVOR_BY_KEY: Record<'osx' | 'linux' | 'windows', string> = {
+  osx: 'macos',
+  linux: 'linux',
+  windows: 'windows'
+}
+
 function pickLaunchCandidate(
   verdict: ButlerdVerdict | undefined,
   platform: InstallPlatform | string
 ): ButlerdVerdictCandidate | undefined {
   const candidates = verdict?.candidates ?? []
   if (candidates.length === 0) return undefined
-  const desiredFlavor =
-    platform === 'Mac' || platform === 'osx'
-      ? 'macos'
-      : platform === 'linux'
-        ? 'linux'
-        : 'windows'
+  const desiredFlavor = FLAVOR_BY_KEY[butlerdPlatformKey(platform) ?? 'windows']
   const native = candidates.filter((c) => c.flavor === desiredFlavor)
   const pool = native.length ? native : candidates
   return pool.slice().sort((a, b) => (b.size ?? 0) - (a.size ?? 0))[0]
 }
 
-/**
- * butlerd identifies install destinations by id, not by path. We register
- * the user-chosen parent directory as a butlerd "install location" on
- * first use and reuse the id afterwards. butlerd creates the per-game
- * subdirectory inside it.
- */
 async function ensureInstallLocationId(path: string): Promise<string> {
   const client = await getClient()
   const list = await client.call<InstallLocationsListResult>(
@@ -376,15 +327,14 @@ export function importGame(
   return Promise.resolve({ stdout: '', stderr: NOT_IMPLEMENTED })
 }
 
+// butlerd uses JSON-RPC notifications, not stdout. This satisfies the
+// GameManager contract; actual progress is wired via `createProgressEmitter`.
 export function onInstallOrUpdateOutput(
   appName: string,
   action: 'installing' | 'updating',
   data: string,
   totalDownloadSize: number
 ): void {
-  // butlerd uses JSON-RPC notifications rather than stdout parsing, so this
-  // intentionally just records a debug breadcrumb in case some upstream
-  // helper drives it.
   logInfo(
     [
       `itch.io onInstallOrUpdateOutput passthrough (action=${action})`,
@@ -394,70 +344,54 @@ export function onInstallOrUpdateOutput(
   )
 }
 
-/**
- * Per-install state for throttling progress logs. butlerd emits Progress
- * notifications several times per second; we only want a log line when
- * the percent advances meaningfully or after a time gap, so the install
- * log stays readable.
- */
-interface ProgressLogState {
-  lastLoggedPercent: number
-  lastLoggedAt: number
-  logWriter?: LogWriter
-}
-
-const progressLogState: Map<string, ProgressLogState> = new Map()
-
-function emitProgress(
+// Per-call closure-bound progress emitter. butlerd fires Progress
+// several times per second; throttle the log output (once per percent
+// step or every 2s) so install.log stays readable. Frontend messages
+// are not throttled — the progress bar can absorb the rate.
+function createProgressEmitter(
   appName: string,
   action: 'installing' | 'updating',
-  p: ButlerdProgress
-): void {
-  if (p.progress === undefined) return
-  const percent = Math.round(p.progress * 100)
-  const eta =
-    p.eta !== undefined && Number.isFinite(p.eta)
-      ? new Date(p.eta * 1000).toISOString().substring(11, 19)
-      : ''
-  const downSpeed =
-    p.bps !== undefined ? Math.round(p.bps / (1024 * 1024)) : undefined
+  logWriter: LogWriter
+) {
+  let lastLoggedPercent = -1
+  let lastLoggedAt = 0
+  return (p: ButlerdProgress): void => {
+    if (p.progress === undefined) return
+    const percent = Math.round(p.progress * 100)
+    const eta =
+      p.eta !== undefined && Number.isFinite(p.eta)
+        ? new Date(p.eta * 1000).toISOString().substring(11, 19)
+        : ''
+    const downSpeed =
+      p.bps !== undefined ? Math.round(p.bps / (1024 * 1024)) : undefined
 
-  sendFrontendMessage('progressUpdate', {
-    appName,
-    runner: 'itchio',
-    status: action,
-    progress: {
-      percent,
-      bytes: '',
-      eta,
-      downSpeed
-    }
-  })
+    sendProgressUpdate({
+      appName,
+      runner: 'itchio',
+      status: action,
+      progress: { percent, bytes: '', eta, downSpeed }
+    })
 
-  // Throttle log output: only emit once per percent step or every 2s,
-  // whichever comes first, so the log isn't drowned by butlerd's high-
-  // frequency Progress notifications.
-  const state = progressLogState.get(appName)
-  const now = Date.now()
-  if (
-    state &&
-    percent === state.lastLoggedPercent &&
-    now - state.lastLoggedAt < 2000
-  ) {
-    return
+    const now = Date.now()
+    if (percent === lastLoggedPercent && now - lastLoggedAt < 2000) return
+    lastLoggedPercent = percent
+    lastLoggedAt = now
+    const line = `Progress for ${appName}: ${percent}% ${
+      eta ? `ETA ${eta}` : ''
+    }${downSpeed !== undefined ? ` Down: ${downSpeed}MB/s` : ''}`.trim()
+    logInfo(line, LogPrefix.Itchio)
+    logWriter.logInfo(line).catch(() => {
+      /* writer may be closed */
+    })
   }
-  const line = `Progress for ${appName}: ${percent}% ${
-    eta ? `ETA ${eta}` : ''
-  }${downSpeed !== undefined ? ` Down: ${downSpeed}MB/s` : ''}`.trim()
-  logInfo(line, LogPrefix.Itchio)
-  state?.logWriter?.logInfo(line).catch(() => {
-    /* writer may be closed; ignore */
-  })
-  progressLogState.set(appName, {
-    lastLoggedPercent: percent,
-    lastLoggedAt: now,
-    logWriter: state?.logWriter
-  })
+}
+
+async function closeWriter(writer: LogWriter): Promise<void> {
+  try {
+    await writer.close()
+  } catch {
+    /* already closed */
+  }
 }
 
 export async function install(
@@ -469,10 +403,7 @@ export async function install(
     return { status: 'error', error: `Unknown itch.io app ${appName}` }
   }
 
-  const installInfo = await getItchioLibraryStrictInstallInfo(
-    appName,
-    platformToInstall
-  )
+  const installInfo = await getStrictInstallInfo(appName, platformToInstall)
   if (!installInfo) {
     return {
       status: 'error',
@@ -480,36 +411,28 @@ export async function install(
     }
   }
 
+  const installLogWriter = await createGameLogWriter(
+    appName,
+    'itchio',
+    'install'
+  )
   try {
-    const installLogWriter = await createGameLogWriter(
-      appName,
-      'itchio',
-      'install'
-    )
-    progressLogState.set(appName, {
-      lastLoggedPercent: -1,
-      lastLoggedAt: 0,
-      logWriter: installLogWriter
-    })
     const headline = `Installing ${appName} (${platformToInstall})`
     logInfo(headline, LogPrefix.Itchio)
-    installLogWriter.logInfo(headline).catch(() => {
-      /* ignore */
-    })
+    installLogWriter.logInfo(headline)
 
     const client = await getClient()
+    const onProgress = createProgressEmitter(
+      appName,
+      'installing',
+      installLogWriter
+    )
     const unsub = client.on('Progress', (params) =>
-      emitProgress(appName, 'installing', params as ButlerdProgress)
+      onProgress(params as ButlerdProgress)
     )
 
-    // butlerd retains caves even when Heroic forgets them, which makes a
-    // re-install error out with "That upload is already installed!". Wipe
-    // any pre-existing caves for this gameId so the next Install.Queue
-    // starts from a clean slate.
-    const numericGameId = Number(appName.replace(/^itchio-/, ''))
-    if (!Number.isNaN(numericGameId)) {
-      await clearStaleCavesForGame(numericGameId)
-    }
+    const numericGameId = gameIdFromAppName(appName)
+    if (numericGameId !== undefined) await clearStaleCavesForGame(numericGameId)
 
     let queued: InstallQueueResult
     try {
@@ -529,16 +452,10 @@ export async function install(
       unsub()
     }
 
-    installStore.set(appName, {
-      ...installInfo,
-      game: installInfo.game,
-      upload: installInfo.upload
-    })
+    installStore.set(appName, installInfo)
 
-    // Pull the canonical Cave record from butlerd: it tells us the real
-    // upload (which may differ from the one we queued if butlerd resolved
-    // a build), the resolved installFolder, and the detected launch
-    // candidates (verdict).
+    // Re-fetch the cave: butlerd may resolve to a different upload, and
+    // the verdict/installFolder live there.
     const caveResult = await client
       .call<FetchCaveResult>('Fetch.Cave', { caveId: queued.caveId })
       .catch((err: Error) => {
@@ -552,7 +469,8 @@ export async function install(
         return { cave: undefined } as FetchCaveResult
       })
     const cave = caveResult.cave
-    const installFolder = cave?.installInfo?.installFolder ?? queued.installFolder
+    const installFolder =
+      cave?.installInfo?.installFolder ?? queued.installFolder
     const installedUpload = cave?.upload ?? installInfo.upload
     const installedPlatform = uploadInstalledPlatform(
       installedUpload,
@@ -563,20 +481,14 @@ export async function install(
       installedPlatform
     )
     let executable = candidate ? join(installFolder, candidate.path) : ''
-    // butlerd sometimes hands back the .app bundle path on macOS; resolve
-    // it to the inner Mach-O binary so spawn() can actually run it.
     if (
       executable &&
-      (installedPlatform === 'osx' || installedPlatform === 'Mac') &&
+      butlerdPlatformKey(installedPlatform) === 'osx' &&
       executable.endsWith('.app')
     ) {
-      const inner = resolveAppBundleExecutable(executable)
-      if (inner) executable = inner
+      executable = resolveAppBundleExecutable(executable)?.path ?? executable
     }
     if (!executable) {
-      // butlerd's verdict can be empty for some itch.io uploads (notably
-      // macOS app-bundle-only zips). Fall back to a shallow filesystem
-      // scan so the game still has a launchable target.
       const scanned = scanForExecutable(installFolder, installedPlatform)
       if (scanned) {
         executable = scanned
@@ -608,9 +520,7 @@ export async function install(
       }
       cachedInfo.is_installed = true
       cachedInfo.folder_name = installFolder
-      // The caveId is the canonical butlerd handle for this install; stash
-      // it on the in-memory GameInfo so uninstall/launch can reach it.
-      ;(cachedInfo as GameInfo & { caveId?: string }).caveId = queued.caveId
+      cachedInfo.caveId = queued.caveId
     }
 
     sendFrontendMessage('refreshLibrary', 'itchio')
@@ -622,35 +532,17 @@ export async function install(
     )
     return { status: 'error', error: (err as Error).message }
   } finally {
-    await finishProgressLog(appName)
-  }
-}
-
-async function finishProgressLog(appName: string): Promise<void> {
-  const state = progressLogState.get(appName)
-  if (!state) return
-  progressLogState.delete(appName)
-  if (state.logWriter) {
-    try {
-      await state.logWriter.close()
-    } catch {
-      /* writer may already be closed */
-    }
+    await closeWriter(installLogWriter)
   }
 }
 
 export function isNative(appName: string): boolean {
-  // Stored `install.platform` is the GOG-style lowercase value
-  // ('osx'/'windows'/'linux') because that's what
-  // `frontend/helpers/handleRunnersPlatforms` round-trips for non-Legendary
-  // runners. We accept the Heroic display forms too in case an older
-  // install record is still in the cache.
-  const cached = getItchioLibraryGameInfo(appName)
-  const platform = cached?.install?.platform
+  const platform = getItchioLibraryGameInfo(appName)?.install?.platform
   if (!platform) return false
   if (isWindows) return true
-  if (isMac && (platform === 'osx' || platform === 'Mac')) return true
-  if (isLinux && platform === 'linux') return true
+  const key = butlerdPlatformKey(platform)
+  if (isMac && key === 'osx') return true
+  if (isLinux && key === 'linux') return true
   return false
 }
 
@@ -667,14 +559,9 @@ export function removeShortcuts(appName: string): Promise<void> {
   return Promise.resolve()
 }
 
-/**
- * itch.io games are DRM-free, so we don't need butlerd's Launch RPC
- * (which insists on Windows prereq scaffolding and isn't a great fit
- * for the long tail of macOS/Linux indie titles). Instead, we treat
- * installed itch.io games like sideloaded ones: spawn the recorded
- * executable directly, going through Heroic's standard wine path on
- * non-Windows hosts for Windows builds.
- */
+// itch.io is DRM-free, so we skip butlerd's Launch RPC (which insists
+// on Windows prereq scaffolding) and run the recorded executable directly,
+// going through Heroic's wine path on non-Windows for Windows builds.
 export async function launch(
   appName: string,
   logWriter: LogWriter,
@@ -683,10 +570,7 @@ export async function launch(
 ): Promise<boolean> {
   const cached = getItchioLibraryGameInfo(appName)
   if (!cached) {
-    logError(
-      `itch.io launch: unknown app ${appName}`,
-      LogPrefix.Itchio
-    )
+    logError(`itch.io launch: unknown app ${appName}`, LogPrefix.Itchio)
     return false
   }
   if (!cached.install?.executable) {
@@ -709,9 +593,6 @@ export async function moveInstall(
   if (!oldPath) {
     return { status: 'error', error: 'no current install path' }
   }
-  // Delegate the filesystem move to whatever drove this call (the install
-  // manager already does the cross-volume copy); we just record the new
-  // location so future butlerd calls find the right cave.
   await import('./library').then((m) =>
     m.changeGameInstallPath(appName, newInstallPath)
   )
@@ -727,7 +608,6 @@ export async function repair(appName: string): Promise<ExecResult> {
   if (!cached?.is_installed) {
     return { stdout: '', stderr: `${appName} is not installed` }
   }
-  // Repair == re-run Install.Perform against the same cave.
   const platform = (cached.install?.platform as InstallPlatform) ?? 'Windows'
   const result = await install(appName, {
     path: cached.install?.install_path ?? '',
@@ -739,12 +619,12 @@ export async function repair(appName: string): Promise<ExecResult> {
   }
 }
 
+// itch.io has no first-party save sync; intentional no-op.
 export function syncSaves(
   appName: string,
   arg: string,
   path: string
 ): Promise<string> {
-  // itch.io has no first-party save sync; intentional no-op.
   logInfo(
     `itch.io syncSaves no-op (appName=${appName}, arg=${arg}, path=${path})`,
     LogPrefix.Itchio
@@ -753,10 +633,7 @@ export function syncSaves(
 }
 
 function getCaveId(appName: string): string | undefined {
-  const cached = getItchioLibraryGameInfo(appName) as
-    | (GameInfo & { caveId?: string })
-    | undefined
-  return cached?.caveId
+  return getItchioLibraryGameInfo(appName)?.caveId
 }
 
 export async function uninstall({
@@ -765,8 +642,6 @@ export async function uninstall({
 }: RemoveArgs): Promise<ExecResult> {
   const caveId = getCaveId(appName)
   if (!caveId) {
-    // Nothing to ask butlerd about; treat as a force-uninstall of stale local
-    // state.
     await forceUninstall(appName)
     return { stdout: 'no cave', stderr: '' }
   }
@@ -807,26 +682,24 @@ export async function update(appName: string): Promise<InstallResult> {
     return { status: 'error', error: 'no compatible upload for update' }
   }
 
+  const updateLogWriter = await createGameLogWriter(
+    appName,
+    'itchio',
+    'update'
+  )
   try {
-    const updateLogWriter = await createGameLogWriter(
-      appName,
-      'itchio',
-      'update'
-    )
-    progressLogState.set(appName, {
-      lastLoggedPercent: -1,
-      lastLoggedAt: 0,
-      logWriter: updateLogWriter
-    })
     const headline = `Updating ${appName} (${platform})`
     logInfo(headline, LogPrefix.Itchio)
-    updateLogWriter.logInfo(headline).catch(() => {
-      /* ignore */
-    })
+    updateLogWriter.logInfo(headline)
 
     const client = await getClient()
+    const onProgress = createProgressEmitter(
+      appName,
+      'updating',
+      updateLogWriter
+    )
     const unsub = client.on('Progress', (params) =>
-      emitProgress(appName, 'updating', params as ButlerdProgress)
+      onProgress(params as ButlerdProgress)
     )
 
     try {
@@ -854,7 +727,7 @@ export async function update(appName: string): Promise<InstallResult> {
     )
     return { status: 'error', error: (err as Error).message }
   } finally {
-    await finishProgressLog(appName)
+    await closeWriter(updateLogWriter)
   }
 }
 
