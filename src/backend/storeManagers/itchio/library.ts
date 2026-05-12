@@ -23,12 +23,20 @@ import { getClient } from './butlerd'
 import { configStore, installStore, libraryStore } from './electronStores'
 import { ItchioUser } from './user'
 
-interface ProfileGameRecord {
+/**
+ * butlerd's `DownloadKey` wraps a single ownership record for a game the
+ * user purchased, claimed, or was gifted. We only need the embedded
+ * `game` for library display; the rest of the key metadata (createdAt,
+ * downloads, etc.) is unused here.
+ */
+interface DownloadKeyRecord {
+  id: number
+  gameId: number
   game: ItchioGame
 }
 
-interface FetchProfileGamesResult {
-  items: ProfileGameRecord[]
+interface FetchProfileOwnedKeysResult {
+  items: DownloadKeyRecord[]
   stale?: boolean
   nextCursor?: string
 }
@@ -100,9 +108,13 @@ export async function refresh(): Promise<ExecResult | null> {
   let cursor: string | undefined
   let pages = 0
 
+  // Fetch.ProfileOwnedKeys returns the download keys the profile owns —
+  // i.e. games the user bought, claimed for free, or was gifted. (The
+  // sibling Fetch.ProfileGames returns games the profile *uploaded* as
+  // a developer, which is almost always empty for players.)
   do {
-    const result = await client.call<FetchProfileGamesResult>(
-      'Fetch.ProfileGames',
+    const result = await client.call<FetchProfileOwnedKeysResult>(
+      'Fetch.ProfileOwnedKeys',
       {
         profileId,
         cursor,
@@ -111,14 +123,14 @@ export async function refresh(): Promise<ExecResult | null> {
         fresh: pages === 0
       }
     )
-    for (const item of result.items) {
-      games.push(item.game)
+    for (const item of result.items ?? []) {
+      if (item.game) games.push(item.game)
     }
     cursor = result.nextCursor
     pages += 1
     if (pages > 50) {
       logError(
-        'itch.io Fetch.ProfileGames bailed out after 50 pages',
+        'itch.io Fetch.ProfileOwnedKeys bailed out after 50 pages',
         LogPrefix.Itchio
       )
       break
