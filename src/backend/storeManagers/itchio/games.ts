@@ -468,8 +468,57 @@ export async function uninstall({
 }
 
 export async function update(appName: string): Promise<InstallResult> {
-  logNotImplemented('update', { appName })
-  return { status: 'error', error: NOT_IMPLEMENTED }
+  const caveId = getCaveId(appName)
+  if (!caveId) {
+    return { status: 'error', error: `no cave for ${appName}` }
+  }
+  const cached = getItchioLibraryGameInfo(appName)
+  if (!cached?.is_installed) {
+    return { status: 'error', error: `${appName} is not installed` }
+  }
+  const platform =
+    (cached.install?.platform as InstallPlatform) ?? 'Windows'
+
+  const installInfo = (await getItchioLibraryInstallInfo(
+    appName,
+    platform,
+    {}
+  )) as ItchioInstallInfo | undefined
+  if (!installInfo) {
+    return { status: 'error', error: 'no compatible upload for update' }
+  }
+
+  try {
+    const client = await getClient()
+    const unsub = client.on('Progress', (params) =>
+      emitProgress(appName, params as ButlerdProgress)
+    )
+
+    try {
+      const queued = await client.call<InstallQueueResult>('Install.Queue', {
+        cave_id: caveId,
+        game: installInfo.game,
+        upload: installInfo.upload,
+        reason: 'update'
+      })
+      await client.call('Install.Perform', {
+        id: queued.id,
+        staging_folder: queued.staging_folder
+      })
+    } finally {
+      unsub()
+    }
+
+    installStore.set(appName, installInfo)
+    sendFrontendMessage('refreshLibrary', 'itchio')
+    return { status: 'done' }
+  } catch (err) {
+    logError(
+      ['itch.io update failed:', (err as Error).message],
+      LogPrefix.Itchio
+    )
+    return { status: 'error', error: (err as Error).message }
+  }
 }
 
 export async function forceUninstall(appName: string): Promise<void> {

@@ -225,9 +225,48 @@ export async function getInstallInfo(
   }
 }
 
-export function listUpdateableGames(): Promise<string[]> {
-  // Update detection lands in the dedicated update commit.
-  return Promise.resolve([])
+interface CheckUpdateGameUpdate {
+  cave_id: string
+  game?: { id?: number }
+}
+
+interface CheckUpdateResult {
+  updates: CheckUpdateGameUpdate[]
+  warnings?: string[]
+}
+
+export async function listUpdateableGames(): Promise<string[]> {
+  if (!ItchioUser.isLoggedIn()) return []
+  const caveByApp = new Map<string, string>()
+  for (const game of inMemoryLibrary.values()) {
+    const caveId = (game as GameInfo & { cave_id?: string }).cave_id
+    if (game.is_installed && caveId) caveByApp.set(game.app_name, caveId)
+  }
+  if (caveByApp.size === 0) return []
+
+  try {
+    const client = await getClient()
+    const result = await client.call<CheckUpdateResult>('CheckUpdate', {
+      cave_ids: Array.from(caveByApp.values()),
+      verbose: false
+    })
+    const updates: string[] = []
+    for (const update of result.updates ?? []) {
+      for (const [appName, caveId] of caveByApp) {
+        if (caveId === update.cave_id) {
+          updates.push(appName)
+          break
+        }
+      }
+    }
+    return updates
+  } catch (err) {
+    logError(
+      ['itch.io CheckUpdate failed:', (err as Error).message],
+      LogPrefix.Itchio
+    )
+    return []
+  }
 }
 
 export function changeGameInstallPath(
