@@ -68,6 +68,10 @@ export interface ItchioGame {
     | 'comic'
     | 'book'
   user: ItchioGameUser
+  // butlerd reports platform support as a map keyed by 'windows' | 'linux'
+  // | 'osx'. Values can be booleans or arch strings ("all", "x64"); we
+  // treat any truthy value as supported.
+  platforms?: Partial<Record<ItchioInstallPlatform, unknown>>
   // itch.io has no DLC concept; declared as a required empty array so
   // the generic `InstallInfo['game'].owned_dlc` access in DownloadDialog
   // narrows cleanly across all union variants.

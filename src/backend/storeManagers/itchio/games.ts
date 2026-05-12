@@ -21,8 +21,10 @@ import type LogWriter from 'backend/logger/log_writer'
 
 import { LogPrefix, logError, logInfo, logWarning } from 'backend/logger'
 import { GameConfig } from 'backend/game_config'
-import { sendGameStatusUpdate } from 'backend/utils'
+import { killPattern, shutdownWine } from 'backend/utils'
 import { sendFrontendMessage } from '../../ipc'
+import { launchGame } from 'backend/storeManagers/storeManagerCommon/games'
+import { isLinux, isMac, isWindows } from 'backend/constants/environment'
 
 import { getClient } from './butlerd'
 import { installStore } from './electronStores'
@@ -31,7 +33,7 @@ import {
   getInstallInfo as getItchioLibraryInstallInfo,
   installState as setLibraryInstallState
 } from './library'
-import { ItchioInstallInfo } from 'common/types/itchio'
+import { ItchioInstallInfo, ItchioUpload } from 'common/types/itchio'
 
 const NOT_IMPLEMENTED =
   'itch.io integration: butlerd command not yet implemented'
@@ -50,12 +52,27 @@ interface InstallQueueResult {
   caveId: string
 }
 
+interface ButlerdVerdictCandidate {
+  path: string
+  size?: number
+  // butlerd flavor: 'linux'|'macos'|'windows'|'love'|'jar'|'html'|'script'|...
+  flavor?: string
+  arch?: string
+}
+
+interface ButlerdVerdict {
+  basePath?: string
+  candidates?: ButlerdVerdictCandidate[]
+}
+
 interface ButlerdCave {
   id: string
   game?: { id?: number }
+  upload?: ItchioUpload
   installInfo?: {
     installFolder?: string
     installedSize?: number
+    verdict?: ButlerdVerdict
   }
 }
 
@@ -80,6 +97,42 @@ interface InstallLocationsListResult {
 
 interface InstallLocationsAddResult {
   installLocation: InstallLocation
+}
+
+/**
+ * Translate butlerd's upload `platforms` map (lower-case `windows`/
+ * `linux`/`osx`) into Heroic's mixed-case `InstallPlatform` values.
+ * Picks whichever flag is set on the upload; falls back to the
+ * requested platform if butlerd's payload doesn't say.
+ */
+function uploadInstalledPlatform(
+  upload: ItchioUpload | undefined,
+  requested: InstallPlatform
+): InstallPlatform {
+  if (upload?.platforms?.osx) return 'Mac'
+  if (upload?.platforms?.linux) return 'linux'
+  if (upload?.platforms?.windows) return 'Windows'
+  return requested
+}
+
+/**
+ * Pick the best launchable candidate from butlerd's verdict. Prefers
+ * native-flavor candidates (a Mac install should run the macos
+ * candidate, a Windows install should run the windows candidate); then
+ * picks the largest binary, which is usually the main executable rather
+ * than a redistributable or helper.
+ */
+function pickLaunchCandidate(
+  verdict: ButlerdVerdict | undefined,
+  platform: InstallPlatform
+): ButlerdVerdictCandidate | undefined {
+  const candidates = verdict?.candidates ?? []
+  if (candidates.length === 0) return undefined
+  const desiredFlavor =
+    platform === 'Mac' ? 'macos' : platform === 'linux' ? 'linux' : 'windows'
+  const native = candidates.filter((c) => c.flavor === desiredFlavor)
+  const pool = native.length ? native : candidates
+  return pool.slice().sort((a, b) => (b.size ?? 0) - (a.size ?? 0))[0]
 }
 
 /**
@@ -237,26 +290,63 @@ export async function install(
 
     installStore.set(appName, {
       ...installInfo,
-      // overwrite installFolder with butlerd's resolved value
       game: installInfo.game,
       upload: installInfo.upload
     })
+
+    // Pull the canonical Cave record from butlerd: it tells us the real
+    // upload (which may differ from the one we queued if butlerd resolved
+    // a build), the resolved installFolder, and the detected launch
+    // candidates (verdict).
+    const caveResult = await client
+      .call<FetchCaveResult>('Fetch.Cave', { caveId: queued.caveId })
+      .catch((err: Error) => {
+        logWarning(
+          [
+            'itch.io: Fetch.Cave after install failed (using queued values):',
+            err.message
+          ],
+          LogPrefix.Itchio
+        )
+        return { cave: undefined } as FetchCaveResult
+      })
+    const cave = caveResult.cave
+    const installFolder = cave?.installInfo?.installFolder ?? queued.installFolder
+    const installedUpload = cave?.upload ?? installInfo.upload
+    const installedPlatform = uploadInstalledPlatform(
+      installedUpload,
+      platformToInstall
+    )
+    const candidate = pickLaunchCandidate(
+      cave?.installInfo?.verdict,
+      installedPlatform
+    )
+    const executable = candidate
+      ? join(installFolder, candidate.path)
+      : ''
+    if (!executable) {
+      logWarning(
+        `itch.io install ${appName}: butlerd verdict has no candidates; ` +
+          'launch will require setting Target Executable in game settings.',
+        LogPrefix.Itchio
+      )
+    }
 
     setLibraryInstallState(appName, true)
 
     const cachedInfo = getItchioLibraryGameInfo(appName)
     if (cachedInfo) {
       cachedInfo.install = {
-        install_path: queued.installFolder,
+        install_path: installFolder,
         install_size: String(installInfo.install_size),
         is_dlc: false,
-        version: installInfo.upload.channelName ?? '0',
-        platform: platformToInstall,
-        executable: '',
+        version: installedUpload?.channelName ?? '0',
+        platform: installedPlatform,
+        executable,
         appName
       }
       cachedInfo.is_installed = true
-      cachedInfo.folder_name = queued.installFolder
+      cachedInfo.folder_name = installFolder
       // The caveId is the canonical butlerd handle for this install; stash
       // it on the in-memory GameInfo so uninstall/launch can reach it.
       ;(cachedInfo as GameInfo & { caveId?: string }).caveId = queued.caveId
@@ -274,10 +364,17 @@ export async function install(
 }
 
 export function isNative(appName: string): boolean {
-  const cached = installStore.get(appName)
-  if (!cached) return false
-  // Linux + macOS uploads run natively; Windows uploads need wine.
-  return Boolean(cached.upload.platforms.linux || cached.upload.platforms.osx)
+  // Mirror sideload: the install metadata's `platform` is the source of
+  // truth once a game is installed. Windows builds always run natively on
+  // win32 (incl. via Wine on non-Windows hosts, treated as "non-native"
+  // here so launchGame goes through the wine prep path).
+  const cached = getItchioLibraryGameInfo(appName)
+  const platform = cached?.install?.platform
+  if (!platform) return false
+  if (isWindows) return true
+  if (isMac && platform === 'Mac') return true
+  if (isLinux && platform === 'linux') return true
+  return false
 }
 
 export function addShortcuts(
@@ -293,103 +390,37 @@ export function removeShortcuts(appName: string): Promise<void> {
   return Promise.resolve()
 }
 
-interface ManifestAction {
-  name: string
-  path?: string
-  args?: string[]
-}
-
-interface PickManifestActionParams {
-  actions: ManifestAction[]
-}
-
-interface LaunchRunningParams {
-  pid?: number
-}
-
-const runningPidByApp = new Map<string, number>()
-
+/**
+ * itch.io games are DRM-free, so we don't need butlerd's Launch RPC
+ * (which insists on Windows prereq scaffolding and isn't a great fit
+ * for the long tail of macOS/Linux indie titles). Instead, we treat
+ * installed itch.io games like sideloaded ones: spawn the recorded
+ * executable directly, going through Heroic's standard wine path on
+ * non-Windows hosts for Windows builds.
+ */
 export async function launch(
   appName: string,
   logWriter: LogWriter,
-  launchArguments?: LaunchOption
+  _launchArguments?: LaunchOption,
+  args: string[] = []
 ): Promise<boolean> {
-  const caveId = getCaveId(appName)
-  if (!caveId) {
-    logError(
-      `itch.io launch: ${appName} has no caveId; is it installed?`,
-      LogPrefix.Itchio
-    )
-    return false
-  }
-
   const cached = getItchioLibraryGameInfo(appName)
-  logWriter.writeString(
-    `[itchio] launching ${cached?.title ?? appName} (cave=${caveId})\n`
-  )
-
-  const client = await getClient()
-
-  // butlerd may call back asking the client to pick an action, accept a
-  // license, or acknowledge prereq results. Default to picking the first
-  // option / accepting / continuing — typical for the long tail of itch.io
-  // games that ship a single executable.
-  const requestedActionName =
-    launchArguments && 'name' in launchArguments
-      ? launchArguments.name
-      : undefined
-  const unsubPick = client.handle('PickManifestAction', (params: unknown) => {
-    const { actions } = (params ?? {}) as PickManifestActionParams
-    if (requestedActionName && actions?.length) {
-      const idx = actions.findIndex((a) => a.name === requestedActionName)
-      if (idx >= 0) return { index: idx }
-    }
-    return { index: 0 }
-  })
-  const unsubLicense = client.handle('AcceptLicense', () => {
-    logInfo(`itch.io: auto-accepting license for ${appName}`, LogPrefix.Itchio)
-    return { accept: true }
-  })
-  const unsubPrereqs = client.handle('PrereqsFailed', () => ({
-    continue: true
-  }))
-  const unsubAllowSandboxSetup = client.handle('AllowSandboxSetup', () => ({
-    allow: true
-  }))
-
-  const unsubRunning = client.on('LaunchRunning', (params: unknown) => {
-    const { pid } = (params ?? {}) as LaunchRunningParams
-    if (pid) runningPidByApp.set(appName, pid)
-    sendGameStatusUpdate({ appName, runner: 'itchio', status: 'playing' })
-  })
-  const unsubExited = client.on('LaunchExited', () => {
-    runningPidByApp.delete(appName)
-    sendGameStatusUpdate({ appName, runner: 'itchio', status: 'done' })
-  })
-
-  sendGameStatusUpdate({ appName, runner: 'itchio', status: 'playing' })
-
-  try {
-    await client.call('Launch', { caveId })
-    logWriter.writeString('[itchio] launch finished\n')
-    return true
-  } catch (err) {
+  if (!cached) {
     logError(
-      ['itch.io launch failed:', (err as Error).message],
+      `itch.io launch: unknown app ${appName}`,
       LogPrefix.Itchio
     )
-    logWriter.writeString(`[itchio] launch error: ${(err as Error).message}\n`)
-    sendGameStatusUpdate({ appName, runner: 'itchio', status: 'done' })
     return false
-  } finally {
-    unsubPick()
-    unsubLicense()
-    unsubPrereqs()
-    unsubAllowSandboxSetup()
-    unsubRunning()
-    unsubExited()
-    runningPidByApp.delete(appName)
   }
+  if (!cached.install?.executable) {
+    logError(
+      `itch.io launch: ${appName} has no executable recorded. Set Target ` +
+        'Executable in the game settings, or reinstall.',
+      LogPrefix.Itchio
+    )
+    return false
+  }
+  return launchGame(appName, logWriter, cached, 'itchio', args)
 }
 
 export async function moveInstall(
@@ -539,23 +570,21 @@ export async function forceUninstall(appName: string): Promise<void> {
 }
 
 export async function stop(appName: string): Promise<void> {
-  const pid = runningPidByApp.get(appName)
-  if (!pid) {
+  const cached = getItchioLibraryGameInfo(appName)
+  const executable = cached?.install?.executable
+  if (!executable) {
     logWarning(
-      `itch.io stop(${appName}): no running pid tracked`,
+      `itch.io stop(${appName}): no executable recorded, nothing to kill`,
       LogPrefix.Itchio
     )
     return
   }
-  try {
-    process.kill(pid, 'SIGTERM')
-  } catch (err) {
-    logWarning(
-      [`itch.io stop(${appName}) SIGTERM failed:`, (err as Error).message],
-      LogPrefix.Itchio
-    )
+  const exeName = executable.split('/').pop() ?? executable
+  killPattern(exeName)
+  if (!isNative(appName)) {
+    const settings = await getSettings(appName)
+    shutdownWine(settings)
   }
-  runningPidByApp.delete(appName)
 }
 
 export async function isGameAvailable(appName: string): Promise<boolean> {

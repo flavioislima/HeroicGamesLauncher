@@ -18,6 +18,7 @@ import {
 } from 'common/types/itchio'
 
 import { LogPrefix, logDebug, logError, logInfo } from 'backend/logger'
+import { isLinux } from 'backend/constants/environment'
 
 import { getClient } from './butlerd'
 import { configStore, installStore, libraryStore } from './electronStores'
@@ -53,6 +54,15 @@ function gameToAppName(game: ItchioGame): string {
 
 function gameToGameInfo(game: ItchioGame): GameInfo {
   const cover = game.coverUrl ?? game.stillCoverUrl ?? ''
+  const platforms = game.platforms ?? {}
+  // The InstallModal reads `is_mac_native` / `is_linux_native` off
+  // GameInfo to decide which platform radio buttons to render. itch.io
+  // wraps that in `Game.platforms`. Per project decision: on Linux we
+  // deliberately suppress the native-Linux option so users always go
+  // through the Wine path (uploads vary too much in shape for
+  // reliable native launching right now).
+  const is_mac_native = Boolean(platforms.osx)
+  const is_linux_native = isLinux ? false : Boolean(platforms.linux)
   return {
     app_name: gameToAppName(game),
     runner: 'itchio',
@@ -64,7 +74,9 @@ function gameToGameInfo(game: ItchioGame): GameInfo {
     canRunOffline: true,
     store_url: game.url,
     developer: game.user?.displayName || game.user?.username,
-    description: game.shortText
+    description: game.shortText,
+    is_mac_native,
+    is_linux_native
   }
 }
 
@@ -160,24 +172,30 @@ export function getGameInfo(appName: string): GameInfo | undefined {
   return inMemoryLibrary.get(appName)
 }
 
+// Map Heroic's InstallPlatform values to butlerd's platform keys.
+function butlerdPlatformKey(
+  platform: InstallPlatform
+): 'windows' | 'linux' | 'osx' | undefined {
+  if (platform === 'linux') return 'linux'
+  if (platform === 'Mac') return 'osx'
+  if (platform === 'Windows') return 'windows'
+  return undefined
+}
+
 function pickUploadForPlatform(
   uploads: ItchioUpload[],
   platform: InstallPlatform
 ): ItchioUpload | undefined {
-  const key: keyof ItchioUpload['platforms'] | undefined =
-    platform === 'linux'
-      ? 'linux'
-      : platform === 'Mac'
-        ? 'osx'
-        : platform === 'Windows'
-          ? 'windows'
-          : undefined
-  if (!key) return uploads[0]
-  return (
-    uploads.find((u) => u.platforms[key]) ??
-    // Fall back to the largest upload — usually the OS-native one.
-    uploads.slice().sort((a, b) => b.size - a.size)[0]
-  )
+  const key = butlerdPlatformKey(platform)
+  if (!key) return undefined
+  // Strict: only return an upload that actually advertises the requested
+  // platform. Avoids silently installing a Mac build when the user asked
+  // for Windows (and vice-versa).
+  const matching = uploads.filter((u) => Boolean(u.platforms?.[key]))
+  if (matching.length === 0) return undefined
+  // Prefer the largest matching upload — typically the full release rather
+  // than a stripped-down demo build.
+  return matching.slice().sort((a, b) => b.size - a.size)[0]
 }
 
 export async function getInstallInfo(
