@@ -3,9 +3,14 @@
         "copied": "Copied!",
         "copy": "Copy",
         "error": "Error, try a different Code",
+        "itchio_error": "Error, try a different API key",
         "loading": "Loading",
         "login": "Log in",
         "open": "Open Link"
+    },
+    "itchio": {
+        "instructions": "itch.io desktop integration uses a personal API key. Visit your itch.io API keys page, generate a key, and paste it below.",
+        "paste_key": "Paste the API key into the field below and click Login."
     },
     "message": {
         "part1": "In order to log in and install your games, you first need to follow the steps below:",
