@@ -130,6 +130,7 @@
     "eslint-plugin-import-x": "^4.15.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "extract-zip": "^2.0.1",
     "fast-xml-parser": "^5.5.7",
     "husky": "^8.0.3",
     "i18next-parser": "^9.3.0",

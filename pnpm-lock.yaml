@@ -242,6 +242,9 @@ importers:
       eslint-plugin-react-hooks:
         specifier: ^5.2.0
         version: 5.2.0(eslint@9.29.0(jiti@2.6.1))
+      extract-zip:
+        specifier: ^2.0.1
+        version: 2.0.1
       fast-xml-parser:
         specifier: ^5.5.7
         version: 5.5.7
@@ -6438,7 +6441,7 @@ snapshots:
       '@babel/traverse': 7.27.1
       '@babel/types': 7.27.1
       convert-source-map: 2.0.0
-      debug: 4.4.0
+      debug: 4.4.3
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -6637,7 +6640,7 @@ snapshots:
       '@babel/parser': 7.27.1
       '@babel/template': 7.27.1
       '@babel/types': 7.27.1
-      debug: 4.4.1
+      debug: 4.4.3
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
@@ -7081,7 +7084,7 @@ snapshots:
   '@eslint/config-array@0.20.1':
     dependencies:
       '@eslint/object-schema': 2.1.6
-      debug: 4.4.1
+      debug: 4.4.3
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -7099,7 +7102,7 @@ snapshots:
   '@eslint/eslintrc@3.3.1':
     dependencies:
       ajv: 6.12.6
-      debug: 4.4.1
+      debug: 4.4.3
       espree: 10.4.0
       globals: 14.0.0
       ignore: 5.3.2
@@ -8137,7 +8140,7 @@ snapshots:
       '@typescript-eslint/types': 6.21.0
       '@typescript-eslint/typescript-estree': 6.21.0(typescript@5.8.3)
       '@typescript-eslint/visitor-keys': 6.21.0
-      debug: 4.4.1
+      debug: 4.4.3
       eslint: 9.29.0(jiti@2.6.1)
     optionalDependencies:
       typescript: 5.8.3
@@ -8150,7 +8153,7 @@ snapshots:
       '@typescript-eslint/types': 8.34.1
       '@typescript-eslint/typescript-estree': 8.34.1(typescript@5.8.3)
       '@typescript-eslint/visitor-keys': 8.34.1
-      debug: 4.4.1
+      debug: 4.4.3
       eslint: 9.29.0(jiti@2.6.1)
       typescript: 5.8.3
     transitivePeerDependencies:
@@ -8198,7 +8201,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 6.21.0
       '@typescript-eslint/visitor-keys': 6.21.0
-      debug: 4.4.1
+      debug: 4.4.3
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.3
@@ -8459,7 +8462,7 @@ snapshots:
       builder-util-runtime: 9.5.1
       chromium-pickle-js: 0.2.0
       ci-info: 4.3.1
-      debug: 4.4.1
+      debug: 4.4.3
       dmg-builder: 26.8.1(electron-builder-squirrel-windows@24.13.3)
       dotenv: 16.5.0
       dotenv-expand: 11.0.7
@@ -8818,7 +8821,7 @@ snapshots:
 
   builder-util-runtime@9.5.1:
     dependencies:
-      debug: 4.4.1
+      debug: 4.4.3
       sax: 1.4.1
     transitivePeerDependencies:
       - supports-color
@@ -8852,7 +8855,7 @@ snapshots:
       builder-util-runtime: 9.5.1
       chalk: 4.1.2
       cross-spawn: 7.0.6
-      debug: 4.4.1
+      debug: 4.4.3
       fs-extra: 10.1.0
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.6
@@ -12602,7 +12605,7 @@ snapshots:
     dependencies:
       '@kwsites/file-exists': 1.1.1
       '@kwsites/promise-deferred': 1.1.1
-      debug: 4.4.1
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
