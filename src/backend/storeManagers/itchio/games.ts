@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, statSync } from 'graceful-fs'
+import { existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'graceful-fs'
 import { join } from 'path'
 
 import {
@@ -21,7 +21,12 @@ import {
   logWarning
 } from 'backend/logger'
 import { GameConfig } from 'backend/game_config'
-import { killPattern, sendProgressUpdate, shutdownWine } from 'backend/utils'
+import {
+  killPattern,
+  removeSpecialcharacters,
+  sendProgressUpdate,
+  shutdownWine
+} from 'backend/utils'
 import { sendFrontendMessage } from '../../ipc'
 import { launchGame } from 'backend/storeManagers/storeManagerCommon/games'
 import { isLinux, isMac, isWindows } from 'backend/constants/environment'
@@ -258,6 +263,29 @@ function pickLaunchCandidate(
   return pool.slice().sort((a, b) => (b.size ?? 0) - (a.size ?? 0))[0]
 }
 
+// Create a wrapper folder named after the game inside the user-chosen
+// install root, then register that wrapper with butlerd as its install
+// location. butlerd will create its own `game-<id>` subfolder inside,
+// keeping its cave path stable (so updates keep working) while the
+// user sees "Game Name/" in their file manager. On collision (existing
+// directory with the same sanitised name) we suffix `(2)`, `(3)`…
+function ensureGameWrapperFolder(
+  parent: string,
+  title: string,
+  appName: string
+): string {
+  const sanitised = removeSpecialcharacters(title).trim()
+  const base = sanitised || appName
+  let wrapper = join(parent, base)
+  let n = 2
+  while (existsSync(wrapper)) {
+    wrapper = join(parent, `${base} (${n})`)
+    n += 1
+  }
+  mkdirSync(wrapper, { recursive: true })
+  return wrapper
+}
+
 async function ensureInstallLocationId(path: string): Promise<string> {
   const client = await getClient()
   const list = await client.call<InstallLocationsListResult>(
@@ -434,9 +462,15 @@ export async function install(
     const numericGameId = gameIdFromAppName(appName)
     if (numericGameId !== undefined) await clearStaleCavesForGame(numericGameId)
 
+    // Create a `<path>/<Game Name>` wrapper and register IT as butlerd's
+    // install location, so butlerd's `game-<id>` slug ends up nested
+    // inside the title-named folder. Cave path stays stable (updates keep
+    // working) while the file manager shows a friendly name.
+    const wrapperFolder = ensureGameWrapperFolder(path, info.title, appName)
+
     let queued: InstallQueueResult
     try {
-      const installLocationId = await ensureInstallLocationId(path)
+      const installLocationId = await ensureInstallLocationId(wrapperFolder)
       queued = await client.call<InstallQueueResult>('Install.Queue', {
         game: installInfo.game,
         upload: installInfo.upload,
@@ -646,12 +680,29 @@ export async function uninstall({
     await forceUninstall(appName)
     return { stdout: 'no cave', stderr: '' }
   }
+  // butlerd installed into `<wrapper>/game-<id>/` and removes the slug
+  // folder on hard uninstall, but leaves the wrapper directory behind.
+  // Capture the install path now so we can clean up the empty wrapper
+  // ourselves after butlerd is done.
+  const installPath = getItchioLibraryGameInfo(appName)?.install?.install_path
+  const wrapperFolder = installPath ? join(installPath, '..') : undefined
+  const shouldDeleteFiles = deleteFiles ?? true
   try {
     const client = await getClient()
-    await client.call('Uninstall.Perform', {
-      caveId,
-      hard: deleteFiles ?? true
-    })
+    await client.call('Uninstall.Perform', { caveId, hard: shouldDeleteFiles })
+    if (shouldDeleteFiles && wrapperFolder && existsSync(wrapperFolder)) {
+      try {
+        rmSync(wrapperFolder, { recursive: true, force: true })
+      } catch (err) {
+        logWarning(
+          [
+            `itch.io: failed to delete wrapper folder ${wrapperFolder}:`,
+            (err as Error).message
+          ],
+          LogPrefix.Itchio
+        )
+      }
+    }
     installStore.delete(appName)
     setLibraryInstallState(appName, false)
     const updated = getItchioLibraryGameInfo(appName)
