@@ -184,7 +184,7 @@
                 "title": "Heroic đang chạy như Snap"
             }
         },
-        "wineprefix": "Chọn thư mục Wine Prefix",
+        "wineprefix": "Chọn thư mục WinePrefix",
         "yes": "CÓ",
         "dontShowAgain": "Không hiển thị lại",
         "choose-nile-binary": "Chọn Nile binary",
@@ -262,8 +262,8 @@
             "refresh": "Làm Mới Thư Viện"
         },
         "abort": "",
-        "install": "",
-        "uninstall": ""
+        "install": "Install",
+        "uninstall": "Uninstall"
     },
     "globalSettings": "Cài Đặt Chung",
     "GOG": "GOG",
@@ -707,13 +707,6 @@
         "offlinemode": "Chạy Trò Chơi Ngoại Tuyến",
         "prefered_language": "Ngôn Ngữ Ưa Thích (Mã Ngôn Ngữ)",
         "preferSystemLibs": "Ưu tiên thư viện hệ thống",
-        "primerun": {
-            "confirmation": {
-                "message": "Chỉ có một card đồ họa được phát hiện trong hệ thống này. Xin lưu ý rằng tùy chọn này dành cho các hệ thống nhiều GPU có GPU không đầu (như máy tính xách tay). Trên các hệ thống GPU đơn, GPU được sử dụng tự động và việc bật tùy chọn này có thể gây ra sự cố. Bạn có thực sự muốn kích hoạt tùy chọn này?",
-                "title": "Chỉ phát hiện được 1 GPU"
-            },
-            "description": "Sử Dụng Card Đồ Họa Chuyên Dụng"
-        },
         "runexe": {
             "message": "Kéo thả file vào đây",
             "title": "Chạy EXE trên Tiền Tố"
@@ -981,8 +974,8 @@
             "search": "",
             "loading": "",
             "open_folder": "",
-            "update": "",
-            "settings": "",
+            "update": "Update",
+            "settings": "Cài đặt",
             "no-results": ""
         },
         "release": "Ngày Phát Hành",
@@ -1163,7 +1156,7 @@
         "filters": {
             "moreFilters": "",
             "ageRating": "",
-            "os": "",
+            "os": "Hệ Điều Hành:",
             "price": "",
             "activeCount_other": "",
             "hideDlcs": "",
@@ -1176,7 +1169,7 @@
             "genresPlaceholder": "",
             "features": "",
             "featuresPlaceholder": "",
-            "ageRatingAll": "",
+            "ageRatingAll": "Tất cả",
             "pageSize": "",
             "releaseYear": ""
         },
@@ -1206,7 +1199,7 @@
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
+            "no-games": "Không tìm thấy game nào",
             "no-grids": "",
             "search": "",
             "grids": ""
@@ -1234,21 +1227,21 @@
             "launch": "",
             "sort": "",
             "navigate": "",
-            "quit": "",
+            "quit": "Thoát",
             "change_store": ""
         },
-        "launching": "",
+        "launching": "Ra Mắt",
         "card": {
             "needsUpdate": ""
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Other",
+            "all": "Tất cả"
         },
         "empty": "",
-        "games": "",
+        "games": "Game đã cài",
         "quitApp": "",
         "loading": ""
     },
-    "next": ""
+    "next": "Tiếp"
 }

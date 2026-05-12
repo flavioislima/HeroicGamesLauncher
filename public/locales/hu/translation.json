@@ -170,7 +170,7 @@
             },
             "title": "Figyelmeztetés",
             "wine-change": {
-                "message": "A kiválasztott Wine verzió nem található a játék elindításához: ({{selectedWine}}). {{newline}} Található egy másik, folytatod az indítást a(z) {{foundWine}} használatával?",
+                "message": "A kiválasztott Wine verzió nem található a játék elindításához: ({{selectedWine}}). {{newline}}Található egy másik, folytatod az indítást a(z) {{foundWine}} használatával?",
                 "title": "A Wine nem található."
             },
             "sideload": {
@@ -182,7 +182,7 @@
             "snap": {
                 "checkbox": "Ne mutassa újra ezt az üzenetet",
                 "title": "A Heroic Snapként fut",
-                "message": "Néhány funkció egyelőre nem elérhető az alkalmazás Snap verziójában, dolgozunk a megoldáson. {{newLine}}Jelenlegi korlátozások: {{newLine}}A Heroic nem találja meg a Protont a Steamből vagy a Wine-t a Lutrisból.{{newLine}}{{newLine}}A Gamescope, a GameMode és a MangoHud szintén nem működik, mivel a Heroicnak nincs jogosultsága az elérésükhöz.{{newLine}}{{newLine}}Hogy hozzáférésed legyen ehhez a funkcióhoz, telepítsd a Heroicot flatpakként, DEB vagy AppImage-csomagként."
+                "message": "Néhány funkció egyelőre nem érhető el az alkalmazás Snap verziójában, dolgozunk a megoldáson. {{newLine}}Jelenlegi korlátozások: {{newLine}}A Heroic nem találja meg a Protont a Steamből vagy a Wine-t a Lutrisból.{{newLine}}{{newLine}}A Gamescope, a GameMode és a MangoHud szintén nem működik, mivel a Heroicnak nincs jogosultsága az elérésükhöz.{{newLine}}{{newLine}}Hogy hozzáférésed legyen ehhez a funkcióhoz, telepítsd a Heroicot flatpakként, DEB vagy AppImage-csomagként."
             },
             "rosetta": {
                 "title": "A Rosetta nem található",
@@ -269,9 +269,9 @@
         "library": {
             "refresh": "Könyvtár frissítése"
         },
-        "abort": "",
-        "install": "",
-        "uninstall": ""
+        "abort": "Megszakítás",
+        "install": "Telepítés",
+        "uninstall": "Eltávolítás"
     },
     "globalSettings": "Globális beállítások",
     "GOG": "GOG",
@@ -715,13 +715,6 @@
         "offlinemode": "Játék futtatása offline",
         "prefered_language": "Előnyben részesített nyelv (nyelvkód)",
         "preferSystemLibs": "Rendszer programkönyvtárainak előnyben részesítése",
-        "primerun": {
-            "confirmation": {
-                "message": "Csak egy grafikus kártya észlelhető a rendszeren. Vegye figyelembe, hogy ez a beállítás csak több GPU-s rendszerekhez van szánva (mint a laptopok). Egy GPU-s rendszerek esetén automatikusan azt a GPU-t használja, a beállítás bekapcsolása pedig problémát okozhat. Biztos, hogy engedélyezi a beállítást?",
-                "title": "Csak 1 GPU észlelve"
-            },
-            "description": "Dedikált grafikus kártya használata"
-        },
         "runexe": {
             "message": "Húzza és ejtse ide ide a fájlokat",
             "title": "EXE-fájl futtatása a környezeten"
@@ -820,7 +813,7 @@
         "scripts": "Parancsfájlok:",
         "enable-quick-sync-menu": "Gyors mentés szinkronizálás menü engedélyezése a játék adatlapján",
         "disable_gog_presence": "GOG jelenlétfrissítések letiltása",
-        "start-in-console-mode": ""
+        "start-in-console-mode": "Indítás konzol módban"
     },
     "settings": {
         "battlEyeRuntime": {
@@ -929,12 +922,12 @@
         "legacy_warning": "Figyelmeztetés: Ezen a lapon található beállítások nagyrészt elavultak, és előfordulhat, hogy egyáltalán nem működnek.",
         "steamgriddb": {
             "apikey": {
-                "title": "",
-                "placeholder": "",
-                "placeholder_saved": ""
+                "title": "SteamGridDB API-kulcs",
+                "placeholder": "Add meg itt a SteamGridDB API-kulcsodat",
+                "placeholder_saved": "Kulcs mentve — gépelj a cseréhez, töröld az eltávolításhoz"
             },
             "help": {
-                "description": ""
+                "description": "Add meg a saját SteamGridDB API-kulcsodat a játékborítók keresésének engedélyezéséhez. A kulcs titkosítva kerül tárolásra, ha a rendszered támogatja. Itt szerezhetsz egyet: www.steamgriddb.com/profile/preferences/api"
             }
         }
     },
@@ -942,7 +935,7 @@
     "sidebar": {
         "collapse": "Collapse sidebar",
         "uncollapse": "Uncollapse sidebar",
-        "console": ""
+        "console": "Konzol mód"
     },
     "status": {
         "installing": "Telepítés…",
@@ -1000,12 +993,12 @@
             "not-found": "Nem található Wine verzió. Kattints a frissítés gombra az újrapróbálkozáshoz.",
             "title": "Wine kezelő",
             "unzipping": "Kibontás",
-            "search": "",
-            "loading": "",
-            "open_folder": "",
-            "update": "",
-            "settings": "",
-            "no-results": ""
+            "search": "Verziók keresése...",
+            "loading": "Wine verziók betöltése...",
+            "open_folder": "Mappa megnyitása",
+            "update": "Frissítés",
+            "settings": "Beállítások",
+            "no-results": "Nincs a keresésnek megfelelő Wine verzió."
         },
         "release": "Kiadás dátuma",
         "size": "Méret",
@@ -1060,9 +1053,9 @@
     "wineExplanation": {
         "proton-ge": "A GE-Proton egy olyan Proton változat, melyet GloriousEggroll készít. Steam melletti használathoz készült, de egyes nem steames játékok is jobban működhetnek ezzel a változattal. Hibakereséshez többnyire haszontalan naplófájlokat biztosít.",
         "wine-ge": "A Wine-GE-Proton egy olyan Wine változat, melyet GloriousEggroll készít. Elavult, a GE-Proton és az umu-launcher váltja le.",
-        "gpt": "",
-        "wine-crossover": "",
-        "wine-staging-macos": ""
+        "gpt": "A Game Porting Toolkitet az Apple fejleszti, és Apple Silicon (M1 vagy újabb) chipekkel rendelkező Maceken ajánlott. Legjobban az újabb, DX12-t használó játékokkal működik.",
+        "wine-crossover": "A Wine-Crossover a Crossover nyílt forráskódú Wine-projektjén alapul, és Intel Maceken, valamint DX11 vagy régebbi játékokhoz ajánlott.",
+        "wine-staging-macos": "A Wine-Staging-macOS a fő Wine-projekten alapul, és Intel Maceken, valamint DX11 vagy régebbi játékokhoz ajánlott, különösen a DXMT eszközzel együtt használva."
     },
     "adtraction-locked": {
         "dont-show-again": "Ne jelenjen meg újra ez a figyelmeztetés",
@@ -1156,128 +1149,130 @@
     "discounts": {
         "region": {
             "countries": {
-                "IT": "",
-                "ES": "",
-                "FI": "",
-                "GR": "",
-                "RO": "",
-                "NO": "",
-                "KR": "",
-                "US": "",
-                "HU": "",
-                "PT": "",
-                "NL": "",
-                "AU": "",
-                "TW": "",
-                "IL": "",
-                "JP": "",
-                "DK": "",
-                "DE": "",
-                "CZ": "",
-                "FR": "",
-                "UA": "",
-                "GB": "",
-                "SE": "",
-                "CN": "",
-                "RU": "",
-                "CA": "",
-                "PL": "",
-                "BR": "",
-                "CH": "",
-                "TR": ""
+                "IT": "Olaszország",
+                "ES": "Spanyolország",
+                "FI": "Finnország",
+                "GR": "Görögország",
+                "RO": "Románia",
+                "NO": "Norvégia",
+                "KR": "Dél-Korea",
+                "US": "Egyesült Államok",
+                "HU": "Magyarország",
+                "PT": "Portugália",
+                "NL": "Hollandia",
+                "AU": "Ausztrália",
+                "TW": "Tajvan",
+                "IL": "Izrael",
+                "JP": "Japán",
+                "DK": "Dánia",
+                "DE": "Németország",
+                "CZ": "Csehország",
+                "FR": "Franciaország",
+                "UA": "Ukrajna",
+                "GB": "Egyesült Királyság",
+                "SE": "Svédország",
+                "CN": "Kína",
+                "RU": "Oroszország",
+                "CA": "Kanada",
+                "PL": "Lengyelország",
+                "BR": "Brazília",
+                "CH": "Svájc",
+                "TR": "Törökország"
             },
-            "auto": "",
-            "label": ""
+            "auto": "Automatikus ({{code}})",
+            "label": "Áruház régió"
         },
         "filters": {
-            "moreFilters": "",
-            "ageRating": "",
-            "os": "",
-            "price": "",
-            "activeCount_other": "",
-            "hideDlcs": "",
-            "ageRatingOption": "",
-            "genres": "",
-            "activeCount_one": "",
-            "lessFilters": "",
-            "rating": "",
-            "sort": "",
-            "genresPlaceholder": "",
-            "features": "",
-            "featuresPlaceholder": "",
-            "ageRatingAll": "",
-            "pageSize": "",
-            "releaseYear": ""
+            "moreFilters": "Több szűrő",
+            "ageRating": "Életkornak megfelelő",
+            "os": "Operációs rendszer:",
+            "price": "Ár",
+            "activeCount_other": "{{count}} aktív",
+            "hideDlcs": "DLC-k elrejtése",
+            "ageRatingOption": "PEGI {{age}} vagy alacsonyabb besorolású játékok megjelenítése",
+            "genres": "Műfajok",
+            "activeCount_one": "{{count}} aktív",
+            "lessFilters": "Kevesebb szűrő",
+            "rating": "Értékelés",
+            "sort": "Rendezés",
+            "genresPlaceholder": "Bármely műfaj",
+            "features": "Jellemzők",
+            "featuresPlaceholder": "Bármely jellemző",
+            "ageRatingAll": "Összes",
+            "pageSize": "Oldalanként",
+            "releaseYear": "Megjelenési év",
+            "hideOwned": "Meglévők elrejtése",
+            "wishlistOnly": "Csak kívánságlistás"
         },
-        "sidebar": "",
+        "sidebar": "Kedvezmények",
         "sort": {
-            "priceDesc": "",
-            "trending": "",
-            "priceAsc": "",
-            "releaseDesc": "",
-            "ratingAsc": "",
-            "releaseAsc": "",
-            "ratingDesc": "",
-            "discount": ""
+            "priceDesc": "Ár: csökkenő",
+            "trending": "Felkapott",
+            "priceAsc": "Ár: növekvő",
+            "releaseDesc": "Megjelenési dátum: újtól a régiig",
+            "ratingAsc": "Értékelés: növekvő",
+            "releaseAsc": "Megjelenési dátum: régitől az újig",
+            "ratingDesc": "Értékelés: csökkenő",
+            "discount": "Legnagyobb kedvezmény"
         },
-        "noMatches": "",
+        "noMatches": "Nincs a jelenlegi szűrőknek megfelelő játék.",
         "aria": {
-            "pagination": "",
-            "rating": ""
+            "pagination": "Oldalszámozás",
+            "rating": "Értékelés: {{rating}} / 10"
         },
-        "error": "",
-        "empty": "",
-        "loading": "",
-        "title": "",
+        "error": "Nem sikerült betölteni a kedvezményeket. Próbáld újra később.",
+        "empty": "Jelenleg nincsenek kedvezményes játékok.",
+        "loading": "Kedvezményes játékok betöltése...",
+        "title": "GOG kedvezmények",
         "pagination": {
-            "prev": ""
+            "prev": "Előző"
         }
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
-            "no-grids": "",
-            "search": "",
-            "grids": ""
+            "no-games": "Nem található játék",
+            "no-grids": "Nem található borító ehhez a játékhoz.",
+            "search": "Nem sikerült játékokat keresni, ellenőrizd a SteamGridDB API-kulcsodat, majd próbáld újra",
+            "grids": "Nem sikerült lekérni a borítókat"
         },
         "picker": {
-            "search": "",
-            "title": "",
-            "select-game": ""
+            "search": "Játék keresése",
+            "title": "SteamGridDB borítók",
+            "select-game": "Válassz egy játékot:"
         }
     },
     "console": {
         "update": {
-            "hintPrefix": "",
-            "body": "",
-            "title": "",
-            "hintSuffix": ""
+            "hintPrefix": "Nyomd meg a(z)",
+            "body": "Ehhez a játékhoz frissítés érhető el. Lépj ki a Konzol módból, és indítás előtt frissítsd a játékot.",
+            "title": "Frissítés szükséges",
+            "hintSuffix": "gombot a visszalépéshez"
         },
-        "sort": "",
+        "sort": "Rendezés",
         "cancel": {
-            "hintSuffix": "",
-            "hintPrefix": ""
+            "hintSuffix": "gombot 3 másodpercig a megszakításhoz",
+            "hintPrefix": "Tartsd lenyomva a(z)"
         },
-        "quit": "",
+        "quit": "Konzol bezárása",
         "hints": {
-            "launch": "",
-            "sort": "",
-            "navigate": "",
-            "quit": "",
-            "change_store": ""
+            "launch": "Indítás",
+            "sort": "Rendezés",
+            "navigate": "Navigálás",
+            "quit": "Kilépés",
+            "change_store": "Áruház váltása"
         },
-        "launching": "",
+        "launching": "Indítás…",
         "card": {
-            "needsUpdate": ""
+            "needsUpdate": "Frissítés szükséges"
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Other",
+            "all": "Összes"
         },
-        "empty": "",
-        "games": "",
-        "quitApp": "",
-        "loading": ""
+        "empty": "Nincsenek megjeleníthető telepített játékok. Telepíts valamit előbb.",
+        "games": "Telepített játékok",
+        "quitApp": "Alkalmazás bezárása",
+        "loading": "Könyvtár betöltése…"
     },
-    "next": ""
+    "next": "Következő"
 }

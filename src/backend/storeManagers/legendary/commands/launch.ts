@@ -15,6 +15,7 @@ interface LaunchCommand {
   '--reset-defaults'?: true
   '--override-exe'?: Path
   '--origin'?: true
+  '--ubisoft'?: true
   '--json'?: true
   '--wine'?: Path
   '--wine-prefix'?: Path

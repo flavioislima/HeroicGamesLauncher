@@ -60,7 +60,7 @@
                 "title": "DXVK/VKD3D a rencontré une erreur"
             },
             "folder-not-found": {
-                "title": "Le dossier du jeu semble avoir été supprimé. Voulez-vous supprimer ce jeu de la liste des jeux installés ?"
+                "title": "Le répertoire du jeu semble avoir été supprimé. Voulez-vous supprimer ce jeu de la liste des jeux installés ?"
             },
             "generic": {
                 "message": "message d'erreur générique",
@@ -145,7 +145,7 @@
             "message": "Des raccourcis ont été créés sur le Bureau et dans le menu Démarrer",
             "message-mac": "Des raccourcis ont été créés dans le dossier des Applications",
             "message-remove": "Les raccourcis ont été supprimés du Bureau et du menu Démarrer",
-            "message-remove-mac": "Des raccourcis ont été supprimés du dossier Applications",
+            "message-remove-mac": "Des raccourcis ont été supprimés du dossier « Applications »",
             "title": "Raccourcis"
         },
         "sync": {
@@ -189,7 +189,7 @@
                 "message": "Heroic requiert Rosetta pour s'exécuter correctement sur un appareil macOS comportant des puces Apple Silicon. Veuillez l'installer depuis le terminal macOS en utilisant la commande suivante : « softwareupdate --install-rosetta » et redémarrez Heroic. "
             }
         },
-        "wineprefix": "Sélectionner le dossier du préfixe Wine",
+        "wineprefix": "Sélectionner le répertoire du préfixe Wine",
         "yes": "OUI",
         "dontShowAgain": "Ne plus afficher",
         "choose-nile-binary": "Sélectionner un exécutable pour Nile",
@@ -270,8 +270,8 @@
             "refresh": "Actualiser la bibliothèque"
         },
         "abort": "",
-        "install": "",
-        "uninstall": ""
+        "install": "Installation",
+        "uninstall": "Désinstaller"
     },
     "globalSettings": "Paramètres globaux",
     "GOG": "GOG",
@@ -392,7 +392,7 @@
             "version": "Version d'Heroic"
         },
         "save-sync": {
-            "searching": "Tentative de détection du dossier de sauvegarde adéquat (cliquer ici pour annuler)"
+            "searching": "Tentative de détection du répertoire de sauvegarde adéquat (cliquer ici pour annuler)"
         },
         "settings": "Les options sont sauvegardées automatiquement",
         "version": "Version de Wine"
@@ -406,7 +406,7 @@
             "title": "Préfixe Wine"
         },
         "wine-repfix": {
-            "message": "Wine utilise ce que l'on appelle un WINEPREFIX afin d'encapsuler les programmes destinés à Windows. Ce préfixe comporte les fichiers de configuration de Wine ainsi qu'une reproduction du système de fichiers de la partition C : (la partition principale d'un système Windows). On y trouve aussi les dépendances et les fichiers de sauvegardes des jeux installés via Winetricks."
+            "message": "Wine utilise ce que l'on appelle un WINEPREFIX afin d'encapsuler les programmes destinés à Windows. Ce préfixe comporte les fichiers de configuration de Wine, ainsi qu'une reproduction du système de fichiers de la partition C : (la partition principale d'un système Windows). On y trouve aussi les dépendances et les fichiers de sauvegardes des jeux installés via Winetricks."
         },
         "wine-path-invalid": "Ce répertoire devrait inclure Wine mais son chemin est invalide, veuillez donc en sélectionner un autre.",
         "wine-path-none-found": "Aucune version de Wine n'a été trouvée, téléchargez-en une depuis l'onglet Wine"
@@ -642,7 +642,7 @@
         "exit-to-tray": "Minimiser dans la barre des tâches",
         "FsrSharpnessStrenght": "Niveau de netteté pour FSR",
         "fsync": "Activer Fsync",
-        "gamemode": "Utiliser GameMode (Feral Game Mode doit être installé)",
+        "gamemode": "Utiliser GameMode (Feral GameMode doit être installé)",
         "hideChangelogsOnStartup": "Ne pas afficher le journal des changements au démarrage",
         "language": "Choix de la langue",
         "library_top_option": {
@@ -715,7 +715,7 @@
         "minimize-on-launch": "Minimiser Heroic après le lancement d'un jeu",
         "offlinemode": "Lancer le jeu hors ligne",
         "prefered_language": "Langue préférée (fr, en...)",
-        "preferSystemLibs": "Opter de préférence pour les bibliothèques du système",
+        "preferSystemLibs": "Opter de préférence pour les bibliothèques système",
         "primerun": {
             "confirmation": {
                 "message": "Nous n'avons détecté qu'une seule carte graphique dans ce système. Veuillez noter que cette option est prévue pour les systèmes multi-GPU avec des GPUs « headless » (tels que les ordinateurs portables). Dans un système comprenant un seul GPU, ledit GPU est automatiquement utilisé & activer cette option peut causer des problèmes. Voulez-vous vraiment activer cette option ?",
@@ -733,13 +733,13 @@
             "warning": "Veuillez par deux fois vous assurer de l'exactitude du chemin choisi (cliquez pour réessayer)"
         },
         "select_theme": "Sélection du thème",
-        "showfps": "Afficher les FPS (DX9, 10 et 11)",
+        "showfps": "Afficher les FPS (DirectX 9, 10 et 11)",
         "start-in-tray": "Réduire au démarrage",
         "steamruntime": "Utiliser le runtime Steam",
         "winecrossoverbottle": "Bouteille CrossOver",
-        "wineprefix": "Dossier du préfixe",
+        "wineprefix": "Répertoire du préfixe",
         "wineversion": "Version de Wine",
-        "autoUpdateGames": "Mettre les jeux à jour automatiquement",
+        "autoUpdateGames": "Mettre à jour les jeux automatiquement",
         "ignoreGameUpdates": "Ignorer les mises à jour du jeu",
         "disable_logs": "Désactiver la génération de rapports d'événements",
         "showMetalOverlay": "Afficher l'interface des statistiques",
@@ -813,7 +813,7 @@
                 "title": "Êtes-vous sûr(e) ?",
                 "message": "Nous recommandons d'utiliser des versions Proton personnalisées (GE-Proton, Proton-CachyOS, etc.) avec Heroic car les versions Proton de Valve ne possèdent ni winetricks, ni protofixes. Vous pouvez tout de même les utiliser si vous le souhaitez."
             },
-            "info_label": "Versions de Proton proposées par Valve ignorées",
+            "info_label": "Les versions de Proton proposées par Valve sont ignorées",
             "label": "Permettre l'utilisation de versions de Proton proposées par Valve pour exécuter des jeux",
             "wine_selector_warning": "Les versions de Proton distribuées par Valve sont ignorées par défaut ; activez-les dans le menu des options globales avancées"
         },
@@ -946,7 +946,7 @@
         "console": ""
     },
     "status": {
-        "installing": "Installation en cours",
+        "installing": "Installation",
         "logging": "Connexion en cours...",
         "processing": "Préparation des fichiers, veuillez patienter",
         "preparing_login": "Préparation de la connexion.... "
@@ -1004,8 +1004,8 @@
             "search": "",
             "loading": "",
             "open_folder": "",
-            "update": "",
-            "settings": "",
+            "update": "Mettre à jour",
+            "settings": "Paramètres",
             "no-results": ""
         },
         "release": "Date de sortie",
@@ -1193,7 +1193,7 @@
         "filters": {
             "moreFilters": "",
             "ageRating": "",
-            "os": "",
+            "os": "Système :",
             "price": "",
             "activeCount_other": "",
             "hideDlcs": "",
@@ -1206,7 +1206,7 @@
             "genresPlaceholder": "",
             "features": "",
             "featuresPlaceholder": "",
-            "ageRatingAll": "",
+            "ageRatingAll": "Tout",
             "pageSize": "",
             "releaseYear": ""
         },
@@ -1236,7 +1236,7 @@
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
+            "no-games": "Aucun jeu trouvé",
             "no-grids": "",
             "search": "",
             "grids": ""
@@ -1264,21 +1264,21 @@
             "launch": "",
             "sort": "",
             "navigate": "",
-            "quit": "",
+            "quit": "Quitter",
             "change_store": ""
         },
         "launching": "",
         "card": {
-            "needsUpdate": ""
+            "needsUpdate": "Requiert une mise à jour"
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Other",
+            "all": "Tout"
         },
         "empty": "",
-        "games": "",
+        "games": "Jeux installés",
         "quitApp": "",
         "loading": ""
     },
-    "next": ""
+    "next": "Suivant"
 }

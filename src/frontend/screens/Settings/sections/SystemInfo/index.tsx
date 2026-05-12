@@ -127,7 +127,7 @@ export default function SystemInfo() {
           className="copyToClipboardButton button is-primary"
           variant="contained"
           startIcon={<ContentCopyIcon />}
-          onClick={window.api.systemInfo.copyToClipboard}
+          onClick={() => window.api.systemInfo.copyToClipboard()}
         >
           {t('settings.systemInformation.copyToClipboard', 'Copy to clipboard')}
         </Button>

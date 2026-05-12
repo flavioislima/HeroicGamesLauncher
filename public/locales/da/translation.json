@@ -500,13 +500,6 @@
         "exit-to-tray": "Afslut til systembakken",
         "FsrSharpnessStrenght": "FSR Skarphed Styrke",
         "preferSystemLibs": "Foretrækker systembiblioteker",
-        "primerun": {
-            "confirmation": {
-                "message": "Kun ét grafikkort blev fundet i dette system. Bemærk venligst, at denne mulighed er beregnet til multi-GPU-systemer med hovedløse GPU'er (som bærbare computere). På enkelt-GPU-systemer bruges GPU'en automatisk, og aktivering af denne mulighed kan forårsage problemer. Vil du virkelig aktivere denne mulighed?",
-                "title": "Kun 1 GPU fundet"
-            },
-            "description": "Brug dedikeret grafikkort"
-        },
         "resizableBar": "Aktiver BAR, der kan ændres størrelse (kun NVIDIA RTX 30xx)",
         "wineversion": "Wine Version",
         "autosync": "Autosync gemmer",

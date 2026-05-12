@@ -1,14 +1,14 @@
 {
     "box": {
         "change": {
-            "message": "Der Installationspfad wird durch diese Aktion geändert, möchtest du fortfahren?",
+            "message": "Der Installationspfad wird durch diese Aktion geändert, möchtest Du fortfahren?",
             "path": "Wähle einen neuen Installationspfad",
             "title": "Spiele-Installationspfad ändern"
         },
         "choose": "Auswählen",
         "importpath": "Zu importierenden Spieleordner auswählen",
         "move": {
-            "message": "Dies kann einige Zeit in Anspruch nehmen, möchtest du fortfahren?",
+            "message": "Dies kann eine längere Zeit in Anspruch nehmen, möchtest Du trotzdem fortfahren?",
             "path": "Auswählen, wohin du es verschieben möchtest",
             "title": "Spieleinstallation verschieben"
         },
@@ -18,14 +18,14 @@
             "title": "Auf Fehler überprüfen und reparieren"
         },
         "runexe": {
-            "title": "Wähle auszuführende EXE"
+            "title": "EXE zum Ausführen auswählen"
         },
         "select": {
             "button": "Auswählen",
             "image": "Bild auswählen"
         },
         "sideload": {
-            "exe": "Wähle ausführbare Datei"
+            "exe": "Ausführbare Datei auswählen"
         },
         "stopInstall": {
             "keepInstalling": "Installation fortsetzen",
@@ -55,7 +55,7 @@
         },
         "selectLaunchOption": {
             "body": "Bitte wähle eine Startoption für dieses Spiel aus (die Option kann später in den Spieleinstellungen geändert werden):",
-            "title": "Wähle Startoption ({{seconds}}s)"
+            "title": "Startoption auswählen ({{seconds}}s)"
         },
         "sync": {
             "force_download_warning": "Lokale Speicherdaten werden gelöscht. Möchtest du trotzdem fortfahren?",
@@ -105,7 +105,7 @@
     },
     "enabled": "Aktiviert",
     "game": {
-        "downloadSize": "Installationsgröße",
+        "downloadSize": "Downloadgröße",
         "firstPlayed": "Erstmals gespielt",
         "getting-download-size": "Downloadgröße wird ermittelt",
         "getting-install-size": "Installationsgröße wird ermittelt",
@@ -119,8 +119,8 @@
         "dlcs": "DLCs",
         "branch": {
             "disabled": "Deaktiviert",
-            "password": "Setze Passwort für privaten Kanal",
-            "setPrivateBranchPassword": "Setze Passwort für privaten Kanal",
+            "password": "Passwort für privaten Kanal festlegen",
+            "setPrivateBranchPassword": "Passwort für privaten Kanal festlegen",
             "select": "Beta-Kanal auswählen"
         },
         "builds": {
@@ -129,14 +129,14 @@
             "toggle": "Behalte das Spiel in einer spezifischen Version"
         },
         "changelogFor": "Änderungsprotokoll für {{gameTitle}}",
-        "modify": "Installation modifizieren",
+        "modify": "Installation anpassen",
         "extra_info": "Zusatzinfo",
         "install_info": "Installationsinfo",
         "achievements": "Erfolge"
     },
     "gamecard": {
-        "moving": "Wird verschoben …",
-        "repairing": "Wird repariert …"
+        "moving": "Wird verschoben",
+        "repairing": "Wird repariert"
     },
     "generic": {
         "error": "Unbekannter Fehler",
@@ -144,11 +144,11 @@
     },
     "hours": "Stunden",
     "how-long-to-beat": {
-        "completionist": "Alles vervollständigen",
+        "completionist": "Komplettist",
         "main-plus-extras": "Hauptgeschichte + Extras",
         "main-story": "Hauptgeschichte"
     },
-    "howLongToBeat": "Wie lange dauert es?",
+    "howLongToBeat": "HowLongToBeat",
     "info": {
         "canRunOffline": "Online erforderlich",
         "installedPlatform": "Installierte Plattform",
@@ -174,13 +174,13 @@
         "wineversion": "Wine-Version",
         "anticheat-warning": {
             "message": "Die Unterstützung vom Anticheat-System ist kaputt oder wurde verweigert. Das Spiel wird nicht funktionieren. Möchtest Du es trotzdem installieren?",
-            "title": "Unterstützung vom Anticheat-System kaputt oder verweigert",
+            "title": "Anticheat-Unterstützung defekt/abgelehnt",
             "cancel": "Nein",
             "install": "Ja (Ich verstehe, dass es nicht funktionieren wird)",
             "ok": "Ok",
             "disabled_installation": "Dieses Spiel verwendet eine Anticheat-Software, die mit deinem Betriebssystem nicht kompatibel ist oder deren Unterstützung von den Spieleentwicklern nicht aktiviert wurde. Das bedeutet, dass die Multiplayer-Funktionen nicht funktionieren und weder du noch das Heroic-Team etwas dagegen unternehmen können. <br /><br />Um dieses Spiel dennoch zu installieren und auszuprobieren, gehe zu „Einstellungen“, „Erweitert“ und aktiviere die Option, welche die Installation von Spielen mit defekter oder abgelehnter Anticheat-Software zulässt. <br /><br />Beachte, dass es hierfür keine Lösung gibt und du riskierst, für das Spiel gesperrt zu werden.",
             "install_anyway": "Ja (ich verstehe, dass die Multiplayer-Funktionen nicht funktionieren werden)",
-            "multiplayer_message": "Die Anticheat-Unterstützung ist defekt oder wird verweigert. Das Spiel kann zwar geöffnet werden, aber die Multiplayer-Funktionen funktionieren nicht. Möchtest du es trotzdem installieren?"
+            "multiplayer_message": "Die Anticheat-Unterstützung ist defekt oder wird abgelehnt. Das Spiel lässt sich möglicherweise öffnen, aber die Multiplayer-Funktionen funktionieren nicht. Möchtest du es trotzdem installieren?"
         },
         "flatpak-path-not-writtable": "Fehler: Sandbox-Zugriff auf diesen Pfad nicht gewährt, Datenverlust wird eintreten."
     },
@@ -197,11 +197,11 @@
         "saves": {
             "syncing": "Spielstände werden synchronisiert"
         },
-        "launching": "Wird gestartet …",
+        "launching": "Wird gestartet",
         "ubisoft": "Ubisoft Connect wird installiert …",
         "prerequisites": "Installiere Voraussetzungen",
-        "winetricks": "Installiere Winetricks Pakete",
-        "redist": "Installiere weiterverbreitbare Komponenten",
+        "winetricks": "Winetricks-Pakete werden installiert",
+        "redist": "Redistributables werden installiert",
         "steam": {
             "installing": "Wird installiert",
             "pleaseWait": "Bitte warten...",
@@ -249,7 +249,7 @@
         "winecrossoverbottle": "CrossOver Bottle",
         "show-wine-settings": "Wine-Einstellungen anzeigen",
         "warn-use-shared-wine-config": "Verwende diese Option nur, wenn du weißt, was du tust.<br />Denselben Wine-Präfix für mehrere Spiele zu verwenden, kann zu Problemen führen, wenn deren Abhängigkeiten zueinander inkompatibel sind.",
-        "use-shared-wine-config": "Benutze den geteilten Wine Präfix"
+        "use-shared-wine-config": "Gemeinsames Wine-Präfix verwenden"
     },
     "sideload": {
         "field": {
@@ -257,8 +257,8 @@
         },
         "info": {
             "exe": "Ausführbare Datei auswählen",
-            "image": "Bild der Anwendung",
-            "title": "Titel des Spiels / der Anwendung",
+            "image": "App-Bild",
+            "title": "Spiele-/App-Titel",
             "broser": "Browser-URL",
             "fullscreen": "Im Vollbild starten (F11 zum Beenden)",
             "useragent": "Benutzerdefinierter Agent"
@@ -283,8 +283,8 @@
         "gameNotAvailable": "Spiel nicht verfügbar",
         "hasUpdates": "Neue Version verfügbar!",
         "installed": "Installiert",
-        "installing": "Wird installiert …",
-        "moving": "Bitte warten. Installation wird verschoben …",
+        "installing": "Wird installiert",
+        "moving": "Bitte warten. Installation wird verschoben",
         "notinstalled": "Dieses Spiel ist nicht installiert",
         "notSupported": "Nicht unterstützt",
         "notSupportedGame": "Nicht unterstützt",
@@ -298,10 +298,10 @@
         "playing": "Wird gespielt …",
         "moving-files": "Datei verschieben '{{file}}': {{percent}}%",
         "syncingSaves": "Spielstände werden synchronisiert …",
-        "launching": "Wird gestartet …",
+        "launching": "Wird gestartet",
         "ubisoft": "Ubisoft wird installiert …",
-        "downloading": "Wird heruntergeladen …",
-        "extracting": "Wird extrahiert …",
+        "downloading": "Wird heruntergeladen",
+        "extracting": "Wird extrahiert",
         "gog-goodie": "Dieses Spiel scheint nicht installiert werden zu können. Überprüfe herunterladbare Inhalte auf https://gog.com/account",
         "goodie": "Kann nicht installiert werden",
         "prerequisites": "Installiere Voraussetzungen",
@@ -327,7 +327,7 @@
         "categories": "Kategorien"
     },
     "help": {
-        "cloud_save_unsupported": "Dieses Spiel unterstützt keinen Cloud-Speicher. Diese Informationen werden von den Spieleentwicklern bereitgestellt. Einige Spiele implementieren ihr eigenes Cloud-Speichersystem",
+        "cloud_save_unsupported": "Dieses Spiel unterstützt keinen Cloud-Speicher. Diese Informationen werden von den Spieleentwicklern bereitgestellt. Einige Spiele implementieren ihr eigenes Cloud-Speichersystem.",
         "content": {
             "gamePage": "Zeige alle Spieldetails und Aktionen. Benutze das Dreipunktmenü für mehr Optionen."
         },

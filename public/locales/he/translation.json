@@ -100,7 +100,7 @@
                 "message": ""
             }
         },
-        "wineprefix": "בחרו תיקיית wine prefix",
+        "wineprefix": "בחר תיקיית WinePrefix",
         "default-steam-path": "מיקום Steam.",
         "customWine": "בחרו קובץ הרצה של Wine או Proton",
         "dontShowAgain": "אל תראה שוב",
@@ -172,8 +172,8 @@
             "search": "",
             "loading": "",
             "open_folder": "",
-            "update": "",
-            "settings": "",
+            "update": "עדכן",
+            "settings": "הגדרות",
             "no-results": ""
         },
         "release": "תאריך יציאה",
@@ -442,13 +442,6 @@
         "offlinemode": "הפעל משחק ללא חיבור לרשת",
         "prefered_language": "שפה מועדפת (Language Code)",
         "preferSystemLibs": "העדף ספריות מערכת",
-        "primerun": {
-            "confirmation": {
-                "title": "רק כרטיס גרפי אחד זוהה",
-                "message": "רק כרטיס גרפי יחיד זוהה במערכת הזאת. שימו לב שאופציה זאת מיועדת למערכות עם יותר מכרטיס גרפי אחד שיש להם כרטיס גרפי ללא פלט ישיר למסך (כגון לפטופים מסויימים). במערכות עם כרטיס גרפי יחיד, השימוש בכרטיס הגרפי הוא אוטומטי והפעלה של אופציה זאת יכולה לגרום לבעיות. אתם באמת רוצים להפעיל אופציה זו?"
-            },
-            "description": "השתמש בכרטיס גרפי ייעודי"
-        },
         "runexe": {
             "title": "הפעל EXE על Prefix",
             "message": "גררו קבצים לפה"
@@ -590,8 +583,8 @@
             "component": "לא נמצאו משחקים - נסו לצאת ולהיכנס שוב או את אחד מהאפשרויות הבאות"
         },
         "abort": "",
-        "install": "",
-        "uninstall": ""
+        "install": "התקן",
+        "uninstall": "הסר התקנה"
     },
     "header": {
         "hide_non_available_games": "הסתר משחקים שאינם זמינים",
@@ -1141,7 +1134,7 @@
         "filters": {
             "moreFilters": "",
             "ageRating": "",
-            "os": "",
+            "os": "מערכת הפעלה:",
             "price": "",
             "activeCount_other": "",
             "hideDlcs": "",
@@ -1212,15 +1205,15 @@
             "launch": "",
             "sort": "",
             "navigate": "",
-            "quit": "",
+            "quit": "יציאה",
             "change_store": ""
         },
-        "launching": "",
+        "launching": "מפעיל",
         "card": {
             "needsUpdate": ""
         },
         "filter": {
-            "sideload": "",
+            "sideload": "אחר",
             "all": ""
         },
         "empty": "",

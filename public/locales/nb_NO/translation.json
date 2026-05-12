@@ -270,7 +270,7 @@
             "refresh": "Oppdater biblioteket"
         },
         "abort": "",
-        "install": "",
+        "install": "Installer",
         "uninstall": ""
     },
     "globalSettings": "Globale innstillinger",
@@ -715,13 +715,6 @@
         "offlinemode": "Kjør spillet frakoblet",
         "prefered_language": "Foretrukket språk (språkkode)",
         "preferSystemLibs": "Foretrekker systembiblioteker",
-        "primerun": {
-            "confirmation": {
-                "message": "Bare ett skjermkort ble funnet i systemet. Merk at denne innstillingen er ment å brukes i systemer med flere skjermkort og hodeløse skjermkort (som for eksempel laptopper). På systemer med bare ett skjermkort, velges den automatisk, og å skru på denne innstillingen kan forårsake problemer. Vil du likevel skru den på?",
-                "title": "Bare 1 skjermkort funnet"
-            },
-            "description": "Bruk dedikert grafikkort"
-        },
         "runexe": {
             "message": "Dra og slipp filer her",
             "title": "Kjør EXE på prefiks"
@@ -995,8 +988,8 @@
             "search": "",
             "loading": "",
             "open_folder": "",
-            "update": "",
-            "settings": "",
+            "update": "Update",
+            "settings": "Innstillinger",
             "no-results": ""
         },
         "release": "Utgivelsesdato",
@@ -1184,7 +1177,7 @@
         "filters": {
             "moreFilters": "",
             "ageRating": "",
-            "os": "",
+            "os": "Operativsystem:",
             "price": "",
             "activeCount_other": "",
             "hideDlcs": "",
@@ -1197,7 +1190,7 @@
             "genresPlaceholder": "",
             "features": "",
             "featuresPlaceholder": "",
-            "ageRatingAll": "",
+            "ageRatingAll": "Alle",
             "pageSize": "",
             "releaseYear": ""
         },
@@ -1255,21 +1248,21 @@
             "launch": "",
             "sort": "",
             "navigate": "",
-            "quit": "",
+            "quit": "Avslutt",
             "change_store": ""
         },
-        "launching": "",
+        "launching": "Starter",
         "card": {
             "needsUpdate": ""
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Other",
+            "all": "Alle"
         },
         "empty": "",
-        "games": "",
+        "games": "Installerte spill",
         "quitApp": "",
         "loading": ""
     },
-    "next": ""
+    "next": "Neste"
 }

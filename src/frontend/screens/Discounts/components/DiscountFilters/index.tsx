@@ -53,6 +53,8 @@ interface Props {
   onHideDlcsChange: (value: boolean) => void
   hideOwned: boolean
   onHideOwnedChange: (value: boolean) => void
+  wishlistOnly: boolean
+  onWishlistOnlyChange: (value: boolean) => void
   isGogLoggedIn: boolean
   pageSize: number
   onPageSizeChange: (value: number) => void
@@ -181,6 +183,8 @@ const DiscountFilters = ({
   onHideDlcsChange,
   hideOwned,
   onHideOwnedChange,
+  wishlistOnly,
+  onWishlistOnlyChange,
   isGogLoggedIn,
   pageSize,
   onPageSizeChange,
@@ -282,17 +286,30 @@ const DiscountFilters = ({
           placeholder={t('search', 'Search for Games')}
         />
         {isGogLoggedIn && (
-          <FormControlLabel
-            className="discountFilters__hideOwned"
-            control={
-              <Checkbox
-                size="small"
-                checked={hideOwned}
-                onChange={(e) => onHideOwnedChange(e.target.checked)}
-              />
-            }
-            label={t('discounts.filters.hideOwned', 'Hide Owned')}
-          />
+          <>
+            <FormControlLabel
+              className="discountFilters__wishlistOnly"
+              control={
+                <Checkbox
+                  size="small"
+                  checked={wishlistOnly}
+                  onChange={(e) => onWishlistOnlyChange(e.target.checked)}
+                />
+              }
+              label={t('discounts.filters.wishlistOnly', 'Wishlist Only')}
+            />
+            <FormControlLabel
+              className="discountFilters__hideOwned"
+              control={
+                <Checkbox
+                  size="small"
+                  checked={hideOwned}
+                  onChange={(e) => onHideOwnedChange(e.target.checked)}
+                />
+              }
+              label={t('discounts.filters.hideOwned', 'Hide Owned')}
+            />
+          </>
         )}
         <FormControlLabel
           className="discountFilters__hideDlcs"

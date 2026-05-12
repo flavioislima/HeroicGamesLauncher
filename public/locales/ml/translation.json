@@ -184,7 +184,7 @@
                 "message": ""
             }
         },
-        "wineprefix": "വൈനിരിക്കുന്ന അറ തിരഞ്ഞെടുക്കൂ",
+        "wineprefix": "വൈൻ പ്രിഫിക്സ് ഫോൾഡർ തിരഞ്ഞെടുക്കൂ",
         "yes": "ശരി",
         "dontShowAgain": "വീണ്ടും കാണിക്കരുത്",
         "choose-nile-binary": "നൈൽ ബൈനറി തിരഞ്ഞെടുക്കുക",
@@ -262,8 +262,8 @@
             "refresh": "Refresh Library"
         },
         "abort": "",
-        "install": "",
-        "uninstall": ""
+        "install": "Install",
+        "uninstall": "Uninstall"
     },
     "globalSettings": "ആഗോള ക്രമീകരണങ്ങള്",
     "GOG": "GOG",
@@ -707,13 +707,6 @@
         "offlinemode": "ഓഫ്ലൈനില് കളിക്കുക",
         "prefered_language": "Prefered Language (Language Code)",
         "preferSystemLibs": "Prefer system libraries",
-        "primerun": {
-            "confirmation": {
-                "message": "Only one graphics card was detected in this system. Please note that this option is intended for multi-GPU systems with headless GPUs (like laptops). On single-GPU systems, the GPU is automatically used & enabling this option can cause issues. Do you really want to enable this option?",
-                "title": "Only 1 GPU detected"
-            },
-            "description": "എന്വിഡിയ പ്രൈം റെന്റര് വയ്ക്കൂ"
-        },
         "runexe": {
             "message": "രേഖകള് ഇവിടെനിന്നും വലിച്ചെടുക്കുക/ഇടുക",
             "title": "ഉപസഗ്ഗ഻ത്തില് EXE ഓടിക്കുക"
@@ -981,8 +974,8 @@
             "search": "",
             "loading": "",
             "open_folder": "",
-            "update": "",
-            "settings": "",
+            "update": "Update",
+            "settings": "ക്രമീകരണങ്ങള്",
             "no-results": ""
         },
         "release": "Release Date",
@@ -1176,7 +1169,7 @@
             "genresPlaceholder": "",
             "features": "",
             "featuresPlaceholder": "",
-            "ageRatingAll": "",
+            "ageRatingAll": "എല്ലാം",
             "pageSize": "",
             "releaseYear": ""
         },
@@ -1206,7 +1199,7 @@
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
+            "no-games": "കളികളൊന്നും കണ്ടെത്തിയില്ല",
             "no-grids": "",
             "search": "",
             "grids": ""
@@ -1234,7 +1227,7 @@
             "launch": "",
             "sort": "",
             "navigate": "",
-            "quit": "",
+            "quit": "പുറത്തുകടക്കൂ",
             "change_store": ""
         },
         "launching": "",
@@ -1242,11 +1235,11 @@
             "needsUpdate": ""
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Other",
+            "all": "എല്ലാം"
         },
         "empty": "",
-        "games": "",
+        "games": "നട്ട കളികള്‍",
         "quitApp": "",
         "loading": ""
     },

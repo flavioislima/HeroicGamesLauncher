@@ -124,8 +124,12 @@ export default function ControllerHints() {
 
   useEffect(() => {
     // set the brand for the images to use
-    if (activeController.match(/sony|054c|PS3|PLAYSTATION|0268|'2563.*0523/i)) {
-      setLayout('ps')
+    if (activeController.match(/054c.*0ce6/i)) {
+      setLayout('ps5')
+    } else if (
+      activeController.match(/054c|PS3|054c.*09cc|0268|'2563.*0523/i)
+    ) {
+      setLayout('ps4')
     } else if (activeController.match(/28de.*11ff/)) {
       setLayout('steam-deck')
     } else if (activeController.match(/microsoft|xbox/i)) {

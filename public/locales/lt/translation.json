@@ -547,13 +547,6 @@
         "darktray": "Naudoti tamsią juostos piktogramą",
         "dxvkfpslimit": "Riboti kadrus per sekundę („DX9/10/11“)",
         "minimize-on-launch": "Nuleisti „Heroic“ po žaidimo paleidimo",
-        "primerun": {
-            "confirmation": {
-                "title": "Tik – 1 „GPU“ aptiktas",
-                "message": "Tik viena vaizdo plokštė buvo aptikti šioje sistemoje. Atkreipkite dėmesį, kad ši parinktis yra skirta tik daugelio „GPU“ sistemoms su paskirtim (kaip nešiojamiesiems kompiuteriams). Vieno „GPU“ sistemose, tik jis ir yra naudojamas; įjungus/įgalinus šią parinktį, gali sukelti problemų. Ar Jūs tikrai norite įjungti/įgalinti šią parinktį?"
-            },
-            "description": "Naudoti paskirtąją vaizdo plokštę"
-        },
         "gamescope": {
             "missingMsg": "Mes negalėjome surasti „Gamescope“ kelio vietoje. Įdiekite jį arba pridėkite prie kelio.",
             "enableLimiter": "Įjungti/Įgalinti kadrų per sekundę ribotuvą/-ę",

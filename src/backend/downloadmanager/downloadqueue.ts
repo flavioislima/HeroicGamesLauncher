@@ -145,7 +145,7 @@ async function addToQueue(element: DMQueueElement) {
     const gameInfo = libraryManagerMap[element.params.runner].getGameInfo(
       element.params.appName
     )
-    if (!gameInfo?.isEAManaged) {
+    if (!gameInfo?.isEAManaged && !gameInfo?.isUbisoftManaged) {
       const installInfo = await libraryManagerMap[
         element.params.runner
       ].getInstallInfo(

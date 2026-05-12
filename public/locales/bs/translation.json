@@ -184,7 +184,7 @@
                 "message": ""
             }
         },
-        "wineprefix": "Odaberite Wine Prefix mapu",
+        "wineprefix": "Izaberite WinePrefix mapu",
         "yes": "DA",
         "dontShowAgain": "Ne prikazuj ponovo",
         "choose-nile-binary": "Odaberite binarni Nil",
@@ -262,8 +262,8 @@
             "refresh": "Osvježi biblioteku"
         },
         "abort": "",
-        "install": "",
-        "uninstall": ""
+        "install": "Install",
+        "uninstall": "Deinstaliraj"
     },
     "globalSettings": "Globalne postavke",
     "GOG": "GOG",
@@ -707,13 +707,6 @@
         "offlinemode": "Pokreni igru izvan mreže",
         "prefered_language": "Željeni jezik (šifra jezika)",
         "preferSystemLibs": "Preferirajte sistemske biblioteke",
-        "primerun": {
-            "confirmation": {
-                "message": "Only one graphics card was detected in this system. Please note that this option is intended for multi-GPU systems with headless GPUs (like laptops). On single-GPU systems, the GPU is automatically used & enabling this option can cause issues. Do you really want to enable this option?",
-                "title": "Only 1 GPU detected"
-            },
-            "description": "Koristite namjensku grafičku karticu"
-        },
         "runexe": {
             "message": "Povucite i ispustite datoteke ovdje",
             "title": "Pokrenite EXE na prefiksu"
@@ -981,8 +974,8 @@
             "search": "",
             "loading": "",
             "open_folder": "",
-            "update": "",
-            "settings": "",
+            "update": "Update",
+            "settings": "Postavke",
             "no-results": ""
         },
         "release": "Datum izlaska",
@@ -1176,7 +1169,7 @@
             "genresPlaceholder": "",
             "features": "",
             "featuresPlaceholder": "",
-            "ageRatingAll": "",
+            "ageRatingAll": "Sve",
             "pageSize": "",
             "releaseYear": ""
         },
@@ -1234,7 +1227,7 @@
             "launch": "",
             "sort": "",
             "navigate": "",
-            "quit": "",
+            "quit": "Odustani",
             "change_store": ""
         },
         "launching": "",
@@ -1242,8 +1235,8 @@
             "needsUpdate": ""
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Other",
+            "all": "Sve"
         },
         "empty": "",
         "games": "",

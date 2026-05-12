@@ -181,6 +181,20 @@
   color: var(--accent);
 }
 
+.discountFilters__wishlistOnly.MuiFormControlLabel-root {
+  margin: 0;
+  color: var(--text-default);
+  white-space: nowrap;
+}
+
+.discountFilters__wishlistOnly .MuiCheckbox-root {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.discountFilters__wishlistOnly .MuiCheckbox-root.Mui-checked {
+  color: var(--accent);
+}
+
 .discountFilters__row--inputs {
   grid-template-columns:
     minmax(140px, 180px)

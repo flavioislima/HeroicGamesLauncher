@@ -6,11 +6,12 @@ import {
   isSteamDeckGameMode,
   isSteamDeck
 } from 'backend/constants/environment'
-import { logInfo, LogPrefix } from 'backend/logger'
+import { logInfo, logWarning, LogPrefix } from 'backend/logger'
 import { GOGUser } from 'backend/storeManagers/gog/user'
 import { LegendaryUser } from 'backend/storeManagers/legendary/user'
 import { NileUser } from 'backend/storeManagers/nile/user'
 import { libraryStore } from 'backend/storeManagers/sideload/electronStores'
+import { getOsInfo } from 'backend/utils/systeminfo/osInfo'
 import { app } from 'electron'
 import https from 'https'
 
@@ -70,7 +71,7 @@ function Plausible() {
   }
 }
 
-export function startPlausible() {
+export async function startPlausible() {
   if (process.env.CI === 'e2e') {
     logInfo('Skipping Plausible Analytics in E2E tests', LogPrefix.Backend)
     return
@@ -89,6 +90,19 @@ export function startPlausible() {
     .filter(([, v]) => v)
     .map(([k]) => k)
 
+  let distro = 'unknown'
+  let distroVersion = 'unknown'
+  try {
+    const osInfo = await getOsInfo()
+    if (osInfo.name) distro = osInfo.name
+    if (osInfo.version) distroVersion = osInfo.version
+  } catch (error) {
+    logWarning(
+      `Failed to read OS info for analytics: ${error}`,
+      LogPrefix.Backend
+    )
+  }
+
   const props = {
     version: appVersion,
     gog: providersObject.gog || false,
@@ -97,6 +111,9 @@ export function startPlausible() {
     sideloaded: providersObject.sideloaded || false,
     providers: loggedInProviders.join(', '),
     OS: process.platform,
+    arch: process.arch,
+    distro,
+    distroVersion,
     isFlatpak: isFlatpak,
     isAppImage: isAppImage,
     isSnap: isSnap,

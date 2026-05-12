@@ -221,7 +221,7 @@
             "install_game": "Instalovat hru",
             "move_cursor": "Přesunout kurzor",
             "open_virtual_keyboard": "Otevřít virtuální klávesnici",
-            "options": "Options",
+            "options": "Volby",
             "play_game": "Hrát hru",
             "scroll": "Scroll",
             "select": "Vybrat",
@@ -232,19 +232,19 @@
     "docs": "Dokumentace",
     "download-manager": {
         "install-type": {
-            "install": "Install",
-            "update": "Update"
+            "install": "Instalovat",
+            "update": "Aktualizovat"
         },
         "label": {
             "disk": "Disk",
-            "speed": "Download"
+            "speed": "Stahování"
         },
         "link": "Stahování",
         "queue": {
             "end-time": "Dokončeno",
             "queue-time": "Přidáno",
             "start-time": "Spuštěno",
-            "type": "Type"
+            "type": "Typ"
         },
         "title": "Stahování",
         "ETA": "Předpokládaný čas"
@@ -269,9 +269,9 @@
         "library": {
             "refresh": "Obnovit knihovnu"
         },
-        "abort": "",
-        "install": "",
-        "uninstall": ""
+        "abort": "Zrušit",
+        "install": "Instalovat",
+        "uninstall": "Odinstalovat"
     },
     "globalSettings": "Globální nastavení",
     "GOG": "GOG",
@@ -716,13 +716,6 @@
         "offlinemode": "Spustit hru offline",
         "prefered_language": "Preferovaný jazyk (kód jazyka)",
         "preferSystemLibs": "Preferovat systémové knihovny",
-        "primerun": {
-            "confirmation": {
-                "message": "V tomto systému byla zjištěna pouze jedna grafická karta. Vezměte prosím na vědomí, že tato možnost je určena pro systémy s více grafickými kartami s headless GPU (např. notebooky). V systémech s jednou grafickou kartou je grafická karta použita automaticky a zapnutí této možnosti může způsobit problémy. Opravdu chcete tuto možnost povolit?",
-                "title": "Nalezeno pouze 1 GPU"
-            },
-            "description": "Použít dedikovanou grafickou kartu"
-        },
         "runexe": {
             "message": "Přetáhněte soubory sem",
             "title": "Spustit EXE na prefixu"
@@ -822,7 +815,7 @@
         "scripts": "Skripty:",
         "enable-quick-sync-menu": "Povolit nabídku Rychlé uložení a synchronizace na stránce hry",
         "disable_gog_presence": "Zakázat aktualizace GOG Presence",
-        "start-in-console-mode": ""
+        "start-in-console-mode": "Začít v konzolovém módu"
     },
     "settings": {
         "battlEyeRuntime": {
@@ -931,12 +924,12 @@
         "legacy_warning": "Upozornění: Nastavení na této kartě jsou většinou zastaralá a nemusí vůbec fungovat.",
         "steamgriddb": {
             "apikey": {
-                "title": "",
-                "placeholder": "",
-                "placeholder_saved": ""
+                "title": "SteamGridDB API Klíč",
+                "placeholder": "Zde vložte SteamGridDB API klíč",
+                "placeholder_saved": "Klíč uložen — pište pro jeho změnu, vymažte pro odstranění"
             },
             "help": {
-                "description": ""
+                "description": "Poskytněte SteamGridDB API pro zapnutí vyhledávaní náhledu her. Tento klíč je šifrován při uložení když to podporuje systém. Můžete ho získat na www.steamgriddb.com/profile/preferences/api"
             }
         }
     },
@@ -944,7 +937,7 @@
     "sidebar": {
         "collapse": "Sbalit postranní panel",
         "uncollapse": "Rozbalit postranní panel",
-        "console": ""
+        "console": "Konzolový Mód"
     },
     "status": {
         "installing": "Instaluji",
@@ -1002,12 +995,12 @@
             "not-found": "Nebyly nalezeny žádné verze Wine. Klikněte na ikonu obnovení a zkuste to znovu.",
             "title": "Správce Wine",
             "unzipping": "Rozbalování",
-            "search": "",
-            "loading": "",
-            "open_folder": "",
-            "update": "",
-            "settings": "",
-            "no-results": ""
+            "search": "Hledání verzí...",
+            "loading": "Načítám wine verze...",
+            "open_folder": "Otevřít Složku",
+            "update": "Aktualizovat",
+            "settings": "Nastavení",
+            "no-results": "Žádné verze Wine neodpovídají hledání."
         },
         "release": "Release Date",
         "size": "Velikost",
@@ -1058,13 +1051,13 @@
     "wineExplanation": {
         "proton-ge": "GE-Proton je verze Protonu od vývojáře Glorious Eggroll. Je vytvořena k použití ve službě Steam, některé hry mimo síť služby Steam ale mohou s touto verzí lépe fungovat. Poskytuje převážně zbytečné protokoly pro ladění chyb.",
         "wine-ge": "Wine-GE-Proton je verze Protonu od vývojáře Glorious Eggroll. Jedná se o doporučenou verzi Wine k použití mimo službu Steam. Poskytuje užitečné protokoly pro ladění chyb.",
-        "gpt": "",
-        "wine-crossover": "",
-        "wine-staging-macos": ""
+        "gpt": "Game Porting Toolkit je vyvíjen Applem a je doporučen pro Apple Silicon Macky s M1+ čipem a nejlépe funguje pro nové hry s DX12.",
+        "wine-crossover": "Wine-Crossover je založen na projektu Crossover OpenSource Wine a je doporučen pro Intel Macky a pro DX11 a starší hry.",
+        "wine-staging-macos": "Wine-Staging-macOS je založen na projektu Wine a je doporučen pro Intel Macky a pro DX11 a starší hry, speciálně když je spárovaný s nástrojem DXMT."
     },
     "emptyLibrary": {
         "noGames": "Vaše knihovna je prázdná.<br /><br />Klikněte <4>zde</4> a přihlaste se pomocí účtu Epic, GOG.com nebo Amazon. Poté se vaše hry zobrazí zde v knihovně.<br /><br />Chcete-li používat hry nebo aplikace z jiných zdrojů, klikněte na <br /> a přidejte je ručně.",
-        "noResults": "S nastavenými filtry nebyl nalezen žádný výsledek."
+        "noResults": "Aktuálním filtrům nic neodpovídá."
     },
     "adtraction-locked": {
         "title": "Služba adtraction je blokována",
@@ -1158,128 +1151,130 @@
     "discounts": {
         "region": {
             "countries": {
-                "IT": "",
-                "ES": "",
-                "FI": "",
-                "GR": "",
-                "RO": "",
-                "NO": "",
-                "KR": "",
-                "US": "",
-                "HU": "",
-                "PT": "",
-                "NL": "",
-                "AU": "",
-                "TW": "",
-                "IL": "",
-                "JP": "",
-                "DK": "",
-                "DE": "",
-                "CZ": "",
-                "FR": "",
-                "UA": "",
-                "GB": "",
-                "SE": "",
-                "CN": "",
-                "RU": "",
-                "CA": "",
-                "PL": "",
-                "BR": "",
-                "CH": "",
-                "TR": ""
+                "IT": "Itálie",
+                "ES": "Španělsko",
+                "FI": "Finsko",
+                "GR": "Řecko",
+                "RO": "Rumunsko",
+                "NO": "Norsko",
+                "KR": "Jižní Korea",
+                "US": "Spojené Státy Americké",
+                "HU": "Maďarsko",
+                "PT": "Portugalsko",
+                "NL": "Nizozemsko",
+                "AU": "Austrálie",
+                "TW": "Taiwan",
+                "IL": "Izrael",
+                "JP": "Japonsko",
+                "DK": "Dánsko",
+                "DE": "Německo",
+                "CZ": "Česko",
+                "FR": "Francie",
+                "UA": "Ukrajina",
+                "GB": "Velká Británie",
+                "SE": "Švédsko",
+                "CN": "Čína",
+                "RU": "Rusko",
+                "CA": "Kanada",
+                "PL": "Polsko",
+                "BR": "Brazílie",
+                "CH": "Švýcarsko",
+                "TR": "Turecko"
             },
-            "auto": "",
-            "label": ""
+            "auto": "Automaticky {{code}}",
+            "label": "Obchodní region"
         },
         "filters": {
-            "moreFilters": "",
-            "ageRating": "",
-            "os": "",
-            "price": "",
-            "activeCount_other": "",
-            "hideDlcs": "",
-            "ageRatingOption": "",
-            "genres": "",
-            "activeCount_one": "",
-            "lessFilters": "",
-            "rating": "",
-            "sort": "",
-            "genresPlaceholder": "",
-            "features": "",
-            "featuresPlaceholder": "",
-            "ageRatingAll": "",
-            "pageSize": "",
-            "releaseYear": ""
+            "moreFilters": "Více filtrů",
+            "ageRating": "Vhodné pro věk",
+            "os": "Operační systém",
+            "price": "Cena",
+            "activeCount_other": "{{count}} aktivních",
+            "hideDlcs": "Schovat DLC",
+            "ageRatingOption": "Zobrazit hry s hodnocením PEGI {{age}} nebo nižším",
+            "genres": "Žánry",
+            "activeCount_one": "{{count}} aktivních",
+            "lessFilters": "Méně filtrů",
+            "rating": "Hodnocení",
+            "sort": "Seřadit podle",
+            "genresPlaceholder": "Jakýkoliv žánr",
+            "features": "Vlastnosti",
+            "featuresPlaceholder": "Jakákoliv vlastnost",
+            "ageRatingAll": "Vše",
+            "pageSize": "Na stránku",
+            "releaseYear": "Rok vydání",
+            "hideOwned": "Schovat Vlastněné",
+            "wishlistOnly": "Pouze seznam přání"
         },
-        "sidebar": "",
+        "sidebar": "Nabídky",
         "sort": {
-            "priceDesc": "",
-            "trending": "",
-            "priceAsc": "",
-            "releaseDesc": "",
-            "ratingAsc": "",
-            "releaseAsc": "",
-            "ratingDesc": "",
-            "discount": ""
+            "priceDesc": "Cena: od největší",
+            "trending": "Trendy",
+            "priceAsc": "Cena: od nejmenší",
+            "releaseDesc": "Rok vydání: od nejnovějšího",
+            "ratingAsc": "Hodnocení: od nejmenšího",
+            "releaseAsc": "Rok vydání: od nejstaršího",
+            "ratingDesc": "Hodnocení: od největšího",
+            "discount": "Největší sleva"
         },
-        "noMatches": "",
+        "noMatches": "Žádné hry neodpovídají aktuálním filtrům.",
         "aria": {
-            "pagination": "",
-            "rating": ""
+            "pagination": "Stránkování",
+            "rating": "Hodnoceno {{rating}} z 10"
         },
-        "error": "",
-        "empty": "",
-        "loading": "",
-        "title": "",
+        "error": "Nemohu načíst slevu. Zkuste to později.",
+        "empty": "Žádné zlevněné hry momentálně nejsou dostupné.",
+        "loading": "Načítám zlevněné hry...",
+        "title": "Nabídky GOGu",
         "pagination": {
-            "prev": ""
+            "prev": "Předcházející"
         }
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
-            "no-grids": "",
-            "search": "",
-            "grids": ""
+            "no-games": "Nebyly nalezeny žádné hry.",
+            "no-grids": "Náhled pro hru nenalezen.",
+            "search": "Selhalo vyhledávání her, zkontrolujte SteamGridDB API klíč a opakujte",
+            "grids": "Selhalo získávání mřížek"
         },
         "picker": {
-            "search": "",
-            "title": "",
-            "select-game": ""
+            "search": "Hledat Hru",
+            "title": "SteamGridDB Náhledy",
+            "select-game": "Vybrat Hru:"
         }
     },
     "console": {
         "update": {
-            "hintPrefix": "",
-            "body": "",
-            "title": "",
-            "hintSuffix": ""
+            "hintPrefix": "Zmáčknout",
+            "body": "Tato hra má dostupnou aktualizaci. Odejděte z konzolového módu a aktualizujte hru před jejím spuštěním.",
+            "title": "Potřeba aktualizace",
+            "hintSuffix": "vrátit se"
         },
-        "sort": "",
+        "sort": "Seřadit",
         "cancel": {
-            "hintSuffix": "",
-            "hintPrefix": ""
+            "hintSuffix": "po dobu tří sekund pro zrušení",
+            "hintPrefix": "Držte"
         },
-        "quit": "",
+        "quit": "Zavřít Konzoli",
         "hints": {
-            "launch": "",
-            "sort": "",
-            "navigate": "",
-            "quit": "",
-            "change_store": ""
+            "launch": "Spustit",
+            "sort": "Seřadit",
+            "navigate": "Vyhledat",
+            "quit": "Ukončit",
+            "change_store": "Změnit obchod"
         },
-        "launching": "",
+        "launching": "Spouštění",
         "card": {
-            "needsUpdate": ""
+            "needsUpdate": "Potřebuje aktualizace"
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Ostatní",
+            "all": "Vše"
         },
-        "empty": "",
-        "games": "",
-        "quitApp": "",
-        "loading": ""
+        "empty": "Žádné stažené hry. Nejprve si nějaké stáhněte.",
+        "games": "Instalované hry",
+        "quitApp": "Zavřít Aplikaci",
+        "loading": "Načítám vaší knihovnu…"
     },
-    "next": ""
+    "next": "Další"
 }

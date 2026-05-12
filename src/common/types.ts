@@ -212,6 +212,7 @@ export interface GameInfo {
   canRunOffline: boolean
   thirdPartyManagedApp?: string
   isEAManaged?: boolean
+  isUbisoftManaged?: boolean
   is_mac_native?: boolean
   is_linux_native?: boolean
   browserUrl?: string

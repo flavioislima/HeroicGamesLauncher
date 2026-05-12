@@ -166,12 +166,15 @@ export const getLocaleSettings = (
   return { countryCode, currencyCode, locale: 'en-US' }
 }
 
+// GOG's affiliate program requires links to use the af.gog.com domain with
+// the path of the original www.gog.com URL preserved, plus the ?as=<id>
+// affiliate parameter. Links pointing at www.gog.com directly are not
+// tracked by GOG even if ?as= is present.
 export const withAffiliate = (storeLink: string): string => {
   try {
     const url = new URL(storeLink)
-    if (!url.searchParams.has('as')) {
-      url.searchParams.set('as', GOG_AFFILIATE_ID)
-    }
+    url.hostname = 'af.gog.com'
+    url.searchParams.set('as', GOG_AFFILIATE_ID)
     return url.toString()
   } catch {
     return storeLink
@@ -244,6 +247,7 @@ interface StoredDiscountFilters {
   searchQuery?: string
   hideDlcs?: boolean
   hideOwned?: boolean
+  wishlistOnly?: boolean
   pageSize?: number
 }
 

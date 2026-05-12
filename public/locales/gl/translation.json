@@ -715,13 +715,6 @@
         "offlinemode": "Executar xogo sen conexión",
         "prefered_language": "Lingua preferida (código de idioma)",
         "preferSystemLibs": "Preferir librerías do sistema",
-        "primerun": {
-            "confirmation": {
-                "message": "Só se detectou unha tarxeta gráfica neste sistema. Ten en conta que esta opción está pensada para sistemas con múltiples GPU ou con GPU \"headless\" (como portátiles). En sistemas con unha soa GPU, esta é usada automaticamente e activar esta opción pode causar problemas. Seguro que queres activar esta opción?",
-                "title": "Só se detectou 1 GPU"
-            },
-            "description": "Usar tarxeta gráfica dedicada"
-        },
         "runexe": {
             "message": "Arrastrar e soltar aqúi",
             "title": "Executar EXE en Prefix"

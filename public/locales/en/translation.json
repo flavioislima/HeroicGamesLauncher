@@ -299,7 +299,8 @@
             "price": "Price",
             "rating": "Rating",
             "releaseYear": "Release year",
-            "sort": "Sort by"
+            "sort": "Sort by",
+            "wishlistOnly": "Wishlist Only"
         },
         "loading": "Loading discounted games...",
         "noMatches": "No games match the current filters.",
@@ -481,6 +482,10 @@
         "general": "Sync with EGL if you have a working installation of the Epic Games Launcher elsewhere and want to import your games to avoid downloading them again.",
         "mangohud": "MangoHUD is an overlay that displays and monitors FPS, temperatures, CPU/GPU load and other system resources.",
         "msync": "Msync aims to reduce wineserver overhead in CPU-intensive games. Enabling may improve performance on supported Linux kernels.",
+        "nvidiaprime": {
+            "details": "Use dedicated graphics card to render game on multi-GPU systems. Only needed on gaming laptops or desktops that use a headless GPU for rendering (NVIDIA Optimus, AMD CrossFire)",
+            "link": "Check more details in our wiki"
+        },
         "other": {
             "part4": "Use the ",
             "part5": "Game Arguments",
@@ -888,6 +893,9 @@
         "minimize-on-launch": "Minimize Heroic After Game Launch",
         "msync": "Enable Msync",
         "no-tray-icon": "Hide System Tray Icon (requires restart)",
+        "nvidiaprime": {
+            "description": "Force use of NVIDIA Optimus or AMD Dynamic Switchable Graphics dGPU. ONLY use this for OpenGL and Vulkan games."
+        },
         "offlinemode": "Run Game Offline",
         "prefered_language": "Prefered Language (Language Code)",
         "preferSystemLibs": "Prefer system libraries",

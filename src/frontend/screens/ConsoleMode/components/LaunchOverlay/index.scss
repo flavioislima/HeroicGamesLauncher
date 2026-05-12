@@ -1,0 +1,93 @@
+// Launch overlay
+.consoleLaunchOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: color-mix(
+    in srgb,
+    var(--body-background, #101014) 70%,
+    transparent
+  );
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  animation: overlayFade 220ms ease;
+}
+
+@keyframes overlayFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.consoleLaunchSpinner {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid
+    color-mix(in srgb, var(--text-default, #eae8e5) 20%, transparent);
+  border-top-color: var(--accent, #0080ff);
+  animation: spin 900ms linear infinite;
+
+  &.idle {
+    border-top-color: var(--status-success, #2bbd60);
+    animation-duration: 2.4s;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.consoleLaunchText {
+  font-size: 1rem;
+  color: var(--text-secondary, #b1b1b1);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+.consoleLaunchGameTitle {
+  font-size: clamp(1.6rem, 2.4vw, 2.4rem);
+  font-weight: 700;
+  color: var(--text-title, var(--text-default, #eae8e5));
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  max-width: 80vw;
+  text-align: center;
+}
+
+.consoleLaunchHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #b1b1b1);
+  opacity: 0.75;
+  transition:
+    opacity 180ms ease,
+    color 180ms ease;
+
+  kbd {
+    font-family: var(--primary-font-family);
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+    background: color-mix(in srgb, currentColor 10%, transparent);
+  }
+
+  &.active {
+    opacity: 1;
+    color: var(--cancel-button, #b94a3a);
+  }
+}

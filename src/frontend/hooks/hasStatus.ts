@@ -25,7 +25,8 @@ export function hasStatus(gameInfo: GameInfo, gameSize?: string) {
     thirdPartyManagedApp = undefined,
     is_installed,
     runner = 'sideload',
-    isEAManaged
+    isEAManaged,
+    isUbisoftManaged
   } = { ...newGameInfo }
 
   React.useEffect(() => {
@@ -69,7 +70,7 @@ export function hasStatus(gameInfo: GameInfo, gameSize?: string) {
         return setGameStatus({ status, folder, label, statusContext })
       }
 
-      if (thirdPartyManagedApp && !isEAManaged) {
+      if (thirdPartyManagedApp && !isEAManaged && !isUbisoftManaged) {
         const label = getStatusLabel({
           status: 'notSupportedGame',
           t,

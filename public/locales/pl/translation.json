@@ -189,7 +189,7 @@
                 "message": "Program Heroic wymaga programu Rosetta do prawidłowego działania na macOS z procesorami Apple Silicon. Zainstaluj go z terminala macOS za pomocą polecenia: 'softwareupdate --install-rosetta', a następnie uruchom ponownie Heroic.• "
             }
         },
-        "wineprefix": "Wybierz folder z prefiksem Wine",
+        "wineprefix": "Wybierz folder z prefiksami Wine",
         "yes": "TAK",
         "dontShowAgain": "Nie pokazuj więcej",
         "choose-nile-binary": "Wybierz plik wykonywalny Nile",
@@ -270,8 +270,8 @@
             "refresh": "Odśwież bibliotekę"
         },
         "abort": "",
-        "install": "",
-        "uninstall": ""
+        "install": "Instaluj",
+        "uninstall": "Odinstaluj"
     },
     "globalSettings": "Ustawienia globalne",
     "GOG": "GOG",
@@ -715,13 +715,6 @@
         "offlinemode": "Uruchom grę w trybie offline",
         "prefered_language": "Preferowany język (kod języka)",
         "preferSystemLibs": "Preferuj biblioteki systemowe",
-        "primerun": {
-            "confirmation": {
-                "message": "W tym komputerze wykryto tylko jedną kartę graficzną. Zwróć uwagę, że ta opcja jest przeznaczona dla komputerów z wieloma układami GPU i układami bez obudowy GPU (np. laptopy). W komputerach z jedną kartą graficzną układ GPU jest wykorzystywany automatycznie i włączenie tej opcji może spowodować problemy. Czy na pewno chcesz włączyć tę funkcję?",
-                "title": "Wykryto tylko jedną kartę graficzną"
-            },
-            "description": "Używaj dedykowanej karty graficznej"
-        },
         "runexe": {
             "message": "Przeciągnij i upuść pliki tutaj",
             "title": "Uruchom EXE w prefiksie"
@@ -1003,8 +996,8 @@
             "search": "",
             "loading": "",
             "open_folder": "",
-            "update": "",
-            "settings": "",
+            "update": "Aktualizuj",
+            "settings": "Ustawienia",
             "no-results": ""
         },
         "release": "Data wydania",
@@ -1192,7 +1185,7 @@
         "filters": {
             "moreFilters": "",
             "ageRating": "",
-            "os": "",
+            "os": "System operacyjny:",
             "price": "",
             "activeCount_other": "",
             "hideDlcs": "",
@@ -1205,7 +1198,7 @@
             "genresPlaceholder": "",
             "features": "",
             "featuresPlaceholder": "",
-            "ageRatingAll": "",
+            "ageRatingAll": "Wszystkie",
             "pageSize": "",
             "releaseYear": ""
         },
@@ -1235,7 +1228,7 @@
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
+            "no-games": "Nie znaleziono żadnej gry",
             "no-grids": "",
             "search": "",
             "grids": ""
@@ -1263,21 +1256,21 @@
             "launch": "",
             "sort": "",
             "navigate": "",
-            "quit": "",
+            "quit": "Wyjdź",
             "change_store": ""
         },
-        "launching": "",
+        "launching": "Uruchamianie",
         "card": {
             "needsUpdate": ""
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Other",
+            "all": "Wszystkie"
         },
         "empty": "",
-        "games": "",
+        "games": "Zainstalowane gry",
         "quitApp": "",
         "loading": ""
     },
-    "next": ""
+    "next": "Następny"
 }

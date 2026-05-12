@@ -262,8 +262,8 @@
             "refresh": "Uppdatera bibliotek"
         },
         "abort": "",
-        "install": "",
-        "uninstall": ""
+        "install": "Installation",
+        "uninstall": "Avinstallera"
     },
     "globalSettings": "Globala inställningar",
     "GOG": "GOG",
@@ -708,13 +708,6 @@
         "offlinemode": "Kör spelet offline",
         "prefered_language": "Föredraget språk (Språkkod)",
         "preferSystemLibs": "Föredra systemets bibliotek",
-        "primerun": {
-            "confirmation": {
-                "message": "Endast ett grafikkort upptäcktes i detta system. Observera att det här alternativet är avsett för multi-GPU system med headless GPU:er (som bärbara datorer). På system med en GPU används GPU:n automatiskt och om du aktiverar det här alternativet kan det orsaka problem. Vill du verkligen aktivera det här alternativet?",
-                "title": "Endast 1 GPU upptäcktes"
-            },
-            "description": "Använd dedikerat grafikkort"
-        },
         "runexe": {
             "message": "Drag och släpp filer här",
             "title": "Kör EXE-fil i prefix"
@@ -989,8 +982,8 @@
             "search": "",
             "loading": "",
             "open_folder": "",
-            "update": "",
-            "settings": "",
+            "update": "Uppdatering",
+            "settings": "Inställningar",
             "no-results": ""
         },
         "release": "Utgivningsdatum",
@@ -1171,7 +1164,7 @@
         "filters": {
             "moreFilters": "",
             "ageRating": "",
-            "os": "",
+            "os": "Oprativsystem:",
             "price": "",
             "activeCount_other": "",
             "hideDlcs": "",
@@ -1184,7 +1177,7 @@
             "genresPlaceholder": "",
             "features": "",
             "featuresPlaceholder": "",
-            "ageRatingAll": "",
+            "ageRatingAll": "Alla",
             "pageSize": "",
             "releaseYear": ""
         },
@@ -1214,7 +1207,7 @@
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
+            "no-games": "Inga spel hittades",
             "no-grids": "",
             "search": "",
             "grids": ""
@@ -1242,21 +1235,21 @@
             "launch": "",
             "sort": "",
             "navigate": "",
-            "quit": "",
+            "quit": "Avsluta",
             "change_store": ""
         },
-        "launching": "",
+        "launching": "Startar",
         "card": {
             "needsUpdate": ""
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Other",
+            "all": "Alla"
         },
         "empty": "",
-        "games": "",
+        "games": "Installerade spel",
         "quitApp": "",
         "loading": ""
     },
-    "next": ""
+    "next": "Nästa"
 }

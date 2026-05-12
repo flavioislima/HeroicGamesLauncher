@@ -544,7 +544,9 @@ function loadFile(app_name: string): boolean {
   const FolderName = customAttributes?.FolderName
   const canRunOffline = customAttributes?.CanRunOffline?.value === 'true'
   const thirdPartyManagedApp =
-    customAttributes?.ThirdPartyManagedApp?.value || undefined
+    customAttributes?.ThirdPartyManagedApp?.value ||
+    customAttributes?.ThirdPartyManagedProvider?.value ||
+    undefined
 
   if (dlcItemList) {
     dlcItemList.forEach((v: { releaseInfo: { appId: string }[] }) => {
@@ -642,6 +644,9 @@ function loadFile(app_name: string): boolean {
     isEAManaged:
       !!thirdPartyManagedApp &&
       ['origin', 'the ea app'].includes(thirdPartyManagedApp.toLowerCase()),
+    isUbisoftManaged:
+      !!thirdPartyManagedApp &&
+      'ubisoftconnect' == thirdPartyManagedApp.toLowerCase(),
     is_linux_native: false,
     runner: 'legendary',
     store_url: formatEpicStoreUrl(title)

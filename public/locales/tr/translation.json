@@ -10,8 +10,8 @@
         "titles_always_visible": "Kütüphanede her zaman başlıkları göster",
         "content_font_family_default": "İçerik Yazı Tipi Ailesi (Varsayılan: {{fontFamily}})",
         "actions_font_family_default": "Eylemler Yazı Tipi Ailesi (Varsayılan: {{fontFamily}})",
-        "disable_smooth_scrolling": "Düzgün kaydırmayı devre dışı bırak (yeniden başlatma gerekir)",
-        "disable_animations": "Arayüz animasyonu devredışı bırak"
+        "disable_smooth_scrolling": "Yumuşak kaydırmayı devre dışı bırak (yeniden başlatma gerekir)",
+        "disable_animations": "Arayüz animasyonlarını devre dışı bırak"
     },
     "add_game": "Oyun Ekle",
     "All": "Tümü",
@@ -268,7 +268,7 @@
         },
         "install": "Kur",
         "uninstall": "Uninstall",
-        "abort": ""
+        "abort": "İptal"
     },
     "globalSettings": "Genel Ayarlar",
     "GOG": "GOG",
@@ -713,13 +713,6 @@
         "offlinemode": "Oyunu Çevrim Dışı Çalıştır",
         "prefered_language": "Tercih Edilen Dil (Dil Kodu)",
         "preferSystemLibs": "Sistem kitaplıklarını tercih et",
-        "primerun": {
-            "confirmation": {
-                "message": "Bu sistemde yalnızca bir grafik kartı algılandı. Lütfen bu seçeneğin başsız GPU'lara (dizüstü bilgisayarlar gibi) sahip çoklu GPU sistemleri için tasarlandığını unutmayın. Tek GPU'lu sistemlerde GPU otomatik olarak kullanılır ve bu seçeneğin etkinleştirilmesi sorunlara neden olabilir. Bu seçeneği gerçekten etkinleştirmek istiyor musunuz?",
-                "title": "Yalnızca 1 GPU algılandı"
-            },
-            "description": "Harici Grafik Kartı Kullan"
-        },
         "runexe": {
             "message": "Dosyaları buraya Sürükle ve Bırak",
             "title": "Prefix'te EXE Çalıştır"
@@ -817,7 +810,7 @@
         "enable-quick-sync-menu": "Oyun sayfasında Hızlı Kaydet-Eşitle Menüsü'nü etkinleştir",
         "scripts": "Betikler:",
         "disable_gog_presence": "GOG Durum güncellemelerini devre dışı bırak",
-        "start-in-console-mode": ""
+        "start-in-console-mode": "Uçbirim Modunda başlat"
     },
     "settings": {
         "battlEyeRuntime": {
@@ -926,12 +919,12 @@
         "legacy_warning": "Uyarı: Bu sayfadaki ayarların çoğu kullanımdan kaldırıldı ve hiç çalışmayabilirler.",
         "steamgriddb": {
             "apikey": {
-                "title": "",
-                "placeholder": "",
-                "placeholder_saved": ""
+                "title": "SteamGridDB API Anahtarı",
+                "placeholder": "SteamGridDB API Anahtarınızı buraya girin",
+                "placeholder_saved": "Anahtar kaydedildi — değiştirmek için yazın, silmek için temizleyin"
             },
             "help": {
-                "description": ""
+                "description": "Oyun kapağı aramasını etkinleştirmek için kendi SteamGridDB API anahtarınızı girin. Sisteminiz destekliyorsa, anahtar şifrelenmiş olarak saklanır. Anahtarı www.steamgriddb.com/profile/preferences/api adresinden alabilirsiniz"
             }
         }
     },
@@ -939,7 +932,7 @@
     "sidebar": {
         "collapse": "Kenar çubuğunu daralt",
         "uncollapse": "Kenar çubuğunu genişlet",
-        "console": ""
+        "console": "Uçbirim Modu"
     },
     "status": {
         "installing": "Kuruluyor",
@@ -999,10 +992,10 @@
             "unzipping": "Çıkartılıyor",
             "settings": "Ayarlar",
             "update": "Update",
-            "search": "",
-            "loading": "",
-            "open_folder": "",
-            "no-results": ""
+            "search": "Sürümleri ara…",
+            "loading": "Wine sürümleri yükleniyor…",
+            "open_folder": "Klasör Aç",
+            "no-results": "Aramanızla eşleşen bir wine sürümü bulunamadı."
         },
         "release": "Yayınlanma Tarihi",
         "size": "Boyut",
@@ -1055,16 +1048,16 @@
         "noGames": "Kütüphaneniz boş.<br /><br />Epic, GOG.com veya Amazon hesaplarınızla giriş yapmak için <4>buraya</4> tıklayın. Oyunlarınız kütüphanede burada görünecektir.<br /><br />Diğer kaynaklardan oyun veya uygulama kullanmak için, bunları el ile eklemek üzere <br /> öğesine tıklayın."
     },
     "adtraction-locked": {
-        "description": "track.adtraction.com alan adı yüklenememiş veya engellenmiş gibi görünüyor. Adtraction sayesinde, GOG mağazasında yaptığınız her satın alma işlemi Heroic'e maddi destek sağlar. Katkıda bulunmak istiyorsanız, engellemeyi kaldırmayı düşünebilirsiniz.",
+        "description": "track.adtraction.com alan adı yüklenememiş veya engellenmiş gibi görünüyor. Adtraction ile GOG mağazasında yaptığınız her satın alma işlemi Heroic'e maddi destek sağlar. Katkıda bulunmak istiyorsanız, engellemeyi kaldırmayı düşünebilirsiniz.",
         "dont-show-again": "Bu uyarıyı bir daha gösterme",
         "title": "Adtraction engellendi"
     },
     "wineExplanation": {
         "wine-ge": "Wine-GE-Proton, Glorious Eggroll tarafından geliştirilen bir Wine çeşididir. Umu başlatıcısı ile GE-Proton lehine kullanımdan kaldırılmıştır.",
         "proton-ge": "GE-Proton Glorious Eggroll tarafından yapılmış bir Proton varyasyonudur. Steam'de kullanılmak üzere tasarlanmış olsa da, bazı Steam dışı oyunlar bu varyant ile daha iyi çalışabilir. Sorun giderme için genellikle işe yaramaz hata günlükleri sağlar.",
-        "gpt": "",
-        "wine-crossover": "",
-        "wine-staging-macos": ""
+        "gpt": "Game Porting Toolkit, Apple tarafından geliştirilmiştir; M1+ yongalarına sahip Apple Silicon Mac'ler için önerilir ve DX12 kullanan yeni oyunlarda en iyi performansı gösterir.",
+        "wine-crossover": "Wine-Crossover, Crossover OpenSource Wine projesine dayanmaktadır ve İntel tabanlı Mac'ler ile DX11 veya daha eski sürümdeki oyunlar için önerilmektedir.",
+        "wine-staging-macos": "Wine-Staging-macOS, ana Wine projesine dayanmaktadır ve İntel Mac'ler ile DX11 veya daha eski sürümdeki oyunlar için, özellikle de DXMT aracıyla birlikte kullanıldığında tavsiye edilmektedir."
     },
     "categories-manager": {
         "add-placeholder": "Yeni kategori ekle",
@@ -1132,10 +1125,10 @@
         }
     },
     "analyticsModal": {
-        "disable": "Devre Dışı",
+        "disable": "Devre Dışı Bırak",
         "enable": "Etkinleştir",
         "info": {
-            "pt1": "Heroic, uygulamayı geliştirmek adına %100 anonim veri toplar.",
+            "pt1": "Heroic uygulamayı geliştirmek için %100 anonim veri toplar.",
             "pt3": "Heroic; kullanıcı adınız, IP adresiniz ya da e-postanız gibi kişisel bilgilerinizi asla toplamaz.",
             "pt6": "Şeffaf olmak açısından, toplanılan verileri Heroic kayıtlarında görebilirsiniz.",
             "pt7": "Bu ayarı dilediğiniz zaman uygulama ayarlarından değiştirebilirsiniz.",
@@ -1153,94 +1146,96 @@
     "steamgriddb": {
         "error": {
             "no-games": "Oyun Bulunamadı",
-            "no-grids": "",
-            "search": "",
-            "grids": ""
+            "no-grids": "Bu oyun için bir kapak bulunamadı.",
+            "search": "Oyun arama işlemi başarısız oldu, lütfen SteamGridDB API anahtarınızı kontrol edin ve tekrar deneyin",
+            "grids": "Kapaklar yüklenemedi"
         },
         "picker": {
-            "search": "",
-            "title": "",
-            "select-game": ""
+            "search": "Oyun Ara",
+            "title": "SteamGridDB Kapakları",
+            "select-game": "Oyun Seç:"
         }
     },
     "discounts": {
         "filters": {
             "ageRatingAll": "Tümü",
             "os": "İşletim sistemi:",
-            "moreFilters": "",
-            "ageRating": "",
-            "price": "",
-            "activeCount_other": "",
-            "hideDlcs": "",
-            "ageRatingOption": "",
-            "genres": "",
-            "activeCount_one": "",
-            "lessFilters": "",
-            "rating": "",
-            "sort": "",
-            "genresPlaceholder": "",
-            "features": "",
-            "featuresPlaceholder": "",
-            "pageSize": "",
-            "releaseYear": ""
+            "moreFilters": "Daha fazla filtre",
+            "ageRating": "Uygun olan yaş",
+            "price": "Fiyat",
+            "activeCount_other": "{{count}} aktif",
+            "hideDlcs": "DLC'leri gizle",
+            "ageRatingOption": "PEGI {{age}} veya daha düşük yaş derecesine sahip oyunları göster",
+            "genres": "Türler",
+            "activeCount_one": "{{count}} aktif",
+            "lessFilters": "Daha az filtre",
+            "rating": "Puan",
+            "sort": "Sırala",
+            "genresPlaceholder": "Herhangi bir tür",
+            "features": "Özellikler",
+            "featuresPlaceholder": "Herhangi bir özellik",
+            "pageSize": "Sayfa başına",
+            "releaseYear": "Çıkış yılı",
+            "hideOwned": "Sahip Olunanları gizle",
+            "wishlistOnly": "Yalnızca İstek Listesi"
         },
         "region": {
             "countries": {
-                "IT": "",
-                "ES": "",
-                "FI": "",
-                "GR": "",
-                "RO": "",
-                "NO": "",
-                "KR": "",
-                "US": "",
-                "HU": "",
-                "PT": "",
-                "NL": "",
-                "AU": "",
-                "TW": "",
-                "IL": "",
-                "JP": "",
-                "DK": "",
-                "DE": "",
-                "CZ": "",
-                "FR": "",
-                "UA": "",
-                "GB": "",
-                "SE": "",
-                "CN": "",
-                "RU": "",
-                "CA": "",
-                "PL": "",
-                "BR": "",
-                "CH": "",
-                "TR": ""
+                "IT": "İtalya",
+                "ES": "İspanya",
+                "FI": "Finlandiya",
+                "GR": "Yunanistan",
+                "RO": "Romanya",
+                "NO": "Norveç",
+                "KR": "Güney Kore",
+                "US": "Amerika",
+                "HU": "Macaristan",
+                "PT": "Portekiz",
+                "NL": "Hollanda",
+                "AU": "Avustralya",
+                "TW": "Tayvan",
+                "IL": "İsrail",
+                "JP": "Japonya",
+                "DK": "Danimarka",
+                "DE": "Almanya",
+                "CZ": "Çekya",
+                "FR": "Fransa",
+                "UA": "Ukrayna",
+                "GB": "Birleşik Krallık",
+                "SE": "İsveç",
+                "CN": "Çin",
+                "RU": "Rusya",
+                "CA": "Kanada",
+                "PL": "Polonya",
+                "BR": "Brezilya",
+                "CH": "İsviçre",
+                "TR": "TÜRKİYE"
             },
-            "auto": "",
-            "label": ""
+            "auto": "Otomatik ({{code}})",
+            "label": "Mağaza bölgesi"
         },
-        "sidebar": "",
+        "sidebar": "Fırsatlar",
         "sort": {
-            "priceDesc": "",
-            "trending": "",
-            "priceAsc": "",
-            "releaseDesc": "",
-            "ratingAsc": "",
-            "releaseAsc": "",
-            "ratingDesc": "",
-            "discount": ""
+            "priceDesc": "Fiyat: yüksekten düşüğe",
+            "trending": "Trend",
+            "priceAsc": "Fiyat: düşükten yükseğe",
+            "releaseDesc": "Çıkış tarihi: yeniden eskiye",
+            "ratingAsc": "Puan: düşükten yükseğe",
+            "releaseAsc": "Çıkış tarihi: eskiden yeniye",
+            "ratingDesc": "Puan: yüksekten düşüğe",
+            "discount": "En büyük indirim"
         },
-        "noMatches": "",
+        "noMatches": "Şu anki filtrelerle eşleşen bir oyun yok.",
         "aria": {
-            "pagination": "",
-            "rating": ""
+            "pagination": "Numaralandırma",
+            "rating": "10 üzerinden {{rating}} puan"
         },
-        "error": "",
-        "empty": "",
-        "loading": "",
-        "title": "",
+        "error": "İndirimler yüklenemedi. Lütfen daha sonra tekrar deneyin.",
+        "empty": "Şu anda indirimde olan bir oyun yok.",
+        "loading": "İndirimdeki oyunlar yükleniyor…",
+        "title": "GOG Fırsatları",
         "pagination": {
-            "prev": ""
+            "prev": "Önceki"
         }
     },
     "next": "Sonraki",
@@ -1252,29 +1247,29 @@
         "games": "Kurulu oyunlar",
         "hints": {
             "quit": "Çık",
-            "launch": "",
-            "sort": "",
-            "navigate": "",
-            "change_store": ""
+            "launch": "Başlat",
+            "sort": "Sırala",
+            "navigate": "Gezin",
+            "change_store": "Mağazayı değiştir"
         },
         "launching": "Başlatılıyor",
         "update": {
-            "hintPrefix": "",
-            "body": "",
-            "title": "",
-            "hintSuffix": ""
+            "hintPrefix": "Bas",
+            "body": "Bu oyun için bir güncelleme mevcut. Lütfen Uçbirim Modundan çıkın ve oyunu başlatmadan önce güncelleyin.",
+            "title": "Güncelleme gerekli",
+            "hintSuffix": "geri gitmek için"
         },
-        "sort": "",
+        "sort": "Sırala",
         "cancel": {
-            "hintSuffix": "",
-            "hintPrefix": ""
+            "hintSuffix": "iptal etmek için 3s",
+            "hintPrefix": "Tut"
         },
-        "quit": "",
+        "quit": "Uçbirimden Çık",
         "card": {
-            "needsUpdate": ""
+            "needsUpdate": "Güncelleme gerekli"
         },
-        "empty": "",
-        "quitApp": "",
-        "loading": ""
+        "empty": "Gösterilecek indirilmiş bir oyun yok. Önce bir oyun indirin.",
+        "quitApp": "Uygulamadan Çık",
+        "loading": "Kütüphaneniz yükleniyor…"
     }
 }

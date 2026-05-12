@@ -54,7 +54,7 @@
         },
         "selectLaunchOption": {
             "title": "Pilih Opsi Peluncuran ({{seconds}}d)",
-            "body": ""
+            "body": "Silakan pilih opsi peluncuran untuk game ini (dapat diubah nanti di pengaturan game):"
         },
         "sync": {
             "force_download_warning": "Penyimpanan lokal akan dihapus. Apakah Anda ingin melanjutkan?",
@@ -62,9 +62,9 @@
         },
         "ok": "OK",
         "offline_warning": {
-            "message": "",
-            "playAnyway": "",
-            "title": ""
+            "message": "Game ini mungkin tidak berfungsi dengan baik saat offline. Apakah Anda tetap ingin bermain?",
+            "playAnyway": "Tetap Mainkan",
+            "title": "Peringatan Offline"
         }
     },
     "button": {
@@ -131,7 +131,7 @@
         "modify": "Ubah Pemasangan",
         "extra_info": "Info tambahan",
         "install_info": "Info instalasi",
-        "achievements": ""
+        "achievements": "Pencapaian"
     },
     "gamecard": {
         "moving": "Memindahkan",
@@ -208,7 +208,7 @@
     },
     "launch": {
         "options": "Opsi Peluncuran…",
-        "default": ""
+        "default": "Bawaan"
     },
     "not_logged_in": {
         "epic": "Anda tidak masuk dengan akun Epic di Heroic. Jangan gunakan halaman toko untuk masuk, klik tombol berikut sebagai gantinya:",

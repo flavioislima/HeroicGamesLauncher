@@ -35,7 +35,13 @@ export const initTrayIcon = async (mainWindow: BrowserWindow) => {
 
   // event listeners
   appIcon.on('click', () => {
-    mainWindow.show()
+    const { exitToTray } = GlobalConfig.get().getSettings()
+
+    if (exitToTray && mainWindow.isVisible()) {
+      mainWindow.hide()
+    } else {
+      mainWindow.show()
+    }
   })
 
   backendEvents.on('languageChanged', async () => {

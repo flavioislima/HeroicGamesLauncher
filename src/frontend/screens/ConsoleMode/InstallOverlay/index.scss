@@ -1,0 +1,65 @@
+// Install overlay
+.consoleInstallOverlay {
+  position: fixed;
+  inset: 0;
+  gap: 16px;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  align-items: center;
+  animation: overlayFade 220ms ease;
+  display: flex;
+  justify-content: center;
+}
+
+.consoleModal {
+  background: color-mix(
+    in srgb,
+    var(--body-background, #101014) 90%,
+    transparent
+  );
+  z-index: 20;
+  gap: 16px;
+  flex-direction: column;
+  padding: var(--space-xl);
+  border-radius: var(--space-lg);
+}
+
+@keyframes overlayFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.consoleModalTitle {
+  font-size: 1rem;
+  color: var(--text-secondary, #b1b1b1);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: var(--space-md);
+}
+
+.consoleModalGameTitle {
+  font-size: clamp(1.6rem, 2.4vw, 2.4rem);
+  font-weight: 700;
+  color: var(--text-title, var(--text-default, #eae8e5));
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  max-width: 80vw;
+  text-align: center;
+}
+
+.consoleInstallButtons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: var(--space-lg);
+}

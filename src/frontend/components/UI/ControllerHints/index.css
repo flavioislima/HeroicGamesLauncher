@@ -50,26 +50,48 @@
   --imageUrl: url(/src/frontend/assets/controllers/xbox-series/XboxSeriesX_B.png);
 }
 
-.controller-hints.ps .buttonImage.d-pad {
-  --imageUrl: url(/src/frontend/assets/controllers/ps/PS5_Dpad.png);
+.controller-hints.ps5 .buttonImage.d-pad {
+  --imageUrl: url(/src/frontend/assets/controllers/ps5/PS5_Dpad.png);
 }
-.controller-hints.ps .buttonImage.left-stick {
-  --imageUrl: url(/src/frontend/assets/controllers/ps/PS5_Left_Stick.png);
+.controller-hints.ps5 .buttonImage.left-stick {
+  --imageUrl: url(/src/frontend/assets/controllers/ps5/PS5_Left_Stick.png);
 }
-.controller-hints.ps .buttonImage.right-stick {
-  --imageUrl: url(/src/frontend/assets/controllers/ps/PS5_Right_Stick.png);
+.controller-hints.ps5 .buttonImage.right-stick {
+  --imageUrl: url(/src/frontend/assets/controllers/ps5/PS5_Right_Stick.png);
 }
-.controller-hints.ps .buttonImage.main-action {
-  --imageUrl: url(/src/frontend/assets/controllers/ps/PS5_Cross.png);
+.controller-hints.ps5 .buttonImage.main-action {
+  --imageUrl: url(/src/frontend/assets/controllers/ps5/PS5_Cross.png);
 }
-.controller-hints.ps .buttonImage.alt-action {
-  --imageUrl: url(/src/frontend/assets/controllers/ps/PS5_Square.png);
+.controller-hints.ps5 .buttonImage.alt-action {
+  --imageUrl: url(/src/frontend/assets/controllers/ps5/PS5_Square.png);
 }
-.controller-hints.ps .buttonImage.alt-action2 {
-  --imageUrl: url(/src/frontend/assets/controllers/ps/PS5_Triangle.png);
+.controller-hints.ps5 .buttonImage.alt-action2 {
+  --imageUrl: url(/src/frontend/assets/controllers/ps5/PS5_Triangle.png);
 }
-.controller-hints.ps .buttonImage.back {
-  --imageUrl: url(/src/frontend/assets/controllers/ps/PS5_Circle.png);
+.controller-hints.ps5 .buttonImage.back {
+  --imageUrl: url(/src/frontend/assets/controllers/ps5/PS5_Circle.png);
+}
+
+.controller-hints.ps4 .buttonImage.d-pad {
+  --imageUrl: url(/src/frontend/assets/controllers/ps4/PS4_Dpad.png);
+}
+.controller-hints.ps4 .buttonImage.left-stick {
+  --imageUrl: url(/src/frontend/assets/controllers/ps4/PS4_Left_Stick.png);
+}
+.controller-hints.ps4 .buttonImage.right-stick {
+  --imageUrl: url(/src/frontend/assets/controllers/ps4/PS4_Right_Stick.png);
+}
+.controller-hints.ps4 .buttonImage.main-action {
+  --imageUrl: url(/src/frontend/assets/controllers/ps4/PS4_Cross.png);
+}
+.controller-hints.ps4 .buttonImage.alt-action {
+  --imageUrl: url(/src/frontend/assets/controllers/ps4/PS4_Square.png);
+}
+.controller-hints.ps4 .buttonImage.alt-action2 {
+  --imageUrl: url(/src/frontend/assets/controllers/ps4/PS4_Triangle.png);
+}
+.controller-hints.ps4 .buttonImage.back {
+  --imageUrl: url(/src/frontend/assets/controllers/ps4/PS4_Circle.png);
 }
 
 .controller-hints.steam-deck .buttonImage.d-pad {

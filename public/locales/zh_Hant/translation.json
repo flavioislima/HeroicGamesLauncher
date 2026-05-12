@@ -262,8 +262,8 @@
             "refresh": "重新整理遊戲庫"
         },
         "abort": "",
-        "install": "",
-        "uninstall": ""
+        "install": "Install",
+        "uninstall": "解除安裝"
     },
     "globalSettings": "全域設定",
     "GOG": "GOG",
@@ -707,13 +707,6 @@
         "offlinemode": "離線執行遊戲",
         "prefered_language": "偏好語言（語言代碼）",
         "preferSystemLibs": "偏好系統庫",
-        "primerun": {
-            "confirmation": {
-                "message": "Only one graphics card was detected in this system. Please note that this option is intended for multi-GPU systems with headless GPUs (like laptops). On single-GPU systems, the GPU is automatically used & enabling this option can cause issues. Do you really want to enable this option?",
-                "title": "Only 1 GPU detected"
-            },
-            "description": "使用獨立顯卡"
-        },
         "runexe": {
             "message": "將檔案拖曳到此處",
             "title": "在 Prefix 上執行 EXE 檔案"
@@ -981,8 +974,8 @@
             "search": "",
             "loading": "",
             "open_folder": "",
-            "update": "",
-            "settings": "",
+            "update": "Update",
+            "settings": "設定",
             "no-results": ""
         },
         "release": "發行日期",
@@ -1163,7 +1156,7 @@
         "filters": {
             "moreFilters": "",
             "ageRating": "",
-            "os": "",
+            "os": "作業系統：",
             "price": "",
             "activeCount_other": "",
             "hideDlcs": "",
@@ -1237,16 +1230,16 @@
             "quit": "",
             "change_store": ""
         },
-        "launching": "",
+        "launching": "啟動中",
         "card": {
             "needsUpdate": ""
         },
         "filter": {
-            "sideload": "",
+            "sideload": "其它",
             "all": ""
         },
         "empty": "",
-        "games": "",
+        "games": "已安裝的遊戲",
         "quitApp": "",
         "loading": ""
     },

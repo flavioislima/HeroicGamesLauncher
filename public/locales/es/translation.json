@@ -189,7 +189,7 @@
                 "title": "Rosetta no encontrado"
             }
         },
-        "wineprefix": "Seleccione la carpeta de prefijos de Wine",
+        "wineprefix": "Selecciona la carpeta de Prefijo de Wine",
         "yes": "SÍ",
         "dontShowAgain": "No volver a mostrar",
         "choose-nile-binary": "Seleccionar binario del Nile",
@@ -269,9 +269,9 @@
         "library": {
             "refresh": "Recargar biblioteca"
         },
-        "abort": "",
-        "install": "",
-        "uninstall": ""
+        "abort": "Abortar",
+        "install": "Instalar",
+        "uninstall": "Desinstalar"
     },
     "globalSettings": "Ajustes globales",
     "GOG": "GOG",
@@ -716,13 +716,6 @@
         "offlinemode": "Ejecutar juego sin conexión",
         "prefered_language": "Lenguaje preferido (Código de Lenguaje)",
         "preferSystemLibs": "Preferir librerías del sistema",
-        "primerun": {
-            "confirmation": {
-                "message": "Se detectó sólo una tarjeta gráfica en el sistema. Note que está opción está pensada para sistemas con múltiples GPU con tarjetas \"headless\" (como laptops para juegos). En sistemas de GPU única, la GPU usada automáticamente y activar esta opción puede generar problemas. Seguro que quiere activar esta opción?",
-                "title": "Sólo 1 GPU detectada"
-            },
-            "description": "Utilizar tarjeta de video dedicada"
-        },
         "runexe": {
             "message": "Arrastra y suelta archivos aquí",
             "title": "Ejecutar EXE en Prefijo"
@@ -822,7 +815,7 @@
         "enable-quick-sync-menu": "Habilitar el menú Guardar y sincronizar rápidamente en la página del juego",
         "scripts": "Secuencias de comandos:",
         "disable_gog_presence": "Desactivar actualizaciones de GOG Presence",
-        "start-in-console-mode": ""
+        "start-in-console-mode": "Iniciar en modo consola"
     },
     "settings": {
         "battlEyeRuntime": {
@@ -931,12 +924,12 @@
         "legacy_warning": "Advertencia: La mayoría de los ajustes de esta pestaña están obsoletos y es posible que no funcionen.",
         "steamgriddb": {
             "apikey": {
-                "title": "",
-                "placeholder": "",
-                "placeholder_saved": ""
+                "title": "Clave API de SteamGridDB",
+                "placeholder": "Introduzca aquí su clave API de SteamGridDB",
+                "placeholder_saved": "Clave guardada — escriba para reemplazar, borre para eliminar"
             },
             "help": {
-                "description": ""
+                "description": "Proporciona tu propia clave API de SteamGridDB para habilitar la búsqueda de carátulas de juegos. La clave se almacena cifrada si tu sistema lo admite. Puedes obtener una en www.steamgriddb.com/profile/preferences/api"
             }
         }
     },
@@ -944,7 +937,7 @@
     "sidebar": {
         "collapse": "Colapsar barra lateral",
         "uncollapse": "Expandir barra lateral",
-        "console": ""
+        "console": "Modo consola"
     },
     "status": {
         "installing": "Instalando",
@@ -1002,12 +995,12 @@
             "not-found": "No se encontraron version de Wine. Por favor, presiona el botón de refrescar para volver a intentar.",
             "title": "Gestor de Wine",
             "unzipping": "Descomprimiendo",
-            "search": "",
-            "loading": "",
-            "open_folder": "",
-            "update": "",
-            "settings": "",
-            "no-results": ""
+            "search": "Buscar versiones...",
+            "loading": "Cargando versiones de wine...",
+            "open_folder": "Abrir carpeta",
+            "update": "Actualizar",
+            "settings": "Ajustes",
+            "no-results": "No se encontraron versiones de Wine que coincidan con su búsqueda."
         },
         "release": "Fecha de lanzamiento",
         "size": "Tamaño",
@@ -1079,9 +1072,9 @@
     "wineExplanation": {
         "proton-ge": "GE-Proton es una variante de Proton creada por Glorious Eggroll. Está diseñada para usarse en Steam, pero algunos juegos fuera de Steam podrían funcionar mejor con esta variante. Genera registros casi siempre inútiles para solucionar problemas.",
         "wine-ge": "Wine-GE-Proton es una variante de Wine creada por Glorious Eggroll. Es la versión de Wine para ser usada fuera de Steam. Genera registros útiles para solucionar problemas.",
-        "gpt": "",
-        "wine-crossover": "",
-        "wine-staging-macos": ""
+        "gpt": "Game Porting Toolkit es un programa desarrollado por Apple y se recomienda para Macs con procesadores Apple Silicon y chips M1+, funcionando mejor con juegos más recientes que utilizan DX12.",
+        "wine-crossover": "Wine-Crossover se basa en el proyecto de código abierto Crossover para Wine y se recomienda para Macs con procesador Intel y para juegos compatibles con DX11 o versiones anteriores.",
+        "wine-staging-macos": "Wine-Staging-macOS se basa en el proyecto principal de Wine y se recomienda para Macs con procesador Intel y para juegos con DX11 o versiones anteriores, especialmente cuando se combina con la herramienta DXMT."
     },
     "tour": {
         "back": "Volver",
@@ -1158,128 +1151,130 @@
     "discounts": {
         "region": {
             "countries": {
-                "IT": "",
-                "ES": "",
-                "FI": "",
-                "GR": "",
-                "RO": "",
-                "NO": "",
-                "KR": "",
-                "US": "",
-                "HU": "",
-                "PT": "",
-                "NL": "",
-                "AU": "",
-                "TW": "",
-                "IL": "",
-                "JP": "",
-                "DK": "",
-                "DE": "",
-                "CZ": "",
-                "FR": "",
-                "UA": "",
-                "GB": "",
-                "SE": "",
-                "CN": "",
-                "RU": "",
-                "CA": "",
-                "PL": "",
-                "BR": "",
-                "CH": "",
-                "TR": ""
+                "IT": "Italia",
+                "ES": "España",
+                "FI": "Finlandia",
+                "GR": "Grecia",
+                "RO": "Rumania",
+                "NO": "Noruega",
+                "KR": "Corea del Sur",
+                "US": "Estados Unidos",
+                "HU": "Hungría",
+                "PT": "Portugal",
+                "NL": "Países Bajos",
+                "AU": "Australia",
+                "TW": "Taiwán",
+                "IL": "Israél",
+                "JP": "Japón",
+                "DK": "Dinamarca",
+                "DE": "Alemania",
+                "CZ": "República Checa",
+                "FR": "Francia",
+                "UA": "Ucrania",
+                "GB": "Reino Unido",
+                "SE": "Suecia",
+                "CN": "China",
+                "RU": "Rusia",
+                "CA": "Canadá",
+                "PL": "Polonia",
+                "BR": "Brasil",
+                "CH": "Suiza",
+                "TR": "Turquía"
             },
-            "auto": "",
-            "label": ""
+            "auto": "Auto ({{code}})",
+            "label": "Región de la tienda"
         },
         "filters": {
-            "moreFilters": "",
-            "ageRating": "",
-            "os": "",
-            "price": "",
-            "activeCount_other": "",
-            "hideDlcs": "",
-            "ageRatingOption": "",
-            "genres": "",
-            "activeCount_one": "",
-            "lessFilters": "",
-            "rating": "",
-            "sort": "",
-            "genresPlaceholder": "",
-            "features": "",
-            "featuresPlaceholder": "",
-            "ageRatingAll": "",
-            "pageSize": "",
-            "releaseYear": ""
+            "moreFilters": "Más filtros",
+            "ageRating": "Adecuado para la edad",
+            "os": "Sistema operativo",
+            "price": "Precio",
+            "activeCount_other": "{{count}} activa",
+            "hideDlcs": "Ocultar DLCs",
+            "ageRatingOption": "Juegos clasificados por PEGI {{age}} o inferior",
+            "genres": "Géneros",
+            "activeCount_one": "{{count}} activo",
+            "lessFilters": "Menos filtros",
+            "rating": "Clasificación",
+            "sort": "Ordenar por",
+            "genresPlaceholder": "Cualquier género",
+            "features": "Características",
+            "featuresPlaceholder": "Cualquier característica",
+            "ageRatingAll": "Todos",
+            "pageSize": "Por página",
+            "releaseYear": "Año de lanzamiento",
+            "hideOwned": "Ocultar adquiridos",
+            "wishlistOnly": "Solo lista de deseos"
         },
-        "sidebar": "",
+        "sidebar": "Ofertas",
         "sort": {
-            "priceDesc": "",
-            "trending": "",
-            "priceAsc": "",
-            "releaseDesc": "",
-            "ratingAsc": "",
-            "releaseAsc": "",
-            "ratingDesc": "",
-            "discount": ""
+            "priceDesc": "Precio: de mayor a menor",
+            "trending": "Tendencias",
+            "priceAsc": "Precio: de bajo a alto",
+            "releaseDesc": "Fecha de lanzamiento: de nuevo a antiguo",
+            "ratingAsc": "Calificación: de baja a alta",
+            "releaseAsc": "Fecha de lanzamiento: de antiguo a nuevo",
+            "ratingDesc": "Calificación: de alta a baja",
+            "discount": "El mayor descuento"
         },
-        "noMatches": "",
+        "noMatches": "No hay juegos que coincidan con los filtros actuales.",
         "aria": {
-            "pagination": "",
-            "rating": ""
+            "pagination": "Paginación",
+            "rating": "Calificación {{rating}} sobre 10"
         },
-        "error": "",
-        "empty": "",
-        "loading": "",
-        "title": "",
+        "error": "No se pudieron cargar los descuentos. Inténtalo de nuevo más tarde.",
+        "empty": "Actualmente no hay juegos con descuento disponibles.",
+        "loading": "Cargando juegos con descuento...",
+        "title": "Ofertas de GOG",
         "pagination": {
-            "prev": ""
+            "prev": "Previo"
         }
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
-            "no-grids": "",
-            "search": "",
-            "grids": ""
+            "no-games": "No se han encontrado juegos.",
+            "no-grids": "No se encontraron carátulas para este juego.",
+            "search": "No se pudo buscar juegos, por favor compruebe su clave API de SteamGridDB e inténtelo de nuevo",
+            "grids": "Búsqueda de cuadrículas fallida"
         },
         "picker": {
-            "search": "",
-            "title": "",
-            "select-game": ""
+            "search": "Buscar Juego",
+            "title": "Carátulas de SteamGridDB",
+            "select-game": "Selecciona un juego:"
         }
     },
     "console": {
         "update": {
-            "hintPrefix": "",
-            "body": "",
-            "title": "",
-            "hintSuffix": ""
+            "hintPrefix": "Presiona",
+            "body": "Este juego tiene una actualización disponible. Por favor, sal del modo consola y actualiza el juego antes de iniciarlo.",
+            "title": "Se requiere actualización",
+            "hintSuffix": "para volver"
         },
-        "sort": "",
+        "sort": "Ordenar",
         "cancel": {
-            "hintSuffix": "",
-            "hintPrefix": ""
+            "hintSuffix": "por 3s para cancelar",
+            "hintPrefix": "Presionar"
         },
-        "quit": "",
+        "quit": "Salir de la consola",
         "hints": {
-            "launch": "",
-            "sort": "",
-            "navigate": "",
-            "quit": "",
-            "change_store": ""
+            "launch": "Ejecutar",
+            "sort": "Ordenar",
+            "navigate": "Navegar",
+            "quit": "Salir",
+            "change_store": "Cambiar tienda"
         },
-        "launching": "",
+        "launching": "Ejecutando",
         "card": {
-            "needsUpdate": ""
+            "needsUpdate": "Necesita actualización"
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Otros",
+            "all": "Todos"
         },
-        "empty": "",
-        "games": "",
-        "quitApp": "",
-        "loading": ""
+        "empty": "No hay juegos instalados para mostrar. Instala algo primero.",
+        "games": "Juegos Instalados",
+        "quitApp": "Salir de la aplicación",
+        "loading": "Cargando tu biblioteca…"
     },
-    "next": ""
+    "next": "Siguiente"
 }

@@ -32,7 +32,8 @@ const isFallbackLocale = (locale: CatalogLocaleSettings) =>
 const buildUrl = (
   page: number,
   locale: CatalogLocaleSettings,
-  hideOwned: boolean
+  hideOwned: boolean,
+  wishlistOnly: boolean
 ) => {
   const params = new URLSearchParams({
     limit: String(PAGE_LIMIT),
@@ -49,6 +50,10 @@ const buildUrl = (
     params.append('hideOwned', 'true')
   }
 
+  if (wishlistOnly) {
+    params.append('wishlist', 'eq:true')
+  }
+
   return `${CATALOG_URL}?${params.toString()}`
 }
 
@@ -56,18 +61,19 @@ const fetchPage = async (
   page: number,
   locale: CatalogLocaleSettings,
   hideOwned: boolean,
+  wishlistOnly: boolean,
   token: string | undefined
 ) => {
   const headers: Record<string, string> = {
     'User-Agent': `HeroicGamesLauncher/${app.getVersion()}`
   }
 
-  if (hideOwned && token) {
+  if ((hideOwned && token) || (wishlistOnly && token)) {
     headers['Authorization'] = `Bearer ${token}`
   }
 
   const { data } = await axios.get<CatalogResponse>(
-    buildUrl(page, locale, hideOwned),
+    buildUrl(page, locale, hideOwned, wishlistOnly),
     {
       timeout: 15000,
       headers
@@ -79,15 +85,16 @@ const fetchPage = async (
 const fetchAllDiscounts = async (
   locale: CatalogLocaleSettings,
   hideOwned: boolean,
+  wishlistOnly: boolean,
   token: string | undefined
 ) => {
-  const first = await fetchPage(1, locale, hideOwned, token)
+  const first = await fetchPage(1, locale, hideOwned, wishlistOnly, token)
   const totalPages = Math.min(first.pages, MAX_PAGES)
   if (totalPages <= 1) return first.products
 
   const rest = await Promise.all(
     Array.from({ length: totalPages - 1 }, (_, i) =>
-      fetchPage(i + 2, locale, hideOwned, token)
+      fetchPage(i + 2, locale, hideOwned, wishlistOnly, token)
         .then((d) => d.products)
         .catch((err: unknown) => {
           logError(
@@ -113,16 +120,17 @@ const fetchAllDiscounts = async (
 
 addHandler(
   'getGogDiscounts',
-  async (_event, locale, hideOwned: boolean = false) => {
+  async (_event, locale, hideOwned = false, wishlistOnly = false) => {
     try {
       let token: string | undefined = undefined
 
-      if (hideOwned) {
+      if (hideOwned || wishlistOnly) {
         const credentials = await GOGUser.getCredentials()
         if (credentials) {
           token = credentials.access_token
         } else {
           hideOwned = false
+          wishlistOnly = false
           logWarning(
             'Failed to get user credentials: User maybe is not looged in',
             LogPrefix.Backend
@@ -130,7 +138,12 @@ addHandler(
         }
       }
 
-      const products = await fetchAllDiscounts(locale, hideOwned, token)
+      const products = await fetchAllDiscounts(
+        locale,
+        hideOwned,
+        wishlistOnly,
+        token
+      )
       if (products.length > 0 || isFallbackLocale(locale)) {
         return products
       }
@@ -139,7 +152,12 @@ addHandler(
         `No discounts for ${locale.countryCode}/${locale.currencyCode}, retrying with US/USD`,
         LogPrefix.Backend
       )
-      return await fetchAllDiscounts(FALLBACK_LOCALE, hideOwned, token)
+      return await fetchAllDiscounts(
+        FALLBACK_LOCALE,
+        hideOwned,
+        wishlistOnly,
+        token
+      )
     } catch (err) {
       logError(
         `Failed to fetch GOG discounts: ${String(err)}`,

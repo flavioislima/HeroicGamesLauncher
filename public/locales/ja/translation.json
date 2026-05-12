@@ -264,9 +264,9 @@
         "library": {
             "refresh": "ライブラリを更新"
         },
-        "abort": "",
-        "install": "",
-        "uninstall": ""
+        "abort": "中止",
+        "install": "Install",
+        "uninstall": "Uninstall"
     },
     "globalSettings": "グローバル設定",
     "GOG": "GOG",
@@ -291,7 +291,7 @@
         "no_categories": "カスタムカテゴリーがありません。各ゲームメニューからカテゴリーを追加してください。",
         "show_support_offline_only": "オフライン対応のゲームのみ表示する",
         "show_third_party_managed_only": "サードパーティで管理しているゲームのみ表示",
-        "show_updates_only": ""
+        "show_updates_only": "更新のあるゲームのみを表示する"
     },
     "help": {
         "amdfsr": "AMDのFSRは、フルスクリーンモードで低い解像度をアップスケーリングすることでフレームレートを向上させます。パフォーマンスに若干の影響を及ぼしますが、画質は5から1に向上します。有効にするとパフォーマンスが向上する可能性があります。",
@@ -315,7 +315,7 @@
             "part6": " を使用します。例えば: ",
             "part7": " で一部のゲームでランチャーをスキップする、など"
         },
-        "preferSystemLibs": "カスタムWineバージョン（Wine-GE、Wine-Lutris）は、ライブラリの依存関係が同梱されています。このオプションを有効にすると、それらの同梱されたライブラリを無視し、代わりにWineがシステムライブラリを読み込みます。警告! 依存関係が満たされていない場合、問題が発生する可能性があります。",
+        "preferSystemLibs": "カスタムWineバージョン（Wine-GE、Wine-Lutris）は、ライブラリの依存関係が同梱されています。このオプションを有効にすると、それらの同梱されたライブラリを無視し、代わりにWineがシステムライブラリを読み込みます。警告！依存関係が満たされていない場合、問題が発生する可能性があります。",
         "primerun": "マルチGPUシステムでゲームを描画するには、専用のグラフィックカードを使用します。描画にヘッドレスGPU（NVIDIA Optimus、AMD CrossFire）を使用するゲーミングノートまたはデスクトップでのみ必要です",
         "steam_path": {
             "info": "このパスにより、Heroicが非SteamゲームをSteamに追加するためにどのバージョンのProton Steamを使用するかを指定できます。"
@@ -371,12 +371,12 @@
         },
         "msync": "Fsync aims to reduce wineserver overhead in CPU-intensive games. Enabling may improve performance on supported Linux kernels.",
         "dxfpslimit": "Sets a frame rate cap for DXVK games",
-        "download_proton_steam": "",
-        "wine-hdr": "",
-        "WoW64": "",
-        "wine-wayland": "",
-        "advertiseAvxForRosetta": "",
-        "analytics": ""
+        "download_proton_steam": "この機能を有効にすると、GE-ProtonはデフォルトのHeroicパスではなく、Steam互換性ツールのディレクトリに直接ダウンロードされます。この際、上記の「デフォルトのSteamパス」設定で指定されたパスが使用されます。",
+        "wine-hdr": "HDRは、ハイライト部分をより明るく、コントラストをより鮮明にすることで、色彩を際立たせます。HDRを利用するには、ディスプレイとゲームの両方がHDRに対応している必要があります。",
+        "WoW64": "WineのWoW64モードを使用すると、64ビット版のWine上で32ビット版のWindowsゲームを実行できます。このモードを有効にするとパフォーマンスが向上する可能性がありますが、古い32ビット版のゲームが正常に動作しなくなる恐れもあります。",
+        "wine-wayland": "Wine-Wayland実験用ドライバーを使用すると、Waylandディスプレイプロトコル上でゲームをネイティブに実行できるようになります。有効にすると、一部のゲームが正常に動作しなくなる可能性があります。",
+        "advertiseAvxForRosetta": "Apple Silicon搭載MacでRosetta経由でWindowsゲームを実行する際、AVX命令セットのサポートを有効にします。これは、『Death Stranding』のようにAVXサポートを必要とする一部のゲームで必要となる場合があります。",
+        "analytics": "Heroicがアプリケーションの改善に役立てるため、100%匿名化された利用データを収集できるようにします。変更を反映するには再起動が必要です。"
     },
     "info": {
         "heroic": {
@@ -437,7 +437,7 @@
         "message": "お使いのプラットフォームにログインします。同時に複数のプラットフォームにログインすることができます。",
         "amazon": "Amazonログイン",
         "old-mac": "このmacOSのバージョンは {{version}} です。 ログインするにはmacOS 12以降が必要です。",
-        "zoom": ""
+        "zoom": "Zoomへのログイン"
     },
     "message": {
         "sync": "同期を完了しました",
@@ -672,7 +672,7 @@
                 "error": {
                     "title": "アップロードに失敗しました",
                     "content": "ログファイルのアップロードに失敗しました。詳細については、Heroic の一般ログを確認してください。",
-                    "manual_upload": ""
+                    "manual_upload": "「ログファイルをフォルダに表示」ボタンをクリックし、「launch.log」ファイルを手動でDiscordまたは任意のオンラインファイル共有サービスにアップロードしてください。"
                 },
                 "header": "アップロード済みのログファイル",
                 "no-files": "ログファイルはアップロードされませんでした",
@@ -691,7 +691,7 @@
                 "gog": "GOGログ",
                 "legendary": "Epic Games / Legendaryログ",
                 "nile": "Amazon / Nileログ",
-                "zoom": ""
+                "zoom": "Zoom ログ"
             },
             "show-uploads": "アップロードされたログファイルを表示する"
         },
@@ -711,13 +711,6 @@
         "offlinemode": "ゲームをオフラインで実行",
         "prefered_language": "優先言語（言語コード）",
         "preferSystemLibs": "システムライブラリを優先",
-        "primerun": {
-            "confirmation": {
-                "message": "このシステムでは、グラフィックスカードが1枚だけ検出されました。このオプションは、ヘッドレスGPUを搭載したマルチGPUシステム（ラップトップなど）を対象としていることに注意してください。シングルGPUシステムでは、GPUが自動的に使用され、このオプションを有効にすると問題が発生する可能性があります。本当にこのオプションを有効にしますか?",
-                "title": "GPUが1つだけ検出されました"
-            },
-            "description": "専用グラフィックカードを使用"
-        },
         "runexe": {
             "message": "ここにファイルをドラッグアンドドロップ",
             "title": "環境上でEXEを実行"
@@ -763,7 +756,7 @@
             "automaticWinetricksFixes": "既存の修正を自動的に適用",
             "cometSupport": "Cometサポート",
             "umuSupport": "umuをProtonのランタイムとして使用",
-            "zoomPlatform": ""
+            "zoomPlatform": "Zoomプラットフォームのサポート（Linuxのみ）"
         },
         "msync": "Esyncを有効にする",
         "allow_installation_broken_anticheat": {
@@ -795,22 +788,22 @@
         "show_valve_proton": {
             "confirmation": {
                 "title": "本当によろしいですか？",
-                "show": "",
-                "dont_show": "",
-                "message": ""
+                "show": "許可する",
+                "dont_show": "拒否",
+                "message": "ValveのProtonビルドにはwinetricksやprotofixesが含まれていないため、Heroicとの併用にはカスタムProtonフォーク（GE-Proton、Proton-CachyOSなど）の使用をお勧めします。もちろん、ValveのProtonビルドを使用することも可能です。"
             },
-            "wine_selector_warning": "",
-            "label": "",
-            "info_label": ""
+            "wine_selector_warning": "デフォルトでは、Valve版Protonは無視されます。グローバル設定の「詳細設定」で有効にしてください。",
+            "label": "Valve Protonビルドを使用してゲームを実行できるようにする",
+            "info_label": "Valve Proton版は対象外"
         },
-        "WoW64": "",
-        "scripts": "",
-        "enable-quick-sync-menu": "",
-        "no-tray-icon": "",
-        "analyticsOptIn": "",
+        "WoW64": "WoW64 を有効にする（実験的機能）",
+        "scripts": "スクリプト:",
+        "enable-quick-sync-menu": "ゲームページで「クイックセーブ・同期」メニューを有効にする",
+        "no-tray-icon": "システムトレイのアイコンを非表示にする（再起動が必要）",
+        "analyticsOptIn": "Heroicの開発に役立てるために匿名データを送信する",
         "advertiseAvxForRosetta": "",
-        "start-in-console-mode": "",
-        "disable_gog_presence": ""
+        "start-in-console-mode": "コンソールモードで起動する",
+        "disable_gog_presence": "GOG Presenceの更新を無効にする"
     },
     "settings": {
         "battlEyeRuntime": {
@@ -848,7 +841,7 @@
             "wineExt": "Wine Extensions",
             "gamescope": "Gamescope",
             "systemInformation": "システム情報",
-            "legacy": ""
+            "legacy": "レガシー設定"
         },
         "open-config-file": "構成ファイルを開く",
         "reset-heroic": "Heroicをリセット",
@@ -916,15 +909,15 @@
             "title": "カスタムCSSスタイル"
         },
         "launchOptions": "Launch Options...",
-        "legacy_warning": "",
+        "legacy_warning": "警告：このタブの設定のほとんどは非推奨となっており、まったく機能しない可能性があります。",
         "steamgriddb": {
             "apikey": {
-                "title": "",
-                "placeholder": "",
-                "placeholder_saved": ""
+                "title": "SteamGridDB APIキー",
+                "placeholder": "ここにSteamGridDB APIキーを入力してください",
+                "placeholder_saved": "キーが保存されています — 入力して上書き、クリアして削除"
             },
             "help": {
-                "description": ""
+                "description": "ゲームのカバー画像の検索を有効にするには、ご自身のSteamGridDB APIキーを入力してください。お使いのシステムが対応している場合、このキーは暗号化されて保存されます。APIキーは www.steamgriddb.com/profile/preferences/api から取得できます。"
             }
         }
     },
@@ -932,7 +925,7 @@
     "sidebar": {
         "collapse": "Collapse sidebar",
         "uncollapse": "Uncollapse sidebar",
-        "console": ""
+        "console": "コンソールモード"
     },
     "status": {
         "installing": "インストール中",
@@ -990,16 +983,16 @@
             "not-found": "Wineバージョンが見つかりません。再試行するには、更新アイコンをクリックしてください。",
             "title": "Wineマネージャー",
             "unzipping": "展開中",
-            "search": "",
-            "loading": "",
-            "open_folder": "",
-            "update": "",
-            "settings": "",
-            "no-results": ""
+            "search": "バージョンを検索...",
+            "loading": "Wineのバージョンを読み込んでいます...",
+            "open_folder": "フォルダを開く",
+            "update": "Update",
+            "settings": "設定",
+            "no-results": "検索条件に一致するWineのバージョンはありません。"
         },
         "release": "リリース日",
         "size": "サイズ",
-        "notes": ""
+        "notes": "注記"
     },
     "externalLink": {
         "dontAskAgain": "次回から確認しない",
@@ -1045,10 +1038,10 @@
     },
     "wineExplanation": {
         "proton-ge": "GE-ProtonはGlorious Eggrollによって作成されたProtonの亜種です。Steamで使うことを想定していますが、Steam以外のゲームではこの亜種の方がうまく動くかもしれません。トラブルシューティングのためにほとんど役に立たないログを提供します。",
-        "wine-ge": "Wine-GE-ProtonはGlorious Eggrollによって作成されたWineの亜種です。Steam以外での使用を推奨するWineです。トラブルシューティング時に便利なログを提供します。",
-        "gpt": "",
-        "wine-crossover": "",
-        "wine-staging-macos": ""
+        "wine-ge": "Wine-GE-Protonは、Glorious Eggrollによって作成されたWineの派生版です。現在は、umuランチャーを搭載したGE-Protonに取って代わられ、非推奨となっています。",
+        "gpt": "「Game Porting Toolkit」はAppleによって開発されたツールキットで、M1+チップを搭載したApple Silicon搭載Macでの使用が推奨されており、DX12を採用した新しいゲームで最も効果を発揮します。",
+        "wine-crossover": "Wine-Crossoverは、オープンソースのWineプロジェクト「Crossover」をベースにしており、Intel搭載のMacや、DX11以前のゲームでの使用が推奨されています。",
+        "wine-staging-macos": "Wine-Staging-macOSはメインラインのWineプロジェクトをベースとしており、Intel搭載のMacやDX11以前のゲーム、特にDXMTツールと組み合わせて使用する場合に推奨されます。"
     },
     "categories-manager": {
         "add-placeholder": "新しいカテゴリーを追加",
@@ -1142,16 +1135,16 @@
     "launch": {
         "options": "Launch Options..."
     },
-    "zoom-store": "",
+    "zoom-store": "Zoom ストア",
     "console": {
         "cancel": {
-            "hintSuffix": "3秒間押すとキャンセルされます",
+            "hintSuffix": "3秒間長押しでキャンセル",
             "hintPrefix": "長押し"
         },
         "card": {
             "needsUpdate": "更新が必要です"
         },
-        "empty": "表示するインストール済みのゲームがありません。まず何かをインストールしてください。",
+        "empty": "インストール済みのゲームがありません。何らかのゲームをインストールしてください。",
         "filter": {
             "all": "すべて",
             "sideload": "その他"
@@ -1166,14 +1159,14 @@
         },
         "launching": "開始",
         "loading": "ライブラリを読み込んでいます…",
-        "quit": "コンソールを終了する",
-        "quitApp": "アプリを終了する",
+        "quit": "コンソールを終了",
+        "quitApp": "アプリを終了",
         "sort": "並び替え",
         "update": {
-            "body": "This game has an update available. Please leave Console Mode and update the game before launching.",
+            "body": "このゲームのアップデートが利用可能です。起動する前に、コンソールモードを終了してゲームをアップデートしてください。",
             "hintPrefix": "押す",
             "hintSuffix": "戻る",
-            "title": ""
+            "title": "更新が必要です"
         }
     },
     "discounts": {
@@ -1185,7 +1178,7 @@
                 "GR": "",
                 "RO": "",
                 "NO": "",
-                "KR": "",
+                "KR": "韓国",
                 "US": "",
                 "HU": "",
                 "PT": "",
@@ -1193,7 +1186,7 @@
                 "AU": "",
                 "TW": "",
                 "IL": "",
-                "JP": "",
+                "JP": "日本",
                 "DK": "",
                 "DE": "",
                 "CZ": "",
@@ -1201,7 +1194,7 @@
                 "UA": "",
                 "GB": "",
                 "SE": "",
-                "CN": "",
+                "CN": "中国",
                 "RU": "",
                 "CA": "",
                 "PL": "",
@@ -1209,65 +1202,67 @@
                 "CH": "",
                 "TR": ""
             },
-            "auto": "",
-            "label": ""
+            "auto": "自動 ({{code}})",
+            "label": "販売地域"
         },
         "filters": {
-            "moreFilters": "",
-            "ageRating": "",
-            "os": "",
-            "price": "",
-            "activeCount_other": "",
-            "hideDlcs": "",
-            "ageRatingOption": "",
-            "genres": "",
-            "activeCount_one": "",
-            "lessFilters": "",
-            "rating": "",
-            "sort": "",
-            "genresPlaceholder": "",
-            "features": "",
-            "featuresPlaceholder": "",
-            "ageRatingAll": "",
-            "pageSize": "",
-            "releaseYear": ""
+            "moreFilters": "その他のフィルター",
+            "ageRating": "対象年齢",
+            "os": "オペレーティングシステム:",
+            "price": "価格",
+            "activeCount_other": "{{count}}件を表示",
+            "hideDlcs": "DLCを非表示",
+            "ageRatingOption": "PEGI {{age}} またはそれ以下の年齢指定のゲームを表示",
+            "genres": "ジャンル",
+            "activeCount_one": "{{count}}件を表示",
+            "lessFilters": "フィルターを隠す",
+            "rating": "評価",
+            "sort": "並べ替え",
+            "genresPlaceholder": "すべてのジャンル",
+            "features": "機能",
+            "featuresPlaceholder": "すべての機能",
+            "ageRatingAll": "すべて",
+            "pageSize": "1ページの表示件数",
+            "releaseYear": "発売年",
+            "hideOwned": "所有済みゲームを非表示",
+            "wishlistOnly": "ウィッシュリストのみ"
         },
-        "sidebar": "",
+        "sidebar": "セール情報",
         "sort": {
-            "priceDesc": "",
-            "trending": "",
-            "priceAsc": "",
-            "releaseDesc": "",
-            "ratingAsc": "",
-            "releaseAsc": "",
-            "ratingDesc": "",
-            "discount": ""
+            "priceDesc": "価格：高い順",
+            "trending": "トレンド",
+            "priceAsc": "価格：安い順",
+            "releaseDesc": "発売日：新しい順",
+            "ratingAsc": "評価：低い順",
+            "releaseAsc": "発売日：古い順",
+            "ratingDesc": "評価：高い順",
+            "discount": "最大割引"
         },
-        "noMatches": "",
+        "noMatches": "現在の条件に一致するゲームはありません。",
         "aria": {
             "pagination": "",
-            "rating": ""
+            "rating": "評価：{{rating}}点（10点満点中）"
         },
-        "error": "",
-        "empty": "",
-        "loading": "",
-        "title": "",
+        "error": "セール情報を読み込めませんでした。後ほどもう一度お試しください。",
+        "empty": "現在、セール対象のゲームはありません。",
+        "loading": "セール中のゲームを読み込んでいます...",
+        "title": "GOG セール",
         "pagination": {
-            "prev": ""
+            "prev": "前へ"
         }
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
-            "no-grids": "",
-            "search": "",
-            "grids": ""
+            "no-games": "ゲームが見つかりません",
+            "no-grids": "このゲームのカバー画像が見つかりませんでした。",
+            "search": "ゲームの検索に失敗しました。SteamGridDB API キーを確認して、もう一度お試しください",
+            "grids": "カバー画像の取得に失敗しました"
         },
         "picker": {
-            "search": "",
-            "title": "",
-            "select-game": ""
+            "search": "ゲームを検索",
+            "title": "SteamGridDB カバー",
+            "select-game": "ゲームを選択:"
         }
     },
-    "next": ""
+    "next": "進む"
 }

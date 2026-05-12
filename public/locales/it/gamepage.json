@@ -132,7 +132,7 @@
         "modify": "Modifica Installazione",
         "extra_info": "Informazioni aggiuntive",
         "install_info": "Informazioni d'installazione",
-        "achievements": ""
+        "achievements": "Trofei"
     },
     "gamecard": {
         "moving": "Spostamento in corso",
@@ -325,7 +325,7 @@
         "categories": "Categorie"
     },
     "help": {
-        "cloud_save_unsupported": "Questo gioco non supporta i salvataggi nel cloud. Queste informazioni sono fornite dagli sviluppatori del gioco. Alcuni giochi implementano il proprio sistema di salvataggio nel cloud",
+        "cloud_save_unsupported": "Questo gioco non supporta i salvataggi nel cloud. Queste informazioni sono fornite dagli sviluppatori del gioco. Alcuni giochi implementano il proprio sistema di salvataggio nel cloud.",
         "content": {
             "gamePage": "Mostra tutti dettagli e le azioni del gioco. Utilizza il menù a 3 punti per altre opzioni."
         },

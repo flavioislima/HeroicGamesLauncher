@@ -707,13 +707,6 @@
         "offlinemode": "Εκτέλεση Παιχνιδιού Εκτός Δικτύου",
         "prefered_language": "Προτιμώμενη γλώσσα (Κωδικός γλώσσας)",
         "preferSystemLibs": "Προτίμηση βιβλιοθηκών συστήματος",
-        "primerun": {
-            "confirmation": {
-                "message": "Only one graphics card was detected in this system. Please note that this option is intended for multi-GPU systems with headless GPUs (like laptops). On single-GPU systems, the GPU is automatically used & enabling this option can cause issues. Do you really want to enable this option?",
-                "title": "Only 1 GPU detected"
-            },
-            "description": "Χρήση κύριας κάρτας γραφικών"
-        },
         "runexe": {
             "message": "Εναποθέστε αρχεία εδώ",
             "title": "Εκτέλεση EXE με Πρόθημα"
@@ -925,7 +918,7 @@
     "sidebar": {
         "collapse": "Σύμπτυξη πλαϊνής γραμμής",
         "uncollapse": "Κατάργηση σύμπτυξης πλαϊνής γραμμής",
-        "console": ""
+        "console": "Λειτουργία κονσόλας"
     },
     "status": {
         "installing": "Εγκατάσταση",
@@ -1185,7 +1178,7 @@
             "pageSize": "",
             "releaseYear": ""
         },
-        "sidebar": "",
+        "sidebar": "Προσφορές",
         "sort": {
             "priceDesc": "",
             "trending": "",
@@ -1201,10 +1194,10 @@
             "pagination": "",
             "rating": ""
         },
-        "error": "",
+        "error": "Δεν ήταν δυνατή η φόρτωση των προσφορών. Παρακαλώ δοκιμάστε αργότερα.",
         "empty": "",
         "loading": "",
-        "title": "",
+        "title": "Προσφορές GOG",
         "pagination": {
             "prev": ""
         }
@@ -1244,11 +1237,11 @@
         },
         "launching": "",
         "card": {
-            "needsUpdate": ""
+            "needsUpdate": "Απαιτείται ενημέρωση"
         },
         "filter": {
-            "sideload": "Other",
-            "all": ""
+            "sideload": "Άλλο",
+            "all": "Όλα"
         },
         "empty": "",
         "games": "Εγκατεστημένα Παιχνίδια",

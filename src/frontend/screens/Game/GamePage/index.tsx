@@ -163,7 +163,8 @@ export default React.memo(function GamePage(): JSX.Element | null {
   const notSupportedGame =
     gameInfo.runner !== 'sideload' &&
     !!gameInfo.thirdPartyManagedApp &&
-    !gameInfo.isEAManaged
+    !gameInfo.isEAManaged &&
+    !gameInfo.isUbisoftManaged
   const isOffline = connectivity.status !== 'online'
   const notPlayableOffline = isOffline && !gameInfo.canRunOffline
 

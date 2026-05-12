@@ -184,7 +184,7 @@
                 "message": "Heroic vaatii Rosetta:n jotta sitä voidaan ajaa asianmukaisesti macOS:llä Apple Silicon -piireillä. Asenna se macOS:n päätteestä seuraavalla käskyllä: \"softwareupdate --install-rosetta\" ja uudelleenkäynnistä Heroic. "
             }
         },
-        "wineprefix": "Valitse Wine Prefix kansio",
+        "wineprefix": "Valitse WinePrefix-kansio",
         "yes": "KYLLÄ",
         "dontShowAgain": "Älä näytä uudelleen",
         "choose-nile-binary": "Valitse Nile-ajotiedosto",
@@ -262,8 +262,8 @@
             "refresh": "Virkistä kirjasto"
         },
         "abort": "",
-        "install": "",
-        "uninstall": ""
+        "install": "Asenna",
+        "uninstall": "Poista asennus"
     },
     "globalSettings": "Yleisvaikutteiset asetukset",
     "GOG": "GOG",
@@ -707,13 +707,6 @@
         "offlinemode": "Käynnistä peli offline-tilassa",
         "prefered_language": "Mitä kieltä suositaan (kielikoodi)",
         "preferSystemLibs": "Suosi järjestelmäkirjastoja",
-        "primerun": {
-            "confirmation": {
-                "message": "Järjestelmässä havaittiin vain yksi näytönohjain. Huomaathan, että tämä toiminto on tarkoitettu moninäytönohjaimelliseen tilanteeseen jossa on lennossa vaihdettava näytönohjainten asetelma (kuten usein läppäreissä). Yhden näytönohjaimen järjestelmissä varsinainen näytönohjain otetaan käyttöön automaattisesti ja tämän ominaisuuden päälle kytkeminen saattaa aiheuttaa ongelmia. Haluatko varmasti kytkeä sen päälle?",
-                "title": "Vain 1 näytönohjain havaittu"
-            },
-            "description": "Käytä omistautunutta näytönohjainta"
-        },
         "runexe": {
             "message": "Raahaa ja pudota tiedostoja tänne",
             "title": "Aja EXE etusasteessa"
@@ -987,8 +980,8 @@
             "search": "",
             "loading": "",
             "open_folder": "",
-            "update": "",
-            "settings": "",
+            "update": "Päivitä",
+            "settings": "Asetukset",
             "no-results": ""
         },
         "release": "Julkaisupäivä",
@@ -1169,7 +1162,7 @@
         "filters": {
             "moreFilters": "",
             "ageRating": "",
-            "os": "",
+            "os": "Käyttöjärjestelmä:",
             "price": "",
             "activeCount_other": "",
             "hideDlcs": "",
@@ -1182,7 +1175,7 @@
             "genresPlaceholder": "",
             "features": "",
             "featuresPlaceholder": "",
-            "ageRatingAll": "",
+            "ageRatingAll": "Kaikki",
             "pageSize": "",
             "releaseYear": ""
         },
@@ -1212,7 +1205,7 @@
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
+            "no-games": "Pelejä ei löydetty",
             "no-grids": "",
             "search": "",
             "grids": ""
@@ -1240,7 +1233,7 @@
             "launch": "",
             "sort": "",
             "navigate": "",
-            "quit": "",
+            "quit": "Poistu",
             "change_store": ""
         },
         "launching": "",
@@ -1248,13 +1241,13 @@
             "needsUpdate": ""
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Muu",
+            "all": "Kaikki"
         },
         "empty": "",
-        "games": "",
+        "games": "Asennetut pelit",
         "quitApp": "",
         "loading": ""
     },
-    "next": ""
+    "next": "Seuraava"
 }

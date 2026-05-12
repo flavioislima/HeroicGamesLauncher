@@ -589,15 +589,17 @@ export async function install(
 }> {
   const gameInfo = getGameInfo(appName)
   if (gameInfo.thirdPartyManagedApp) {
-    if (!gameInfo.isEAManaged) {
-      logError(
-        ['Third party app', gameInfo.thirdPartyManagedApp, 'not supported'],
-        LogPrefix.Legendary
-      )
-      return { status: 'error' }
+    if (gameInfo.isEAManaged) {
+      return installEA(gameInfo, platformToInstall)
+    } else if (gameInfo.isUbisoftManaged) {
+      return installUbisoft(gameInfo, platformToInstall)
     }
 
-    return installEA(gameInfo, platformToInstall)
+    logError(
+      ['Third party app', gameInfo.thirdPartyManagedApp, 'not supported'],
+      LogPrefix.Legendary
+    )
+    return { status: 'error' }
   }
   const { maxWorkers, downloadNoHttps } = GlobalConfig.get().getSettings()
   const info = await getInstallInfo(appName, platformToInstall)
@@ -695,6 +697,44 @@ async function installEA(
       'EAX_LAUNCH_CLIENT=0',
       'IGNORE_INSTALLED=1'
     ])
+
+    if (process.code !== null && process.code === 3) {
+      return { status: 'abort' }
+    }
+  }
+
+  await thirdParty.addInstalledGame(gameInfo.app_name, platformToInstall)
+
+  return { status: 'done' }
+}
+
+async function installUbisoft(
+  gameInfo: GameInfo,
+  platformToInstall: string
+): Promise<{
+  status: 'done' | 'error' | 'abort'
+  error?: string
+}> {
+  logInfo('Getting Ubisoft installer', LogPrefix.Legendary)
+  const installerPath = join(epicRedistPath, 'UbisoftConnectInstaller.exe')
+
+  if (!existsSync(epicRedistPath)) {
+    mkdirSync(epicRedistPath, { recursive: true })
+  }
+
+  if (!existsSync(installerPath)) {
+    try {
+      await downloadFile({
+        url: 'https://static3.cdn.ubi.com/orbit/launcher_installer/UbisoftConnectInstaller.exe',
+        dest: installerPath
+      })
+    } catch (e) {
+      return { status: 'error', error: `${e}` }
+    }
+  }
+
+  if (isWindows) {
+    const process = await spawnAsync(installerPath, ['/S'])
 
     if (process.code !== null && process.code === 3) {
       return { status: 'abort' }
@@ -983,6 +1023,7 @@ export async function launch(
   if (offlineMode) command['--offline'] = true
   if (isCLINoGui) command['--skip-version-check'] = true
   if (gameInfo.isEAManaged) command['--origin'] = true
+  if (gameInfo.isUbisoftManaged) command['--ubisoft'] = true
 
   sendGameStatusUpdate({ appName, runner: 'legendary', status: 'playing' })
 

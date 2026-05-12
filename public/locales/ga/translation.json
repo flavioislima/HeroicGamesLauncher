@@ -458,13 +458,6 @@
         "offlinemode": "Rith Cluiche As Líne",
         "prefered_language": "Teanga is Fearr leat (Cód Teanga)",
         "preferSystemLibs": "Is fearr leabharlanna córais",
-        "primerun": {
-            "confirmation": {
-                "title": "Níor braitheadh ach GPU amháin",
-                "message": "Níor braitheadh ach cárta grafaicí amháin sa chóras seo. Tabhair faoi deara go bhfuil an rogha seo beartaithe do chórais il-GPU le GPUanna gan cheann (cosúil le ríomhairí glúine). Ar chórais aon-GPU, úsáidtear an GPU go huathoibríoch agus d’fhéadfadh fadhbanna a bheith mar thoradh ar an rogha seo a chumasú. An bhfuil tú cinnte gur mhaith leat an rogha seo a chumasú?"
-            },
-            "description": "Úsáid Cárta Grafaicí Tiomnaithe"
-        },
         "runexe": {
             "title": "Rith EXE ar Réimír"
         },
@@ -499,7 +492,7 @@
         "scripts": "Scripteanna:",
         "enable-quick-sync-menu": "Cumasaigh an Roghchlár Sábháil-Sioncrónaithe Tapa ar leathanach an chluiche",
         "disable_gog_presence": "Díchumasaigh nuashonruithe GOG Presence",
-        "start-in-console-mode": ""
+        "start-in-console-mode": "Tosaigh i Mód Consóil"
     },
     "button": {
         "login": "Logáil isteach",
@@ -604,7 +597,7 @@
         },
         "install": "Suiteáil",
         "uninstall": "Díshuiteáil",
-        "abort": ""
+        "abort": "Toirmisc"
     },
     "globalSettings": "Socruithe Domhanda",
     "GOG": "GOG",
@@ -936,12 +929,12 @@
         "legacy_warning": "Rabhadh: Tá na socruithe ar an táb seo imithe i léig den chuid is mó agus b'fhéidir nach n-oibreoidh siad ar chor ar bith.",
         "steamgriddb": {
             "apikey": {
-                "title": "",
-                "placeholder": "",
-                "placeholder_saved": ""
+                "title": "Eochair API SteamGridDB",
+                "placeholder": "Cuir isteach d’Eochair API SteamGridDB anseo",
+                "placeholder_saved": "Eochair shábháilte — clóscríobh le hathsholáthar, glan le baint"
             },
             "help": {
-                "description": ""
+                "description": "Cuir d’eochair SteamGridDB API féin ar fáil chun cuardach clúdach cluiche a chumasú. Stóráiltear an eochair criptithe nuair a thacaíonn do chóras leis. Is féidir leat ceann a fháil ag www.steamgriddb.com/profile/preferences/api"
             }
         }
     },
@@ -1050,10 +1043,10 @@
             "unzipping": "Ag dízipeáil",
             "settings": "Socruithe",
             "update": "Nuashonrú",
-            "search": "",
-            "loading": "",
-            "open_folder": "",
-            "no-results": ""
+            "search": "Cuardaigh leaganacha...",
+            "loading": "Ag lódáil leaganacha fíona...",
+            "open_folder": "Oscail Fillteán",
+            "no-results": "Ní oireann aon leaganacha de Wine chun do chuardach."
         },
         "release": "Dáta Eisiúna",
         "size": "Méid",
@@ -1062,9 +1055,9 @@
     "wineExplanation": {
         "proton-ge": "Is leagan Proton é GE-Proton a chruthaigh Glorious Eggroll. Tá sé ceaptha le húsáid in éineacht leis an lainseálaí umu (réamhshocraithe i Heroic).",
         "wine-ge": "Is leagan de Wine é Wine-GE-Proton a chruthaigh Glorious Eggroll. Tá sé curtha i léig ar mhaithe le GE-Proton leis an lainseálaí umu.",
-        "gpt": "",
-        "wine-crossover": "",
-        "wine-staging-macos": ""
+        "gpt": "D'fhorbair Apple an Game Porting Toolkit agus moltar é do ríomhairí Mac Apple Silicon leis na sceallóga M1+ agus oibríonn sé is fearr do chluichí níos nuaí a úsáideann DX12.",
+        "wine-crossover": "Tá Wine-Crossover bunaithe ar thionscadal Crossover OpenSource Wine agus moltar é do ríomhairí Mac Intel agus do chluichí DX11 nó níos sine.",
+        "wine-staging-macos": "Tá Wine-Staging-macOS bunaithe ar an tionscadal príomhlíne Wine agus moltar é do ríomhairí Mac Intel agus do chluichí DX11 nó níos sine, go háirithe nuair a bhíonn sé péireáilte leis an uirlis DXMT."
     },
     "winetricks": {
         "install": "Suiteáil",
@@ -1084,132 +1077,134 @@
     },
     "discounts": {
         "filters": {
-            "os": "Córas Oibriúcháin:",
-            "moreFilters": "",
-            "ageRating": "",
-            "price": "",
-            "activeCount_other": "",
-            "hideDlcs": "",
-            "ageRatingOption": "",
-            "genres": "",
-            "activeCount_one": "",
-            "lessFilters": "",
-            "rating": "",
-            "sort": "",
-            "genresPlaceholder": "",
-            "features": "",
-            "featuresPlaceholder": "",
-            "ageRatingAll": "",
-            "pageSize": "",
-            "releaseYear": ""
+            "os": "Córas oibriúcháin",
+            "moreFilters": "Tuilleadh scagairí",
+            "ageRating": "Oiriúnach d'aois",
+            "price": "Praghas",
+            "activeCount_other": "{{count}} gníomhach",
+            "hideDlcs": "Folaigh DLCanna",
+            "ageRatingOption": "Taispeáin cluichí a bhfuil rátáil PEGI {{age}} nó níos ísle acu",
+            "genres": "Seánraí",
+            "activeCount_one": "{{count}} gníomhach",
+            "lessFilters": "Níos lú scagairí",
+            "rating": "Rátáil",
+            "sort": "Sórtáil de réir",
+            "genresPlaceholder": "Aon seánra",
+            "features": "Gnéithe",
+            "featuresPlaceholder": "Aon ghné",
+            "ageRatingAll": "Gach",
+            "pageSize": "In aghaidh an leathanaigh",
+            "releaseYear": "Bliain scaoilte",
+            "hideOwned": "Folaigh Úinéireacht",
+            "wishlistOnly": "Liosta Mianta Amháin"
         },
         "region": {
             "countries": {
-                "IT": "",
-                "ES": "",
-                "FI": "",
-                "GR": "",
-                "RO": "",
-                "NO": "",
-                "KR": "",
-                "US": "",
-                "HU": "",
-                "PT": "",
-                "NL": "",
-                "AU": "",
-                "TW": "",
-                "IL": "",
-                "JP": "",
-                "DK": "",
-                "DE": "",
-                "CZ": "",
-                "FR": "",
-                "UA": "",
-                "GB": "",
-                "SE": "",
-                "CN": "",
-                "RU": "",
-                "CA": "",
-                "PL": "",
-                "BR": "",
-                "CH": "",
-                "TR": ""
+                "IT": "An Iodáil",
+                "ES": "An Spáinn",
+                "FI": "An Fhionlainn",
+                "GR": "An Ghréig",
+                "RO": "An Rómáin",
+                "NO": "An Iorua",
+                "KR": "An Chóiré Theas",
+                "US": "Stáit Aontaithe Mheiriceá",
+                "HU": "An Ungáir",
+                "PT": "An Phortaingéil",
+                "NL": "An Ísiltír",
+                "AU": "An Astráil",
+                "TW": "An Téaváin",
+                "IL": "Iosrael",
+                "JP": "An tSeapáin",
+                "DK": "An Danmhairg",
+                "DE": "An Ghearmáin",
+                "CZ": "an tSeicia",
+                "FR": "An Fhrainc",
+                "UA": "An Úcráin",
+                "GB": "Ríocht Aontaithe",
+                "SE": "An tSualainn",
+                "CN": "An tSín",
+                "RU": "An Rúis",
+                "CA": "Ceanada",
+                "PL": "An Pholainn",
+                "BR": "An Bhrasaíl",
+                "CH": "An Eilvéis",
+                "TR": "An Tuirc"
             },
-            "auto": "",
-            "label": ""
+            "auto": "Uathoibríoch ({{code}})",
+            "label": "Réigiún an tsiopa"
         },
-        "sidebar": "",
+        "sidebar": "Margaí",
         "sort": {
-            "priceDesc": "",
-            "trending": "",
-            "priceAsc": "",
-            "releaseDesc": "",
-            "ratingAsc": "",
-            "releaseAsc": "",
-            "ratingDesc": "",
-            "discount": ""
+            "priceDesc": "Praghas: ard go híseal",
+            "trending": "Ag treochtáil",
+            "priceAsc": "Praghas: íseal go hard",
+            "releaseDesc": "Dáta eisiúna: nua go sean",
+            "ratingAsc": "Rátáil: íseal go hard",
+            "releaseAsc": "Dáta eisiúna: sean go nua",
+            "ratingDesc": "Rátáil: ard go híseal",
+            "discount": "Lascaine is mó"
         },
-        "noMatches": "",
+        "noMatches": "Níl aon chluiche ag teacht leis na scagairí reatha.",
         "aria": {
-            "pagination": "",
-            "rating": ""
+            "pagination": "Leathanachú",
+            "rating": "Rátáil {{rating}} as 10"
         },
-        "error": "",
-        "empty": "",
-        "loading": "",
-        "title": "",
+        "error": "Níorbh fhéidir lascainí a luchtú. Déan iarracht arís ar ball.",
+        "empty": "Níl aon chluichí lascainithe ar fáil faoi láthair.",
+        "loading": "Ag lódáil cluichí lascainithe...",
+        "title": "Margaí GOG",
         "pagination": {
-            "prev": ""
+            "prev": "Roimhe Seo"
         }
     },
     "next": "Ar Aghaidh",
     "console": {
         "filter": {
             "sideload": "Eile",
-            "all": ""
+            "all": "Gach"
         },
         "games": "Cluichí suiteáilte",
         "hints": {
             "quit": "Scoir",
-            "launch": "",
-            "sort": "",
-            "navigate": "",
-            "change_store": ""
+            "launch": "Seoladh",
+            "sort": "Sórtáil",
+            "navigate": "Loingseoireacht",
+            "change_store": "Athraigh siopa"
         },
         "launching": "Ag lainseáil",
         "update": {
-            "hintPrefix": "",
-            "body": "",
-            "title": "",
-            "hintSuffix": ""
+            "hintPrefix": "Brúigh",
+            "body": "Tá nuashonrú ar fáil don chluiche seo. Fág Mód Consóil agus nuashonraigh an cluiche sula seoltar é.",
+            "title": "Nuashonrú ag teastáil",
+            "hintSuffix": "dul ar ais"
         },
-        "sort": "",
+        "sort": "Sórtáil",
         "cancel": {
-            "hintSuffix": "",
-            "hintPrefix": ""
+            "hintSuffix": "le haghaidh 3s le cealú",
+            "hintPrefix": "Coinnigh"
         },
-        "quit": "",
+        "quit": "Scoir an Consól",
         "card": {
-            "needsUpdate": ""
+            "needsUpdate": "Riachtanas nuashonraithe"
         },
-        "empty": "",
-        "quitApp": "",
-        "loading": ""
+        "empty": "Níl aon chluichí suiteáilte le taispeáint. Suiteáil rud éigin ar dtús.",
+        "quitApp": "Scoir den Aip",
+        "loading": "Ag lódáil do leabharlann…"
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
-            "no-grids": "",
-            "search": "",
-            "grids": ""
+            "no-games": "Níor aimsíodh aon chluichí.",
+            "no-grids": "Níor aimsíodh aon chlúdaigh don chluiche seo.",
+            "search": "Theip ar chuardach cluichí, seiceáil eochair API SteamGridDB agus déan iarracht arís",
+            "grids": "Theip ar ghreillí a fháil"
         },
         "picker": {
-            "search": "",
-            "title": "",
-            "select-game": ""
+            "search": "Cuardaigh Cluiche",
+            "title": "Clúdaigh SteamGridDB",
+            "select-game": "Roghnaigh Cluiche:"
         }
     },
     "sidebar": {
-        "console": ""
+        "console": "Mód Consóil"
     }
 }

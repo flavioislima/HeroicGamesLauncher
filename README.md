@@ -77,8 +77,8 @@ Heroic is built with Web Technologies:
 ## Supported Operating Systems
 
 - Linux:
-  - Ubuntu 20.04LTS or newer
-  - Fedora 33 or newer
+  - Ubuntu (latest 2 LTS versions)
+  - Fedora (latest 2 versions)
   - Arch Linux & derivatives (Manjaro, Garuda, EndeavourOS)
   - Heroic will still _work_ on most distros, but it is up to you to _get_ it to work
     Chances are though that someone on our [Discord](https://discord.gg/rHJ2uqdquK) can help you

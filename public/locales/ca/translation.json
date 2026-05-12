@@ -91,7 +91,7 @@
                 "title": "Ubisoft Connect"
             },
             "legendary": {
-                "generic": "S'ha produït un error. Proveu de tancar la sessió del compte de l'Epic i tornar a iniciar-la. {{newline}}  {{error}}"
+                "generic": "S'ha produït un error. Prova de tancar la sessió del compte de l'Epic i tornar a iniciar-la. {{newline}}  {{error}}"
             },
             "steam": {
                 "error": "No s'ha trobat l'executable del Steam. És probable que l'usuari hagi cancel·lat la instal·lació, o hagi fallat per la banda del Steam.",
@@ -99,10 +99,10 @@
                 "title": "Error del Steam"
             },
             "executableNotFound": "No s'ha trobat l'executable",
-            "executableNotFoundMessage": "L'Heroic no pot trobar l'executable d'aquest joc. Si us plau, configureu-lo manualment a la configuració del joc.",
+            "executableNotFoundMessage": "L'Heroic no pot trobar l'executable d'aquest joc. Configura'l manualment a la configuració del joc.",
             "dxmt": {
-                "message": "",
-                "title": ""
+                "message": "Error en baixar el DXMT! Comprova la connexió!",
+                "title": "Error de baixada del DXMT"
             }
         },
         "info": {
@@ -139,7 +139,7 @@
         "select": {
             "button": "Tria",
             "exe": "Selecciona l'EXE",
-            "script": "Trieu un script..."
+            "script": "Tria un script..."
         },
         "shortcuts": {
             "message": "S'han creat dreceres a l'escriptori i al menú d'inici",
@@ -170,7 +170,7 @@
             },
             "title": "Avís",
             "wine-change": {
-                "message": "No s'ha pogut trobar la versió del Wine seleccionada per a iniciar aquest títol ({{selectedWine}}). {{newline}} S'ha trobat una altra, vols continuar l'execució utilitzant {{foundWine}}?",
+                "message": "No s'ha pogut trobar la versió del Wine seleccionada per a executar aquest títol ({{selectedWine}}). {{newline}} S'ha trobat una altra, vols continuar l'execució utilitzant {{foundWine}}?",
                 "title": "No s'ha trobat el Wine!"
             },
             "sideload": {
@@ -269,9 +269,9 @@
         "library": {
             "refresh": "Actualitza la biblioteca"
         },
-        "abort": "",
-        "install": "",
-        "uninstall": ""
+        "abort": "Avorta",
+        "install": "Instal·la",
+        "uninstall": "Desinstal·la"
     },
     "globalSettings": "Configuració global",
     "GOG": "GOG",
@@ -317,7 +317,7 @@
         "other": {
             "part4": "Utilitza els ",
             "part5": "arguments del joc",
-            "part6": " després de l'ordre d'inici, com ara: ",
+            "part6": " després de l'ordre d'execució, com ara: ",
             "part7": " per a ometre el llançador a alguns jocs, etc."
         },
         "preferSystemLibs": "Les versions personalitzades del Wine (Wine-GE, Wine-Lutris) s'envien amb les seves dependències de biblioteques. Quan s'activa aquesta opció, s'ignoraran les biblioteques enviades i Wine carregarà les biblioteques del sistema. Avís! Es poden produir problemes si no es compleixen les dependències.",
@@ -341,7 +341,7 @@
         "dxvknvapi": "DXVK-NVAPI és una implementació de NVAPI construïda sobre DXVK i Linux natiu NVAPI. Permet l'ús de DLSS en les GPU de Nvidia.",
         "disablePlaytimeSync": "Desactiva la sincronització del temps de joc amb els servidors d'una botiga determinada. Actualment, només ho suporta el GOG.",
         "gamescope": {
-            "fpsLimiter": "El nombre de FPS límit del gamescope, com ara 60.",
+            "fpsLimiter": "El nombre de FPS límit del gamescope, com ara 60",
             "fpsLimiterNoFocus": "El límit de FPS que ha d'aplicar gamescope si el joc no està en primer pla.",
             "upscaleMethod": "El mètode d'escalatge que hauria de fer servir el gamescope.",
             "gameWidth": "La resolució horitzontal del joc. El gamescope assumeix una relació 16:9.",
@@ -378,7 +378,7 @@
         "dxfpslimit": "Estableix un límit als FPS per als jocs que utilitzin DirectX (9-12)",
         "download_proton_steam": "En activar-ho, el GE-Proton es baixarà directament a la carpeta d'eines de compatibilitat del Steam en compte de la ruta predefinida de l'Heroic. S'utilitzarà la ruta del Steam definida al paràmetre «Ruta predefinida del Steam» de sobre.",
         "advertiseAvxForRosetta": "Activa la compatibilitat amb el conjunt d'instruccions AVX en executar jocs de Windows mitjançant Rosetta als Mac amb Apple Silicon. Això podria ser un requisit per a alguns jocs, com ara el Death Stranding, que necessita compatibilitat amb AVX.",
-        "analytics": "Permet a l'Heroic recopilar dades d'ús 100% anònimes per a ajudar-nos a millorar l'aplicació. Cal que reinicieu per a aplicar-ho.",
+        "analytics": "Permet a l'Heroic recopilar dades d'ús 100% anònimes per a ajudar-nos a millorar l'aplicació. Cal que reiniciïs per a aplicar-ho.",
         "wine-hdr": "L'HDR millora els colors proporcionant punts de llum més brillants i contrastos més profunds. Perquè l'HDR funcioni, cal que tant el joc com la pantalla hi siguin compatibles.",
         "wine-wayland": "El controlador experimental Wine-Wayland permet als jocs executar-se de manera nativa sota el protocol de visualització Wayland. Activar-ho podria trencar alguns jocs.",
         "WoW64": "El mode Wine WoW64 permet que els jocs de Windows a 32 bits s'executin amb el Wine de 64 bits. Activar-ho podria millorar el rendiment, però també podria trencar alguns jocs de 32 bits més antics."
@@ -392,7 +392,7 @@
             "version": "Versió de l'Heroic"
         },
         "save-sync": {
-            "searching": "S'està provant de detectar la carpeta correcta de partides desades (feu clic per a cancel·lar)"
+            "searching": "S'està provant de detectar la carpeta correcta de partides desades (fes clic per a cancel·lar)"
         },
         "settings": "La configuració es desa automàticament",
         "version": "Versió del Wine"
@@ -409,7 +409,7 @@
             "message": "El Wine fa servir el que s'anomena WINEPREFIX per a encapsular les aplicacions de Windows. El prefix conté els fitxers de la configuració del Wine i una reproducció de la jerarquia de fitxers a la unitat C: (el disc principal del SO Windows). En aquesta reproducció del disc és on es desen les partides i s'instal·len les dependències a través del winetricks."
         },
         "wine-path-invalid": "La ruta del Wine no és vàlida. Selecciona'n una altra.",
-        "wine-path-none-found": "No s'ha trobat cap versió del Wine, baixeu-ne una des del Gestor del Wine"
+        "wine-path-none-found": "No s'ha trobat cap versió del Wine, baixa'n una des del Gestor del Wine"
     },
     "install": {
         "path": "Selecciona la ruta d'instal·lació"
@@ -568,7 +568,7 @@
         "custom_themes_path": "Selecciona la ruta per a cercar fitxers CSS personalitzats",
         "dxvkfpsvalue": "Valor enter positiu (com ara 30, 60, ...)",
         "egs-prefix": "Prefix on l'EGS està instal·lat",
-        "prefered_language": "Codi de dos caràcters, com ara «en», «fr» o «ca»",
+        "prefered_language": "Codi de dos o quatre caràcters (p. ex. «fr» o «pt-BR»)",
         "alt-nile-bin": "S'utilitza el binari integrat del Nile..."
     },
     "platforms": {
@@ -621,7 +621,7 @@
         "eosOverlay": {
             "cancelInstall": "Cancel·la",
             "checkForUpdates": "Comprova si hi ha actualitzacions",
-            "checkingForUpdates": "S'estan buscant actualitzacions…",
+            "checkingForUpdates": "S'estan cercant actualitzacions…",
             "currentVersion": "Versió actual: {{version}}",
             "disable": "Desactiva",
             "enable": "Activa",
@@ -674,9 +674,9 @@
                     "content": "S'ha pujat a {{url}} (la URL s'ha copiat al porta-retalls)"
                 },
                 "error": {
-                    "content": "No s'ha pogut pujar el fitxer de registre. Comproveu el registre general de l'Heroic per a obtenir més detalls.",
+                    "content": "No s'ha pogut pujar el fitxer de registre. Comprova el registre general de l'Heroic per a obtenir més detalls.",
                     "title": "La pujada ha fallat",
-                    "manual_upload": ""
+                    "manual_upload": "Fes clic al botó «OBRE LA CARPETA DEL REGISTRE» i puja el fitxer «launch.log» de manera manual a Discord o a altre servei de compartició de fitxers."
                 },
                 "header": "S'han pujat els fitxers de registre",
                 "hours-ago": "S'ha pujat fa {{hoursAgo, relativetime(hours)}}",
@@ -716,21 +716,14 @@
         "offlinemode": "Executa el joc sense connexió",
         "prefered_language": "Idioma preferit (codi de l'idioma)",
         "preferSystemLibs": "Dóna preferència a les biblioteques del sistema",
-        "primerun": {
-            "confirmation": {
-                "message": "Només s'ha detectat una targeta gràfica al sistema. Tingues en compte que aquesta opció està pensada per a sistemes de diverses GPU amb GPU headless (com ara els portàtils). En sistemes d'una sola GPU, ja es fa servir aquesta de manera automàtica i si s'activa aquesta opció es poden produir problemes. Segur que vols activar l'opció?",
-                "title": "Només s'ha detectat 1 GPU"
-            },
-            "description": "Utilitza la targeta gràfica dedicada"
-        },
         "runexe": {
             "message": "Arrossega i solta els fitxers aquí",
             "title": "Executa l'EXE al prefix"
         },
         "savefolder": {
-            "not-found": "No s'ha trobat la carpeta de partides desades. Seleccioneu-la manualment (feu clic per a intentar-ho de nou)",
+            "not-found": "No s'ha trobat la carpeta de partides desades. Selecciona-la manualment (fes clic per a intentar-ho de nou)",
             "placeholder": "Selecciona el directori exacte on es desen els jocs",
-            "warning": "Comproveu si la ruta és correcta (feu clic per a provar-ho de nou)"
+            "warning": "Comprova si la ruta és correcta (fes clic per a provar-ho de nou)"
         },
         "select_theme": "Tema de la interfície",
         "showfps": "Mostra els FPS (DX9, 10 i 11)",
@@ -757,7 +750,7 @@
         },
         "frameless-window": {
             "confirmation": {
-                "message": "Aquesta funció és experimental. Informeu de qualsevol problema que hi trobeu a través de GitHub.",
+                "message": "Aquesta funció és experimental. Informa de qualsevol problema que hi trobis a través de GitHub.",
                 "title": "Funció experimental avançada"
             },
             "description": "Mostra la finestra sense marc (requereix reiniciar)"
@@ -770,9 +763,9 @@
             "missingMsgFlatpak": "No hem pogut trobar una versió compatible del Gamescope. Instal·la el paquet flatpak del Gamescope amb Runtime 25.08 i reinicia l'Heroic.",
             "warningFlatpak": "No hem pogut trobar una versió compatible del Gamescope. Instal·la el paquet flatpak del Gamescope amb l'entorn d'execució {{runtimeVersion}} i reinicia l'Heroic."
         },
-        "after-launch-script-path": "Seleccioneu un script que s'executarà després de sortir del joc",
+        "after-launch-script-path": "Selecciona un script que s'executarà després de sortir del joc",
         "msync": "Activa l'Msync",
-        "before-launch-script-path": "Seleccioneu un script que s'executarà abans que s'iniciï joc",
+        "before-launch-script-path": "Selecciona un script que s'executarà abans que s'iniciï el joc",
         "allow_installation_broken_anticheat": {
             "confirmation": {
                 "title": "Estàs segur?",
@@ -786,7 +779,7 @@
         },
         "disableUMU": "Desactiva l'umu",
         "custom_css": {
-            "warning": "Avís: s'aplica a tota la interfície. Això significa que amb un estil erroni podeu inutilitzar l'Heroic. Si ho necessiteu, podeu canviar manualment l'opció des de `~/.config/heroic/config.json`. No copieu estils d'orígens desconeguts o de poca confiança."
+            "warning": "Avís: s'aplica a tota la interfície. Això significa que amb un estil erroni pots inutilitzar l'Heroic. Si ho necessites, pots canviar manualment l'opció des de `~/.config/heroic/config.json`. No copiïs estils d'orígens desconeguts o de poca confiança."
         },
         "dxfpslimit": "Limita els FPS dels jocs per DirectX",
         "download-proton-steam": "Baixa el GE-Proton a la carpeta del Steam",
@@ -800,12 +793,12 @@
             "confirmation": {
                 "title": "Estàs segur?",
                 "dont_show": "Mostra'ls",
-                "message": "Recomanem utilitzar versions personalitzades del Proton (GE-Proton, Proton-CachyOS, etc.) perquè les versions del Proton de Valve no ténen winetricks ni protofixes. Però les podeu utilitzar, si voleu.",
+                "message": "Recomanem utilitzar versions personalitzades del Proton (GE-Proton, Proton-CachyOS, etc.) perquè les versions del Proton de Valve no tenen winetricks ni protofixes. Però les pots fer servir, si vols.",
                 "show": "Ho entenc, mostra'ls"
             },
             "info_label": "S'han ignorat les versions de Proton de Valve",
             "label": "Permet utilitzar les versions de Proton de Valve per a executar jocs",
-            "wine_selector_warning": "Les versions de Proton de Valve s'ignoren de manera predefinida, activeu-les a la configuració avançada global"
+            "wine_selector_warning": "Les versions de Proton de Valve s'ignoren de manera predefinida, activa-les a la configuració avançada global"
         },
         "analyticsOptIn": "Envia dades anònimes per a ajudar al desenvolupament de l'Heroic",
         "hdr": "Activa l'HDR",
@@ -813,9 +806,9 @@
         "wineWayland": "Activa el Wine-Wayland (Experimental) (Cal que la versió del Wine hi sigui compatible)",
         "WoW64": "Activa el WoW64 (Experimental)",
         "scripts": "Scripts:",
-        "enable-quick-sync-menu": "",
-        "start-in-console-mode": "",
-        "disable_gog_presence": ""
+        "enable-quick-sync-menu": "Activa el menú de sincronització de desades ràpides en la pàgina del joc",
+        "start-in-console-mode": "Inicia en mode consola",
+        "disable_gog_presence": "Desactiva les actualitzacions del GOG Presence"
     },
     "settings": {
         "battlEyeRuntime": {
@@ -853,14 +846,14 @@
             "wineExt": "Extensions del Wine",
             "systemInformation": "Informació del sistema",
             "gamescope": "Gamescope",
-            "legacy": ""
+            "legacy": "Obsolets"
         },
         "open-config-file": "Obre el fitxer de configuració",
         "reset-heroic": "Restableix l'Heroic",
         "saves": {
             "label": "Ubicació de les desades:",
             "warning": "La funció de desar al núvol està en versió beta. Fes una còpia de seguretat de les partides desades abans de sincronitzar-les, per si res sortís malament.",
-            "gog_linux_native_warning": "Els jocs natius de Linux no són compatibles amb la funció de partides desades al núvol del GOG. Feu servir la versió del Windows.",
+            "gog_linux_native_warning": "Els jocs natius de Linux no són compatibles amb la funció de partides desades al núvol del GOG. Fes servir la versió del Windows.",
             "not_supported": "Aquest joc no és compatible amb les partides desades al núvol."
         },
         "systemInformation": {
@@ -873,7 +866,7 @@
             "gpuDriver": "Controlador: {{driverVersion}}",
             "os": "Sistema operatiu:",
             "gpu": "GPU:",
-            "gogdlVersion": "GOGDL: {{gogdlVersion}}",
+            "gogdlVersion": "Gogdl: {{gogdlVersion}}",
             "osVersion": "Versió {{versionNumber}}",
             "osNameFlatpak": "{{osName}} (dins del Flatpak)",
             "software": "Maquinari:",
@@ -890,7 +883,7 @@
             "title": "Funcions experimentals"
         },
         "gamescope": {
-            "searchMsg": "Es busca l'executable del gamescope."
+            "searchMsg": "Es cerca l'executable del gamescope."
         },
         "offline": {
             "warning": "Aquest joc no permet de manera explícita el mode fora de línia, activa-ho sota risc propi. El joc podria no funcionar."
@@ -920,16 +913,16 @@
         "custom_css": {
             "title": "Estil CSS personalitzat"
         },
-        "launchOptions": "Opcions d'execució...",
-        "legacy_warning": "",
+        "launchOptions": "Opcions d'execució",
+        "legacy_warning": "Atenció: La majoria dels paràmetres d'aquesta pestanya estan obsolets i podrien no funcionar.",
         "steamgriddb": {
             "apikey": {
-                "title": "",
-                "placeholder": "",
-                "placeholder_saved": ""
+                "title": "Clau de l'API del SteamGridDB",
+                "placeholder": "Introdueix aquí la clau de l'API de SteamGridDB",
+                "placeholder_saved": "S'ha desat la clau. Escriu-hi per a reemplaçar-la, esborra-la per a eliminar-la"
             },
             "help": {
-                "description": ""
+                "description": "Aporta la teva clau de l'API del SteamGridDB per a poder cercar caràtules dels jocs. La clau s'emmagatzema de manera xifrada si el teu sistema ho permet. Pots obtenir-ne una a www.steamgriddb.com/profile/preferences/api"
             }
         }
     },
@@ -937,7 +930,7 @@
     "sidebar": {
         "collapse": "Col·lapsa la barra lateral",
         "uncollapse": "Expandeix la barra lateral",
-        "console": ""
+        "console": "Mode consola"
     },
     "status": {
         "installing": "S'està instal·lant",
@@ -995,16 +988,16 @@
             "not-found": "No s'han trobat versions del Wine. Fes clic a la icona d'actualització per a provar-ho de nou.",
             "title": "Gestor del Wine",
             "unzipping": "S'està descomprimint",
-            "search": "",
-            "loading": "",
-            "open_folder": "",
-            "update": "",
-            "settings": "",
-            "no-results": ""
+            "search": "Cerca versions…",
+            "loading": "S'estan carregant les versions del wine…",
+            "open_folder": "Obre la carpeta",
+            "update": "Actualitza",
+            "settings": "Configuració",
+            "no-results": "No hi ha cap versió del Wine que coincideixi amb la cerca."
         },
         "release": "Data de llançament",
         "size": "Mida",
-        "notes": ""
+        "notes": "Notes"
     },
     "externalLink": {
         "dontAskAgain": "No ho tornis a preguntar",
@@ -1051,13 +1044,13 @@
     "wineExplanation": {
         "proton-ge": "GE-Proton és una variant del Proton creada per Glorious Eggroll. S'ha de fer servir amb el llançador umu (predefinit a l'Heroic).",
         "wine-ge": "El Wine-GE-Proton és una variant del Wine creada per Glorious Eggroll. S'ha quedat obsolet en favor del GE-Proton i el llançador umu.",
-        "gpt": "",
-        "wine-crossover": "",
-        "wine-staging-macos": ""
+        "gpt": "El Game Porting Toolkit el desenvolupa Apple i es recomana per a equips Mac Apple Silicon amb els xips M1+, i funciona millor per a jocs més nous que fan servir DX12.",
+        "wine-crossover": "El Winde-Crossover es basa en el projecte Crossover OpenSource Wine i es recomana per a equips Mac Intel i per a jocs que fan servir DX11 o més antics.",
+        "wine-staging-macos": "El Wine-Staging-macOS es basa en el projecte Wine principal i es recomana per a equips Mac Intel i per a jocs que fan serivr DX11 o més antics, especialment quan es combina amb l'eina DXMT."
     },
     "emptyLibrary": {
         "noResults": "Els filtres actuals no han produït cap resultat.",
-        "noGames": "La vostra biblioteca està buida.<br /><br />Feu clic <4>aquí</4> per a iniciar sessió als vostres comptes d'Epic, GOG.com o Amazon. Es mostraran els jocs aquí a la biblioteca.<br /><br />Per a fer servir jocs o aplicacions d'altres origens, feu clic a <br /> per a afegir-los manualment."
+        "noGames": "La teva biblioteca està buida.<br /><br />Fes clic <4>aquí</4> per a iniciar la sessió als comptes d'Epic, GOG.com o Amazon. Es mostraran els jocs a la biblioteca.<br /><br />Per a fer servir jocs o aplicacions d'altres orígens, fes clic a <br /> per a afegir-los manualment."
     },
     "categories-manager": {
         "add": "Afegeix",
@@ -1084,40 +1077,40 @@
                 "intro": "Ja està! Gaudiu dels jocs i divertiu-vos!",
                 "title": "Divertiu-vos amb els jocs!"
             },
-            "filters": "Filtreu els jocs per botiga, plataforma, preferits i altres opcions.",
-            "refresh": "Actualitzeu la biblioteca per a afegir jocs nous i les seves actualitzacions.",
-            "search": "Feu servir la barra de cerca per a buscar els vostres jocs.",
-            "sortOptions": "Feu clic aquí per a ordenar els jocs alfabèticament.",
+            "filters": "Filtra els jocs per botiga, plataforma, preferits i altres opcions.",
+            "refresh": "Actualitza la biblioteca per a afegir jocs nous i les seves actualitzacions.",
+            "search": "Fes servir la barra de cerca per a cercar jocs.",
+            "sortOptions": "Fes clic aquí per a ordenar els jocs alfabèticament.",
             "welcome": {
-                "intro": "Us donem la benvinguda a la biblioteca de l'Heroic! Aquí és on podeu veure tots els vostres jocs de les diferents botigues.",
+                "intro": "Et donem la benvinguda a la biblioteca de l'Heroic! Aquí és on pots veure tots els teus jocs de les diferents botigues.",
                 "title": "Us donem la benvinguda a l'Heroic!",
                 "title2": "Gestionant la biblioteca!",
                 "intro2": "Si la biblioteca està buida, inicia la sessió als teus comptes amb el Gestor de comptes de la barra lateral, o afegeix els teus jocs amb el botó «Afegeix un joc» de més amunt."
             },
             "sortInstalled": "Ordena els jocs per l'estat d'instal·lació.",
-            "viewToggle": "Commuteu entre la vista de llista o graella.",
-            "addGame": "Podeu afegir els vostres jocs o aplicacions propis a la biblioteca si feu clic aquí. Poden ser de qualsevol tipus, fins i tot direccions URL.",
-            "categories": "Organitzeu els vostres jocs en categories per a mantenir-ho tot ben ordenat.",
-            "gameCard": "Feu clic amb el botó esquerre a la carta del joc per a navegar a la pàgina del joc, veure'n els detalls i ajustar-ne la configuració. Si hi feu clic amb el botó dret, s'obrirà el menú contextual.",
+            "viewToggle": "Commuta entre la vista de llista o graella.",
+            "addGame": "Pots afegir els teus jocs o aplicacions propis a la biblioteca si fas clic aquí. Poden ser de qualsevol classe, fins i tot adreces URL.",
+            "categories": "Organitza els teus jocs en categories per a mantenir-ho tot ben ordenat.",
+            "gameCard": "Fes clic amb el botó esquerre a la carta del joc per a anar a la seva pàgina, veure'n els detalls i ajustar-ne la configuració. Si hi fas clic amb el botó dret, s'obrirà el menú contextual.",
             "steamInstall": "Utilitza aquest botó per a instal·lar la versió del Steam per al Windows i jugar als teus jocs de Windows fent servir el Crossover, Wine o GPTK."
         },
         "next": "Següent",
         "sidebar": {
             "accessibility": "Accediu a funcions d'accessibilitat per a personalitzar l'experiència.",
-            "accounts": "Gestioneu els diversos comptes de botigues (Epic, GOG, Amazon) i inicieu o tanqueu-ne la sessió.",
-            "community": "Uniu-vos a la nostra comunitat de Discord i ajudeu amb el desenvolupament de l'Heroic.",
+            "accounts": "Gestiona els diversos comptes de botigues (Epic, GOG, Amazon) i inicia o tanca'n la sessió.",
+            "community": "Uneix-te a la nostra comunitat de Discord i ajuda amb el desenvolupament de l'Heroic.",
             "library": "Accediu a la vostra biblioteca de jocs de botigues diferents des d'un sol lloc.",
-            "login": "Inicieu sessió als comptes de les vostres botigues de jocs per a accedir a la biblioteca de jocs.",
+            "login": "Inicia la sessió als comptes de les teves botigues de jocs per a accedir a la biblioteca de jocs.",
             "docs": "Llegiu la documentació d'ajuda de l'ús de l'Heroic.",
-            "downloads": "Gestioneu i comproveu les descàrregues i instal·lacions de jocs.",
+            "downloads": "Gestiona i comprova les baixades i instal·lacions de jocs.",
             "quit": "Sortiu de l'aplicació de manera segura.",
-            "settings": "Configureu les opcions de l'Heroic, les preferències dels jocs i comproveu els registres, entre d'altres.",
-            "version": "Comproveu la versió actual de l'Heroic, feu-hi clic per a veure'n el registre de canvis i accediu a aquesta visita des del botó d'ajuda.",
+            "settings": "Configura les opcions de l'Heroic, les preferències dels jocs i comprova els registres, entre d'altres.",
+            "version": "Comprova la versió actual de l'Heroic, fes-hi clic per a veure'n el registre de canvis i accedeix a aquesta visita des del botó d'ajuda.",
             "welcome": {
                 "title": "Barra lateral de navegació",
                 "intro": "Us donem la benvinguda a l'Heroic! Aquesta barra lateral conté totes les opcions de navegació per a explorar l'aplicació."
             },
-            "wine": "Gestioneu o descarregueu versions noves del Wine/Proton/GPTK per a executar jocs de Windows en màquines Linux o macOS.",
+            "wine": "Gestiona o baixa les versions noves del Wine/Proton/GPTK per a executar jocs de Windows en màquines Linux o macOS.",
             "stores": "Cerca i compra jocs de diferents botigues com ara Epic, GOG o Amazon."
         },
         "skip": "Salta",
@@ -1151,128 +1144,129 @@
     "discounts": {
         "region": {
             "countries": {
-                "IT": "",
-                "ES": "",
-                "FI": "",
-                "GR": "",
-                "RO": "",
-                "NO": "",
-                "KR": "",
-                "US": "",
-                "HU": "",
-                "PT": "",
-                "NL": "",
-                "AU": "",
-                "TW": "",
-                "IL": "",
-                "JP": "",
-                "DK": "",
-                "DE": "",
-                "CZ": "",
-                "FR": "",
-                "UA": "",
-                "GB": "",
-                "SE": "",
-                "CN": "",
-                "RU": "",
-                "CA": "",
-                "PL": "",
-                "BR": "",
-                "CH": "",
-                "TR": ""
+                "IT": "Itàlia",
+                "ES": "Espanya",
+                "FI": "Finlàndia",
+                "GR": "Grècia",
+                "RO": "Romania",
+                "NO": "Noruega",
+                "KR": "Corea del Sud",
+                "US": "Estats Units d'Amèrica",
+                "HU": "Hongria",
+                "PT": "Portugal",
+                "NL": "Països Baixos",
+                "AU": "Austràlia",
+                "TW": "Taiwan",
+                "IL": "Israel",
+                "JP": "Japó",
+                "DK": "Dinamarca",
+                "DE": "Alemanya",
+                "CZ": "Txèquia",
+                "FR": "França",
+                "UA": "Ucraïna",
+                "GB": "Regne Unit",
+                "SE": "Suècia",
+                "CN": "Xina",
+                "RU": "Rússia",
+                "CA": "Canadà",
+                "PL": "Polònia",
+                "BR": "Brasil",
+                "CH": "Suïssa",
+                "TR": "Turquia"
             },
-            "auto": "",
-            "label": ""
+            "auto": "Auto ({{code}})",
+            "label": "Regió de la botiga"
         },
         "filters": {
-            "moreFilters": "",
-            "ageRating": "",
-            "os": "",
-            "price": "",
-            "activeCount_other": "",
-            "hideDlcs": "",
-            "ageRatingOption": "",
-            "genres": "",
-            "activeCount_one": "",
-            "lessFilters": "",
-            "rating": "",
-            "sort": "",
-            "genresPlaceholder": "",
-            "features": "",
-            "featuresPlaceholder": "",
-            "ageRatingAll": "",
-            "pageSize": "",
-            "releaseYear": ""
+            "moreFilters": "Més filtres",
+            "ageRating": "Apropiat per edat",
+            "os": "Sistema operatiu",
+            "price": "Preu",
+            "activeCount_other": "{{count}} actius",
+            "hideDlcs": "Amaga els DLC",
+            "ageRatingOption": "Mostra els jocs classificats com a PEGI {{age}} o inferior",
+            "genres": "Gèneres",
+            "activeCount_one": "{{count}} actiu",
+            "lessFilters": "Menys filtres",
+            "rating": "Classificació",
+            "sort": "Ordena per",
+            "genresPlaceholder": "Qualsevol",
+            "features": "Característiques",
+            "featuresPlaceholder": "Qualsevol",
+            "ageRatingAll": "Tots",
+            "pageSize": "Per pàgina",
+            "releaseYear": "Any de publicació",
+            "hideOwned": "Amaga els que tens"
         },
-        "sidebar": "",
+        "sidebar": "Ofertes",
         "sort": {
-            "priceDesc": "",
-            "trending": "",
-            "priceAsc": "",
-            "releaseDesc": "",
-            "ratingAsc": "",
-            "releaseAsc": "",
-            "ratingDesc": "",
-            "discount": ""
+            "priceDesc": "Preu: de major a menor",
+            "trending": "Tendència",
+            "priceAsc": "Preu: de menor a major",
+            "releaseDesc": "Data de publicació: de més recent a més antiga",
+            "ratingAsc": "Classificació: de menor a major",
+            "releaseAsc": "Data de publicació: de més antiga a més recent",
+            "ratingDesc": "Classificació: de major a menor",
+            "discount": "El descompte més gran"
         },
-        "noMatches": "",
+        "noMatches": "No hi ha cap joc que coincideixi amb els filtres triats.",
         "aria": {
-            "pagination": "",
-            "rating": ""
+            "pagination": "Paginació",
+            "rating": "Classificació {{rating}} de 10"
         },
-        "error": "",
-        "empty": "",
-        "loading": "",
-        "title": "",
+        "error": "No s'han pogut carregar els descomptes. Torna a provar-ho més tard.",
+        "empty": "No hi ha cap joc rebaixat ara mateix.",
+        "loading": "S'estan carregant els jocs rebaixats…",
+        "title": "Ofertes de GOG",
         "pagination": {
-            "prev": ""
+            "prev": "Previs"
         }
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
-            "no-grids": "",
-            "search": "",
-            "grids": ""
+            "no-games": "No s'ha trobat cap joc.",
+            "no-grids": "No s'ha trobat cap caràtula per a aquest joc.",
+            "search": "Error en cercar jocs, comprova la clau de l'API del SteamGridDB i torna a provar-ho",
+            "grids": "No s'han pogut obtenir les graelles"
         },
         "picker": {
-            "search": "",
-            "title": "",
-            "select-game": ""
+            "search": "Cerca un joc",
+            "title": "Caràtules del SteamGridDB",
+            "select-game": "Selecciona un joc:"
         }
     },
     "console": {
         "update": {
-            "hintPrefix": "",
-            "body": "",
-            "title": "",
-            "hintSuffix": ""
+            "hintPrefix": "Prem",
+            "body": "Hi ha una actualització disponible per al joc. Surt del mode consola i actualitza'l abans d'executar-lo.",
+            "title": "Cal actualtizar",
+            "hintSuffix": "per a tornar"
         },
-        "sort": "",
+        "sort": "Ordre",
         "cancel": {
-            "hintSuffix": "",
-            "hintPrefix": ""
+            "hintSuffix": "durant 3 s per a cancel·lar",
+            "hintPrefix": "Manté premut"
         },
-        "quit": "",
+        "quit": "Surt del mode consola",
         "hints": {
-            "launch": "",
-            "sort": "",
-            "navigate": "",
-            "quit": "",
-            "change_store": ""
+            "launch": "Executa",
+            "sort": "Ordre",
+            "navigate": "Navega",
+            "quit": "Surt",
+            "change_store": "Canvia la botiga"
         },
-        "launching": "",
+        "launching": "S'està executant",
         "card": {
-            "needsUpdate": ""
+            "needsUpdate": "Cal actualitzar"
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Other",
+            "all": "Tot"
         },
-        "empty": "",
-        "games": "",
-        "quitApp": "",
-        "loading": ""
+        "empty": "No hi ha cap joc instal·lat. Instal·la'n algun primer.",
+        "games": "Jocs instal·lats",
+        "quitApp": "Surt de l'aplicació",
+        "loading": "S'està carregant la biblioteca…"
     },
-    "next": ""
+    "next": "Següent"
 }

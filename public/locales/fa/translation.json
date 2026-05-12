@@ -184,7 +184,7 @@
                 "message": ""
             }
         },
-        "wineprefix": "انتخاب پوشه Wine Prefix",
+        "wineprefix": "انتخاب پوشه WinePrefix",
         "yes": "بله",
         "dontShowAgain": "عدم نمایش",
         "choose-nile-binary": "باینری Nile را انتخاب کنید",
@@ -262,8 +262,8 @@
             "refresh": "تازه سازی کتابخانه"
         },
         "abort": "",
-        "install": "",
-        "uninstall": ""
+        "install": "نصب کردن",
+        "uninstall": "حذف"
     },
     "globalSettings": "تنظیمات عمومی",
     "GOG": "GOG",
@@ -707,13 +707,6 @@
         "offlinemode": "اجرای آفلاین بازی",
         "prefered_language": "زبان ترجیحی (کد زبان)",
         "preferSystemLibs": "ارجحیت کتابخانه های سیستم",
-        "primerun": {
-            "confirmation": {
-                "message": "تنها یک کارت گرافیک در این سیستم تشخیص داده شد. به یاد داشته باشید این گزینه برای سیستم های حاوی چند کارت گرافیک با گرافیک های headless (مانند لب تاپ ها) طراحی شده است. در سیستم های تک کارت گرافیکی، کارت گرافیک به صورت خودکار مورد استفاده قرار می گیرد و فعال کردن این گزینه می تواند مشکل ایجاد کند. آیا می خواهید این گزینه را فعال کنید؟",
-                "title": "فقط یک گرافیک شناسایی شد"
-            },
-            "description": "استفاده از کارت گرافیک اختصاص یافته"
-        },
         "runexe": {
             "message": "فایلها را اینجا درج کنید",
             "title": "اجرای EXE در محل"
@@ -981,8 +974,8 @@
             "search": "",
             "loading": "",
             "open_folder": "",
-            "update": "",
-            "settings": "",
+            "update": "Update",
+            "settings": "تنظیمات",
             "no-results": ""
         },
         "release": "Release Date",
@@ -1176,7 +1169,7 @@
             "genresPlaceholder": "",
             "features": "",
             "featuresPlaceholder": "",
-            "ageRatingAll": "",
+            "ageRatingAll": "همه",
             "pageSize": "",
             "releaseYear": ""
         },
@@ -1206,7 +1199,7 @@
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
+            "no-games": "بازی یافت نشد",
             "no-grids": "",
             "search": "",
             "grids": ""
@@ -1234,19 +1227,19 @@
             "launch": "",
             "sort": "",
             "navigate": "",
-            "quit": "",
+            "quit": "خروج",
             "change_store": ""
         },
-        "launching": "",
+        "launching": "در حال راه اندازی",
         "card": {
             "needsUpdate": ""
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Other",
+            "all": "همه"
         },
         "empty": "",
-        "games": "",
+        "games": "بازی‌های نصب شده",
         "quitApp": "",
         "loading": ""
     },

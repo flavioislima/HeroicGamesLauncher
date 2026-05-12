@@ -46,7 +46,7 @@
             "message": "Une mise à jour est disponible pour ce jeu. Souhaitez-vous le mettre à jour maintenant ?",
             "title": "Mise à jour requise"
         },
-        "wineprefix": "Sélectionner le dossier du préfixe Wine",
+        "wineprefix": "Sélectionner le répertoire du préfixe Wine",
         "yes": "OUI",
         "close": "Fermer",
         "select-install-path": "Sélectionnez le chemin d'installation de Steam",
@@ -191,11 +191,11 @@
         },
         "playing": {
             "start": "Jouer",
-            "stop": "Jeu en cours d’exécution (Arrêter)",
+            "stop": "En cours d’exécution (arrêter)",
             "start_with_logs": "Jouer (en consignant les événements)"
         },
         "saves": {
-            "syncing": "Synchronisation des sauvegardes en cours"
+            "syncing": "Synchronisation des sauvegardes"
         },
         "launching": "Lancement",
         "ubisoft": "Installation d'Ubisoft Connect",
@@ -282,24 +282,24 @@
         "gameNotAvailable": "Jeu indisponible",
         "hasUpdates": "Nouvelle version disponible !",
         "installed": "Installé",
-        "installing": "Installation en cours",
+        "installing": "Installation",
         "moving": "Déplacement de l'installation, veuillez patienter",
         "notinstalled": "Ce jeu n'est pas installé",
         "notSupported": "Non compatible",
         "notSupportedGame": "non compatible",
         "processing": "Préparation des fichiers, veuillez patienter",
         "queued": "En file d'attente",
-        "reparing": "Réparation du jeu en cours, veuillez patienter",
+        "reparing": "Réparation du jeu, veuillez patienter",
         "this-game-uses-third-party": "Ce jeu nécessite un lanceur tiers et n'est donc pas supporté pour le moment",
         "totalDownloaded": "Téléchargé au total",
         "uninstalling": "Désinstallation",
         "updating": "Mise à jour du jeu",
-        "playing": "Jeu en cours d'exécution",
+        "playing": "En cours d'exécution",
         "moving-files": "Déplacement du fichier \"{{file}}\" : {{percent}}",
-        "syncingSaves": "Synchronisation des sauvegardes en cours",
+        "syncingSaves": "Synchronisation des sauvegardes",
         "launching": "Lancement",
         "ubisoft": "Installation d'Ubisoft",
-        "downloading": "En cours de téléchargement",
+        "downloading": "Téléchargement",
         "extracting": "Extraction",
         "goodie": "Non installable",
         "gog-goodie": "Ce jeu ne semble pas être installable. Consultez les contenus téléchargeable sur https://gog.com/account",
@@ -325,7 +325,7 @@
         "categories": "Catégories"
     },
     "help": {
-        "cloud_save_unsupported": "Ce jeu ne supporte pas la sauvegarde à distance. Cette information est fournie par les développeurs du jeu. Certains jeux proposent néanmoins leur propre système de sauvegarde sur serveurs distants.",
+        "cloud_save_unsupported": "Ce jeu n’est pas compatible avec la sauvegarde à distance. Cette information est fournie par les développeurs du jeu. Certains jeux implémentent leur propre système de sauvegarde à distance.",
         "title": {
             "gamePage": "Page du jeu"
         },

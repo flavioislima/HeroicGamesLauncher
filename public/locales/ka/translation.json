@@ -696,8 +696,8 @@
             "search": "",
             "loading": "",
             "open_folder": "",
-            "update": "",
-            "settings": "",
+            "update": "განახლება",
+            "settings": "პარამეტრები",
             "no-results": ""
         },
         "notes": "",
@@ -1047,8 +1047,8 @@
             "component": ""
         },
         "abort": "",
-        "install": "",
-        "uninstall": ""
+        "install": "დაყენება",
+        "uninstall": "წაშლა"
     },
     "search": "",
     "store": "",
@@ -1171,15 +1171,15 @@
             "launch": "",
             "sort": "",
             "navigate": "",
-            "quit": "",
+            "quit": "გასვლა",
             "change_store": ""
         },
-        "launching": "",
+        "launching": "ეშვება",
         "card": {
             "needsUpdate": ""
         },
         "filter": {
-            "sideload": "",
+            "sideload": "სხვა",
             "all": ""
         },
         "empty": "",
@@ -1187,7 +1187,7 @@
         "quitApp": "",
         "loading": ""
     },
-    "next": "",
+    "next": "შემდეგი",
     "sidebar": {
         "console": ""
     }

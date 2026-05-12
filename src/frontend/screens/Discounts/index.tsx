@@ -56,6 +56,7 @@ export default function Discounts() {
     setSearchQuery('')
     setHideDlcs(false)
     setHideOwned(false)
+    setWishlistOnly(false)
   }
 
   const [products, setProducts] = useState<CatalogProduct[]>([])
@@ -94,6 +95,9 @@ export default function Discounts() {
   )
   const [hideDlcs, setHideDlcs] = useState(storedFilters.hideDlcs ?? false)
   const [hideOwned, setHideOwned] = useState(storedFilters.hideOwned ?? false)
+  const [wishlistOnly, setWishlistOnly] = useState(
+    storedFilters.wishlistOnly ?? false
+  )
   const [pageSize, setPageSize] = useState<number>(
     storedFilters.pageSize ?? DEFAULT_PAGE_SIZE
   )
@@ -118,6 +122,7 @@ export default function Discounts() {
       searchQuery,
       hideDlcs,
       hideOwned,
+      wishlistOnly,
       pageSize
     })
   }, [
@@ -132,6 +137,7 @@ export default function Discounts() {
     searchQuery,
     hideDlcs,
     hideOwned,
+    wishlistOnly,
     pageSize
   ])
 
@@ -146,7 +152,8 @@ export default function Discounts() {
       try {
         const result = await window.api.getGogDiscounts(
           localeSettings,
-          hideOwned
+          hideOwned,
+          wishlistOnly
         )
         if (!cancelled) {
           setProducts(result)
@@ -178,7 +185,7 @@ export default function Discounts() {
     return () => {
       cancelled = true
     }
-  }, [localeSettings, hideOwned, t])
+  }, [localeSettings, hideOwned, wishlistOnly, t])
 
   const priceMax = useMemo(() => {
     const max = products.reduce((acc, p) => {
@@ -406,6 +413,7 @@ export default function Discounts() {
     searchQuery,
     hideDlcs,
     hideOwned,
+    wishlistOnly,
     pageSize,
     products
   ])
@@ -431,6 +439,7 @@ export default function Discounts() {
     searchQuery.trim() !== '' ||
     hideDlcs ||
     hideOwned ||
+    wishlistOnly ||
     (priceRange !== null &&
       (priceRange[0] !== 0 || priceRange[1] !== priceMax)) ||
     (releaseYearRange !== null &&
@@ -449,6 +458,7 @@ export default function Discounts() {
     setSearchQuery('')
     setHideDlcs(false)
     setHideOwned(false)
+    setWishlistOnly(false)
   }
 
   const handlePageChange = (newPage: number) => {
@@ -568,6 +578,8 @@ export default function Discounts() {
             onHideDlcsChange={setHideDlcs}
             hideOwned={hideOwned}
             onHideOwnedChange={setHideOwned}
+            wishlistOnly={wishlistOnly}
+            onWishlistOnlyChange={setWishlistOnly}
             isGogLoggedIn={isGogLoggedIn}
             pageSize={pageSize}
             onPageSizeChange={setPageSize}

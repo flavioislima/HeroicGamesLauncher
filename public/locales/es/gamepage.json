@@ -33,17 +33,17 @@
             "title": "Detener la instalación"
         },
         "uninstall": {
-            "checkbox": "Eliminar prefijo: {{prefix}}{{newLine}}Nota: Esta acción no se puede deshacer y eliminará también los archivos de guardado sin copia de seguridad.",
+            "checkbox": "Eliminar prefijo: {{prefix}}{{newLine}}Nota: Esto no se puede deshacer y también eliminará los archivos de guardado que no se hayan respaldado.",
             "message": "¿Quieres desinstalar \"{{title}}\"?",
-            "settingcheckbox": "Borrar ajustes y eliminar registros{{newLine}}Nota: Este cambio no se puede deshacer. Todos los ajustes se olvidarán y el registro se eliminará.",
+            "settingcheckbox": "Borrar configuración y eliminar registro{{newLine}}Nota: Esto no se puede deshacer. Cualquier configuración modificada se perderá y el registro se eliminará.",
             "title": "Desinstalar",
             "prefix_warning": "El prefijo de Wine para este juego es el predeterminado. Si realmente deseas eliminarlo, tienes que hacerlo manualmente.",
             "dlc": "¿Quieres desinstalar \"{{title}}\" (DLC)?",
             "cannotUninstallEpic": "Epic Games no se puede desinstalar mientras se está instalando otro juego de Epic.",
-            "gameIsRunning": "{{title}} se está ejecutando. Ciérralo para desinstalarlo."
+            "gameIsRunning": "{{title}} se está ejecutando. Cierra el juego para desinstalarlo."
         },
         "update": {
-            "message": "Este juego tiene una actualización. ¿Quieres aplicarla ahora?",
+            "message": "Este juego tiene una actualización. ¿Quieres instalarla ahora?",
             "title": "El juego necesita una actualización"
         },
         "wineprefix": "Selecciona la carpeta de Prefijo de Wine",
@@ -179,7 +179,7 @@
             "title": "Anticheat Roto/Denegado",
             "ok": "Ok",
             "install_anyway": "Sí (Entiendo que las características multijugador no funcionarán)",
-            "disabled_installation": "Este juego utiliza software antitrampas no compatible con tu sistema operativo o el soporte no fue habilitado por los desarrolladores del juego. Esto significa que las funciones de multijugador no van a funcionar, y no hay nada que tu(o el equipo de Heroic) puedan hacer al respecto.<br /><br />. Para instalar este juego y probarlo de cualquier forma, ve hacia las Opciones, Avanzado, y revisa la opción para permitir la instalación de juegos con antitrampas rechazado o roto.<br /><br />. Nótese que no hay ninguna solución para esto y al hacer esto, se corre el riesgo de ser suspendida/baneada del juego.",
+            "disabled_installation": "Este juego utiliza un software antitrampas que no es compatible con tu sistema operativo o cuyos desarrolladores no lo habilitaron. Esto significa que las funciones multijugador no funcionarán y no hay nada que tú (ni el equipo de Heroic) puedan hacer al respecto.<br /><br />Para instalar este juego y probarlo de todos modos, ve a Configuración, Avanzado y marca la opción para permitir la instalación de juegos con antitrampas defectuosos o denegados.<br /><br />Ten en cuenta que no hay solución para esto y corres el riesgo de ser baneado del juego.",
             "multiplayer_message": "El soporte antitrampas está roto o ha sido denegado. El juego podría ejecutarse, pero las características multijugador no funcionarán. ¿Deseas instalarlo de todos modos?"
         },
         "flatpak-path-not-writtable": "Error: No se ha concedido acceso al Sandbox a esta ruta, se perderán los datos."
@@ -191,7 +191,7 @@
         },
         "playing": {
             "start": "Jugar ahora",
-            "stop": "Reproduciendo",
+            "stop": "Jugando (Detener)",
             "start_with_logs": "Jugar ahora (con registros)"
         },
         "saves": {
@@ -271,7 +271,7 @@
         },
         "import-hint": {
             "content": "NO utilizar esta función para eso.<br />En vez, <3>inicia sesión</3> en la tienda, busca el juego en tu librería, abre el diálogo de instalación, y presiona en el botón de &quot;Importar Juego&quot;",
-            "title": "Importante! Estás añadiendo un juego de Epic/GOG/Amazon? Presiona aquí!"
+            "title": "¡Importante! ¿Estás añadiendo un juego de Epic/GOG/Amazon? ¡Presiona aquí!"
         }
     },
     "specs": {
@@ -327,7 +327,7 @@
         "categories": "Categorías"
     },
     "help": {
-        "cloud_save_unsupported": "Este juego no admite guardados en la nube. Esta información es proporcionada por los desarrolladores del juego. Algunos juegos implementan su propio sistema de guardado en la nube",
+        "cloud_save_unsupported": "Este juego no admite guardados en la nube. Esta información es proporcionada por los desarrolladores del juego. Algunos juegos implementan su propio sistema de guardado en la nube.",
         "content": {
             "gamePage": "Mostrar todos los detalles y acciones del juego. Utilice el menú de 3 puntos para más opciones."
         },

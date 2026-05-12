@@ -324,7 +324,7 @@
         "categories": "Kategorier"
     },
     "help": {
-        "cloud_save_unsupported": "Dette spillet støtter ikke skylagring. Denne informasjonen er gitt av spillutviklerne. Noen spill implementerer sitt eget skylagringssystem",
+        "cloud_save_unsupported": "Dette spillet støtter ikke skylagring. Denne informasjonen er gitt av spillutviklerne. Noen spill implementerer sitt eget skylagringssystem.",
         "title": {
             "gamePage": "Spillside"
         },

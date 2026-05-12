@@ -184,7 +184,7 @@
                 "message": ""
             }
         },
-        "wineprefix": "Vyberte Wine Prefix Folder",
+        "wineprefix": "Vyberte Priečinok WinePrefix",
         "yes": "ÁNO",
         "dontShowAgain": "Už nezobrazovať",
         "choose-nile-binary": "Vyberte binárny Níl",
@@ -262,8 +262,8 @@
             "refresh": "Obnoviť Knižnicu"
         },
         "abort": "",
-        "install": "",
-        "uninstall": ""
+        "install": "Inštalácia",
+        "uninstall": "Odinštalovať"
     },
     "globalSettings": "Global Settings",
     "GOG": "GOG",
@@ -707,13 +707,6 @@
         "offlinemode": "Spustite hru offline",
         "prefered_language": "Prefered Language (Language Code)",
         "preferSystemLibs": "Prefer system libraries",
-        "primerun": {
-            "confirmation": {
-                "message": "Only one graphics card was detected in this system. Please note that this option is intended for multi-GPU systems with headless GPUs (like laptops). On single-GPU systems, the GPU is automatically used & enabling this option can cause issues. Do you really want to enable this option?",
-                "title": "Only 1 GPU detected"
-            },
-            "description": "Use Dedicated Graphics Card"
-        },
         "runexe": {
             "message": "Presuňte sem súbory",
             "title": "Select EXE to Run"
@@ -988,8 +981,8 @@
             "search": "",
             "loading": "",
             "open_folder": "",
-            "update": "",
-            "settings": "",
+            "update": "Aktualizovať",
+            "settings": "Nastavenia",
             "no-results": ""
         },
         "release": "Release Date",
@@ -1170,7 +1163,7 @@
         "filters": {
             "moreFilters": "",
             "ageRating": "",
-            "os": "",
+            "os": "Operačný Systém:",
             "price": "",
             "activeCount_other": "",
             "hideDlcs": "",
@@ -1183,7 +1176,7 @@
             "genresPlaceholder": "",
             "features": "",
             "featuresPlaceholder": "",
-            "ageRatingAll": "",
+            "ageRatingAll": "Všetky",
             "pageSize": "",
             "releaseYear": ""
         },
@@ -1241,19 +1234,19 @@
             "launch": "",
             "sort": "",
             "navigate": "",
-            "quit": "",
+            "quit": "Quit",
             "change_store": ""
         },
-        "launching": "",
+        "launching": "Spúšťam",
         "card": {
             "needsUpdate": ""
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Other",
+            "all": "Všetky"
         },
         "empty": "",
-        "games": "",
+        "games": "Nainštalované hry",
         "quitApp": "",
         "loading": ""
     },

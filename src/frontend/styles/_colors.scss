@@ -73,7 +73,9 @@ body {
 
 a {
   color: var(--text-default);
-  text-decoration: none;
+  &:not(.underlined) {
+    text-decoration: none;
+  }
 }
 
 .simple-keyboard-wrapper {

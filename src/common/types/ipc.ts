@@ -337,7 +337,8 @@ interface AsyncIPCFunctions {
   isIntelMac: () => boolean
   getGogDiscounts: (
     locale: CatalogLocaleSettings,
-    hideOwned?: boolean
+    hideOwned?: boolean,
+    wishlistOnly?: boolean
   ) => Promise<CatalogProduct[]>
   'steamgriddb.hasApiKey': () => Promise<boolean>
   'steamgriddb.setApiKey': (key: string) => Promise<void>

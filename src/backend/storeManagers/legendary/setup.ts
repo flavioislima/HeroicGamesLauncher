@@ -43,7 +43,8 @@ export const legendarySetup = async (appName: string, logWriter: LogWriter) => {
   if (
     gameInfo.install.platform &&
     winPlatforms.includes(gameInfo.install.platform) &&
-    !gameInfo.isEAManaged
+    !gameInfo.isEAManaged &&
+    !gameInfo.isUbisoftManaged
   ) {
     try {
       const info = await getInstallInfo(appName, gameInfo.install.platform)
@@ -85,6 +86,19 @@ export const legendarySetup = async (appName: string, logWriter: LogWriter) => {
       })
     } catch (e) {
       logError(`Failed to run EA App installer ${e}`, LogPrefix.Legendary)
+    }
+  } else if (gameInfo.isUbisoftManaged) {
+    const installerPath = join(epicRedistPath, 'UbisoftConnectInstaller.exe')
+    console.log('Installing', installerPath)
+    try {
+      await runWineCommand({
+        gameSettings,
+        commandParts: [installerPath, '/S'],
+        wait: true,
+        protonVerb: 'run'
+      })
+    } catch (e) {
+      logError(`Failed to run Ubisoft installer ${e}`, LogPrefix.Legendary)
     }
   }
 

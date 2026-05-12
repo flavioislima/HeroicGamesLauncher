@@ -755,13 +755,6 @@
         "minimize-on-launch": "O'yin boshlanganidan keyin qahramonlikni minimallashtiring",
         "offlinemode": "O'yinni oflayn rejimda ishga tushiring",
         "preferSystemLibs": "Tizim kutubxonalarini afzal ko'ring",
-        "primerun": {
-            "confirmation": {
-                "message": "Ushbu tizimda faqat bitta grafik karta aniqlandi. Shuni esda tutingki, ushbu parametr boshsiz GPUli (noutbuklar kabi) ko'p GPUli tizimlar uchun mo'ljallangan. Yagona GPUli tizimlarda GPU avtomatik ravishda ishlatiladi va bu opsiyani yoqish muammolarga olib kelishi mumkin. Haqiqatan ham bu variantni yoqmoqchimisiz?",
-                "title": "Faqat 1 ta GPU aniqlandi"
-            },
-            "description": "Maxsus grafik kartadan foydalaning"
-        },
         "runexe": {
             "message": "Fayllarni bu yerga sudrab tashlang",
             "title": "Prefiksda EXE-ni ishga tushiring"

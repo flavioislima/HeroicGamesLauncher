@@ -269,7 +269,7 @@
         "library": {
             "refresh": "Värskenda varamut"
         },
-        "abort": "",
+        "abort": "Katkesta",
         "install": "Paigaldus",
         "uninstall": "Eemalda"
     },
@@ -715,13 +715,6 @@
         "offlinemode": "Käivita mäng võrguühenduseta",
         "prefered_language": "Eelistatud keel (keelekood)",
         "preferSystemLibs": "Eelista süsteemiteeke",
-        "primerun": {
-            "confirmation": {
-                "message": "Süsteemis tuvastati ainult üks graafikakaart. Pange tähele, et see valik on mõeldud ainult mitme GPU-ga süsteemide jaoks, millel on 'headless' GPU-d (näiteks sülearvutid). Ühe GPU-ga süsteemidel on GPU automaatselt kasutuses, ning see valik võib tekitada probleeme. Kas soovite tõesti seda valikut lubada?",
-                "title": "Ainult 1 graafikaprotsessor tuvastatud"
-            },
-            "description": "Kasuta pühendatud graafikakaarti"
-        },
         "runexe": {
             "message": "Lohistage failid siia",
             "title": "Käivita EXE prefiksil"
@@ -820,7 +813,7 @@
         "scripts": "Skriptid:",
         "enable-quick-sync-menu": "Luba kiire salvestuste sünkroonimine mängu lehel",
         "disable_gog_presence": "Keela GOG Presence'i uuendused",
-        "start-in-console-mode": ""
+        "start-in-console-mode": "Alusta Konsoolirežiimis"
     },
     "settings": {
         "battlEyeRuntime": {
@@ -929,12 +922,12 @@
         "legacy_warning": "Hoiatus: Sätted sellel vahelehel on enamasti aegunud ja ei pruugi üldse toimida.",
         "steamgriddb": {
             "apikey": {
-                "title": "",
-                "placeholder": "",
-                "placeholder_saved": ""
+                "title": "SteamGridDB API võti",
+                "placeholder": "Sisestage SteamGridDB API võti siia",
+                "placeholder_saved": "Võti salvestatud — kirjutage siia, et asendada; tühjendage, et eemaldada"
             },
             "help": {
-                "description": ""
+                "description": "Varustage oma SteamGridDB API võti, et lubada mängude kaanepiltide otsing. Võti talletatakse krüpteeritult, kui teie süsteem seda toetab. Võite leida võtme aadressil www.steamgriddb.com/profile/preferences/api"
             }
         }
     },
@@ -942,7 +935,7 @@
     "sidebar": {
         "collapse": "Ahenda külgriba",
         "uncollapse": "Lahtista külgriba",
-        "console": ""
+        "console": "Konsoolirežiim"
     },
     "status": {
         "installing": "Paigaldamine",
@@ -1000,12 +993,12 @@
             "not-found": "Wine'i versioone ei leitud. Palun klikkige.",
             "title": "Wine'i haldur",
             "unzipping": "Lahtipakkimine",
-            "search": "",
-            "loading": "",
-            "open_folder": "",
+            "search": "Otsi versioone...",
+            "loading": "Laen wine versioone...",
+            "open_folder": "Ava kaust",
             "update": "Uuendus",
             "settings": "Seaded",
-            "no-results": ""
+            "no-results": "Teie otsing ei vastanud ühelegi Wine'i otsingule."
         },
         "release": "Väljalaske kuupäev",
         "size": "Suurus",
@@ -1062,9 +1055,9 @@
     "wineExplanation": {
         "proton-ge": "GE-Proton on Protoni variant, mille lõi Glorious Eggroll. See on mõeldud Steami jaoks kasutamiseks, aga mõned Steami-välised mängud võivad sellega paremini töötada. Selle tõrkeotsingu logid on enamasti kasutud.",
         "wine-ge": "Wine-GE-Proton on Wine'i variant, mille lõi Glorious Eggroll. See on soovitatav Wine'i versioon, mida kasutada väljaspool Steami. Selle tõrkeotsingu logid on kasulikud ja asjakohased.",
-        "gpt": "",
-        "wine-crossover": "",
-        "wine-staging-macos": ""
+        "gpt": "Game Porting Toolkit on arendatud Apple'i poolt ja on soovitatav Apple Siliconi Macidele M1+ kiipidega ja töötab kõige paremini uuemate mängude puhul, mis kasutavad DX12-t.",
+        "wine-crossover": "Wine-Crossover põhineb Crossover OpenSource Wine'i projektil ja on soovitatav Inteli Macidele ja DX11 või vanemate mängude puhul.",
+        "wine-staging-macos": "Wine-Staging-macOS põhineb peavoolu Wine'i projektil ja on soovitatav Inteli Macidele ja DX11 või vanemate mängude puhul, eriti koos DXMT tööriistaga."
     },
     "adtraction-locked": {
         "description": "Näib, et track.adtraction.com domeeni ei olnud võimalik laadida või on keelatud. Tänu adtractionile, iga ost, mida GOG poes teete, toetab rahaliselt Heroicut. Kui soovite aidata, palun eemaldage keeld.",
@@ -1156,128 +1149,130 @@
     "discounts": {
         "region": {
             "countries": {
-                "IT": "",
-                "ES": "",
-                "FI": "",
-                "GR": "",
-                "RO": "",
-                "NO": "",
-                "KR": "",
-                "US": "",
-                "HU": "",
-                "PT": "",
-                "NL": "",
-                "AU": "",
-                "TW": "",
-                "IL": "",
-                "JP": "",
-                "DK": "",
-                "DE": "",
-                "CZ": "",
-                "FR": "",
-                "UA": "",
-                "GB": "",
-                "SE": "",
-                "CN": "",
-                "RU": "",
-                "CA": "",
-                "PL": "",
-                "BR": "",
-                "CH": "",
-                "TR": ""
+                "IT": "Itaalia",
+                "ES": "Hispaania",
+                "FI": "Soome",
+                "GR": "Kreeka",
+                "RO": "Rumeenia",
+                "NO": "Norra",
+                "KR": "Lõuna-Korea",
+                "US": "Ameerika Ühendriigid",
+                "HU": "Ungari",
+                "PT": "Portugal",
+                "NL": "Holland",
+                "AU": "Austraalia",
+                "TW": "Taiwan",
+                "IL": "Iisrael",
+                "JP": "Jaapan",
+                "DK": "Taani",
+                "DE": "Saksamaa",
+                "CZ": "Tšehhi",
+                "FR": "Prantsusmaa",
+                "UA": "Ukraina",
+                "GB": "Ühendkuningriik",
+                "SE": "Rootsi",
+                "CN": "Hiina",
+                "RU": "Venemaa",
+                "CA": "Kanada",
+                "PL": "Poola",
+                "BR": "Brasiilia",
+                "CH": "Šveits",
+                "TR": "Türgi"
             },
-            "auto": "",
-            "label": ""
+            "auto": "Automaatne ({{code}})",
+            "label": "Poe regioon"
         },
         "filters": {
-            "moreFilters": "",
-            "ageRating": "",
+            "moreFilters": "Rohkem filtreid",
+            "ageRating": "Sobilik vanusele",
             "os": "Operatsioonisüsteem:",
-            "price": "",
-            "activeCount_other": "",
-            "hideDlcs": "",
-            "ageRatingOption": "",
-            "genres": "",
-            "activeCount_one": "",
-            "lessFilters": "",
-            "rating": "",
-            "sort": "",
-            "genresPlaceholder": "",
-            "features": "",
-            "featuresPlaceholder": "",
+            "price": "Hind",
+            "activeCount_other": "{{count}} aktiivsed",
+            "hideDlcs": "Peida DLC-d",
+            "ageRatingOption": "Näita mänge PEGI reitinguga {{age}} või noorem",
+            "genres": "Žanrid",
+            "activeCount_one": "{{count}} aktiivsed",
+            "lessFilters": "Vähem filtreid",
+            "rating": "Reiting",
+            "sort": "Sorteerimisalus",
+            "genresPlaceholder": "Mis tahes žanr",
+            "features": "Omadused",
+            "featuresPlaceholder": "Mis tahes omadus",
             "ageRatingAll": "Kõik",
-            "pageSize": "",
-            "releaseYear": ""
+            "pageSize": "Igal leheküljel",
+            "releaseYear": "Väljalaske aasta",
+            "hideOwned": "Peida kuuluvad",
+            "wishlistOnly": "Ainult soovinimekirjas"
         },
-        "sidebar": "",
+        "sidebar": "Allahindlused",
         "sort": {
-            "priceDesc": "",
-            "trending": "",
-            "priceAsc": "",
-            "releaseDesc": "",
-            "ratingAsc": "",
-            "releaseAsc": "",
-            "ratingDesc": "",
-            "discount": ""
+            "priceDesc": "Hind: kallist odavaks",
+            "trending": "Trendiv",
+            "priceAsc": "Hind: odavast kalliks",
+            "releaseDesc": "Väljalaskekuupäev: uuest vanaks",
+            "ratingAsc": "Reiting: madalast kõrgeks",
+            "releaseAsc": "Väljalaskekuupäev: vanast uueks",
+            "ratingDesc": "Reiting: kõrgest madalaks",
+            "discount": "Suurim allahindlus"
         },
-        "noMatches": "",
+        "noMatches": "Ükski mäng ei vasta praegustele filtritele.",
         "aria": {
-            "pagination": "",
-            "rating": ""
+            "pagination": "Leheküljed",
+            "rating": "Reiting {{rating}} 10-st"
         },
-        "error": "",
-        "empty": "",
-        "loading": "",
-        "title": "",
+        "error": "Allahindlusi polnud võimalik laadida. Palun proovige hiljem uuesti.",
+        "empty": "Ühtegi allahinnatud mängu pole hetkel saadaval.",
+        "loading": "Laen allahinnatud mänge...",
+        "title": "GOG allahindlused",
         "pagination": {
-            "prev": ""
+            "prev": "Eelmine"
         }
     },
     "steamgriddb": {
         "error": {
             "no-games": "Mänge ei leitud",
-            "no-grids": "",
-            "search": "",
-            "grids": ""
+            "no-grids": "Selle mängu jaoks ei leitud kaanepilte.",
+            "search": "Ei suutnud mänge otsida, palun kontrollige oma SteamGridDB API võtit ja proovige uuesti",
+            "grids": "Ei suutnud ruudustikke hankida"
         },
         "picker": {
-            "search": "",
-            "title": "",
-            "select-game": ""
+            "search": "Otsi mängu",
+            "title": "SteamGridDB kaanepildid",
+            "select-game": "Valige mäng:"
         }
     },
     "console": {
         "update": {
-            "hintPrefix": "",
-            "body": "",
-            "title": "",
-            "hintSuffix": ""
+            "hintPrefix": "Vajuta",
+            "body": "Sellele mängule on uuendus saadaval. Palun lahkuge Konsoolirežiimist ja uuendage mängu enne käivitamist.",
+            "title": "Uuendus nõutav",
+            "hintSuffix": "et tagasi minna"
         },
-        "sort": "",
+        "sort": "Sorteeri",
         "cancel": {
-            "hintSuffix": "",
-            "hintPrefix": ""
+            "hintSuffix": "3 sekundit tühistamiseks",
+            "hintPrefix": "Hoia"
         },
-        "quit": "",
+        "quit": "Lahku Konsoolist",
         "hints": {
-            "launch": "",
-            "sort": "",
-            "navigate": "",
+            "launch": "Käivita",
+            "sort": "Sorteeri",
+            "navigate": "Navigeeri",
             "quit": "Lahku",
-            "change_store": ""
+            "change_store": "Vaheta poodi"
         },
-        "launching": "",
+        "launching": "Käivitamas",
         "card": {
-            "needsUpdate": ""
+            "needsUpdate": "Vajab uuendamist"
         },
         "filter": {
             "sideload": "Other",
             "all": "Kõik"
         },
-        "empty": "",
+        "empty": "Pole ühtegi paigaldatud mängu näidata. Paigalda midagi.",
         "games": "Paigaldatud mängud",
-        "quitApp": "",
-        "loading": ""
+        "quitApp": "Lahku äpist",
+        "loading": "Varamu laadimine…"
     },
     "next": "Järgmine"
 }

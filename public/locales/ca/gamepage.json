@@ -34,13 +34,13 @@
         },
         "uninstall": {
             "checkbox": "Suprimeix el prefix: {{prefix}}{{newLine}}Avís: No es pot desfer i també suprimirà les partides desades de les quals no s'hagin fet còpies de seguretat.",
-            "message": "Vols desinstal·lar «{{title}}» (DLC)?",
+            "message": "Vols desinstal·lar «{{title}}»?",
             "settingcheckbox": "Esborra la configuració i suprimeix el registre{{newLine}}Avís: aquesta acció no es pot desfer. S'oblidarà qualsevol opció modificada i el registre se suprimirà.",
             "title": "Desinstal·la",
             "prefix_warning": "El prefix Wine d'aquest joc és el prefix predefinit. Si realment vols eliminar-lo, has de fer-ho manualment.",
             "dlc": "Vols desinstal·lar \"{{title}}\" (DLC)?",
             "cannotUninstallEpic": "No es poden desinstal·lar jocs d'Epic Games mentre s'instal·la un altre joc d'Epic Games.",
-            "gameIsRunning": "{{title}} ja s'executa. Tanqueu el joc per a desinstal·lar-lo."
+            "gameIsRunning": "{{title}} ja s'executa. Tanca el joc per a desinstal·lar-lo."
         },
         "update": {
             "message": "Hi ha una actualització per a aquest joc, el vols actualitzar ara?",
@@ -55,17 +55,17 @@
         },
         "ok": "D'acord",
         "offline_warning": {
-            "message": "",
-            "playAnyway": "",
-            "title": ""
+            "message": "Aquest joc podria no funcionar bé fora de línia. Vols jugar-lo igualment?",
+            "playAnyway": "Juga'l igualment",
+            "title": "Avís de fora de línia"
         },
         "selectLaunchOption": {
-            "title": "",
-            "body": ""
+            "title": "Selecciona una opció d'execució ({{seconds}} s)",
+            "body": "Selecciona una opció d'execució per al joc (es pot canviar més endavant, en la configuració del joc):"
         },
         "sync": {
-            "force_download_warning": "",
-            "force_upload_warning": ""
+            "force_download_warning": "S'esborraran les partides desades locals. Vols continuar?",
+            "force_upload_warning": "Se sobreescriuran les partides desades al núvol. Vols continuar?"
         }
     },
     "button": {
@@ -132,7 +132,7 @@
         "modify": "Modifica la instal·lació",
         "extra_info": "Informació addicional",
         "install_info": "Informació de la instal·lació",
-        "achievements": ""
+        "achievements": "Assoliments"
     },
     "gamecard": {
         "moving": "S'està movent",
@@ -180,7 +180,7 @@
             "multiplayer_message": "El suport antitrampes està trencat o s'ha blocat. El joc pot executar-se, però les característiques multijugador no funcionaran. Vols instal·lar-lo igualment?",
             "install_anyway": "Sí (entenc que les funcions multijugador no funcionen)",
             "ok": "D'acord",
-            "disabled_installation": "Aquest joc fa servir programari antitrampes que no és compatible amb el vostre sistema operatiu o els desenvolupadors del joc no n'han activat el suport. Això significa que les funcions multijugador no funcionaran i no hi ha res que pugueu fer per a resoldre-ho ‒ni tan sols l'equip de l'Heroic.<br /><br />Per a instal·lar aquest joc i provar-lo de totes maneres, aneu a Configuració→Avançat i seleccioneu l'opció d'instal·lar jocs amb antitrampes trencat o denegat.<br /><br />Tingueu en compte que no hi ha manera de resoldre-ho i us arrisqueu a què us expulsin de les partides."
+            "disabled_installation": "Aquest joc fa servir programari antitrampes que no és compatible amb el teu sistema operatiu, o els desenvolupadors del joc no n'han activat la compatibilitat. Això significa que les funcions multijugador no funcionaran i no hi ha res que pugues fer per a resoldre-ho, ni tan sols l'equip de l'Heroic.<br /><br />Per a instal·lar aquest joc i provar-lo de totes maneres, ves a Configuració → Avançat i selecciona l'opció d'instal·lar jocs amb antitrampes trencat o denegat.<br /><br />Tingues en compte que no hi ha manera de resoldre-ho i t'arrisques a què t'expulsin de les partides."
         },
         "flatpak-path-not-writtable": "Error: L'accés lliure a aquest camí no està garantit. Potser es perden dades."
     },
@@ -197,7 +197,7 @@
         "saves": {
             "syncing": "S'estan sincronitzant les partides"
         },
-        "launching": "S'inicia",
+        "launching": "S'executa",
         "ubisoft": "S'instal·la l'Ubisoft Connect",
         "winetricks": "S'estan instal·lant els paquets del Winetricks",
         "prerequisites": "S'estan instal·lant els prerequisits",
@@ -231,7 +231,7 @@
     },
     "launch": {
         "options": "Opcions d'execució...",
-        "default": ""
+        "default": "Predefinit"
     },
     "not_logged_in": {
         "epic": "No has iniciat sessió amb un compte d'Epic a l'Heroic. No facis servir la pàgina de la botiga per a iniciar-la. Fes-ho després de prémer el botó següent:",
@@ -239,7 +239,7 @@
         "login": "Inicia la sessió",
         "title": "No has iniciat sessió",
         "amazon": "No has iniciat sessió amb un compte d'Amazon a l'Heroic. No facis servir la pàgina de la botiga per a iniciar-la, fes-ho millor amb aquest botó:",
-        "zoom": "No heu iniciat sessió amb un compte Zoom a Heroic. No utilitzeu la pàgina de la botiga per iniciar la sessió, en lloc feu clic al botó següent:"
+        "zoom": "No has iniciat sessió amb un compte Zoom a Heroic. No utilitzes la pàgina de la botiga per iniciar la sessió, en compte d'això fes clic al botó següent:"
     },
     "report_problem": "Informa d'un problema quan s'executa el joc",
     "sdl": {
@@ -247,7 +247,7 @@
     },
     "setting": {
         "winecrossoverbottle": "Ampolla CrossOver",
-        "warn-use-shared-wine-config": "Feu servir aquesta opció només si sabeu què feu.<br/>Si es comparteix el mateix prefix per a diversos jocs, poden produir-se alguns problemes si les seves dependències no són compatibles.",
+        "warn-use-shared-wine-config": "Fes servir aquesta opció només si saps què fas.<br/>Si es comparteix el mateix prefix per a diversos jocs, poden produir-se alguns problemes si les seves dependències no són compatibles.",
         "show-wine-settings": "Mostra la configuració del Wine",
         "use-shared-wine-config": "Usa el prefix del Wine compartit"
     },
@@ -261,17 +261,17 @@
             "title": "Títol del joc o aplicació",
             "broser": "URL del navegador",
             "useragent": "Agent d'usuari personalitzat",
-            "fullscreen": "Inicia a pantalla completa (F11 per a sortir)"
+            "fullscreen": "Executa a pantalla completa (F11 per a sortir)"
         },
         "placeholder": {
             "image": "Enganxa l'URL d'una imatge o selecciona'n una del teu ordinador",
             "title": "Afegeix un títol al joc o aplicació",
-            "url": "Enganxeu l'URL del joc aquí",
+            "url": "Enganxa l'URL del joc aquí",
             "useragent": "Escriviu aquí un agent d'usuari personalitzat per a fer-lo servir en aquesta aplicació/joc de navegador."
         },
         "import-hint": {
             "title": "Important! Si vols afegir un joc d'Epic/GOG/Amazon, fes clic aquí.",
-            "content": "No feu servir aquesta funció per a això.<br />En el seu lloc, <3>inicieu sessió</3> a la botiga, busqueu el joc a la vostra biblioteca, obriu el diàleg d'instal·lació i feu clic al botó &quot;Importa un joc&quot;."
+            "content": "No facis servir aquesta funció per a això.<br />En el seu lloc, <3>inicia la sessió</3> a la botiga, cerca el joc a la teva biblioteca, obre el diàleg d'instal·lació i fes clic al botó &quot;Importa un joc&quot;."
         }
     },
     "specs": {
@@ -298,11 +298,11 @@
         "playing": "Jugant",
         "moving-files": "Es mou el fitxer «{{file}}»: {{percent}} %",
         "syncingSaves": "S'estan sincronitzant les partides",
-        "launching": "S'està iniciant",
+        "launching": "S'està executant",
         "ubisoft": "Instal·lació d'Ubisoft",
         "downloading": "S'està baixant",
         "extracting": "S'està extraient",
-        "gog-goodie": "Sembla que aquest joc no es pot instal·lar. Comproveu el contingut descarregable a https://gog.com/account",
+        "gog-goodie": "Sembla que aquest joc no es pot instal·lar. Comprova el contingut descarregable a https://gog.com/account",
         "goodie": "No instal·lable",
         "prerequisites": "S'estan instal·lant els prerequisits",
         "winetricks": "S'estan aplicant les correccions del Winetricks",
@@ -327,7 +327,7 @@
         "categories": "Categories"
     },
     "help": {
-        "cloud_save_unsupported": "Aquest joc no admet desacions al núvol. Aquesta informació la proporcionen els desenvolupadors del joc. Alguns jocs implementen el seu propi sistema de desat al núvol",
+        "cloud_save_unsupported": "Aquest joc no admet partides desades al núvol. Aquesta informació la proporcionen els desenvolupadors del joc. Alguns jocs implementen el seu propi sistema de desament al núvol.",
         "content": {
             "gamePage": "Mostra tots els detalls i accions del joc. Utilitza el menú dels 3 punts per a més opcions."
         },
@@ -359,5 +359,5 @@
             "resume": "Reprèn la descàrrega"
         }
     },
-    "open-saves-folder": ""
+    "open-saves-folder": "Obre la carpeta de partides"
 }

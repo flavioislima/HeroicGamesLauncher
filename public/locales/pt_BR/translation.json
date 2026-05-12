@@ -269,7 +269,7 @@
         "library": {
             "refresh": "Atualizar biblioteca"
         },
-        "abort": "",
+        "abort": "Abortar",
         "install": "Instalar",
         "uninstall": "Uninstall"
     },
@@ -716,13 +716,6 @@
         "offlinemode": "Iniciar o jogo offline",
         "prefered_language": "Idioma preferido (código do idioma)",
         "preferSystemLibs": "Preferir as bibliotecas do sistema",
-        "primerun": {
-            "confirmation": {
-                "message": "Somente uma placa de vídeo foi detectada nesse sistema. Note que essa opção é orientada para sistemas multi-GPU com GPUs headless (como laptops). Em sistemas com uma única GPU, a GPU é automaticamente usada & habilitar essa opção pode causar problemas. Realmente quer habilitar essa opção?",
-                "title": "Somente 1 GPU detectada"
-            },
-            "description": "Usar placa gráfica dedicada"
-        },
         "runexe": {
             "message": "Arraste e solte arquivos aqui",
             "title": "Executar EXE no prefixo"
@@ -822,7 +815,7 @@
         "scripts": "Scripts:",
         "enable-quick-sync-menu": "Ativar o Menu de Sincronização Rápida de Saves na página do jogo",
         "disable_gog_presence": "Desativar atualizações do GOG Presence",
-        "start-in-console-mode": ""
+        "start-in-console-mode": "Iniciar em modo console"
     },
     "settings": {
         "battlEyeRuntime": {
@@ -931,12 +924,12 @@
         "legacy_warning": "Aviso: A maioria das configurações nesta aba estão obsoletas e podem não funcionar.",
         "steamgriddb": {
             "apikey": {
-                "title": "",
-                "placeholder": "",
-                "placeholder_saved": ""
+                "title": "Chave de API do SteamGridDB",
+                "placeholder": "Insira aqui sua chave de API do SteamGridDB",
+                "placeholder_saved": "Chave salva — digite para substituí-la, apague para removê-la"
             },
             "help": {
-                "description": ""
+                "description": "Forneça sua própria chave de API do SteamGridDB para habilitar a busca por capas de jogos. A chave é armazenada criptografada se seu sistema suportar. Você pode obter uma em www.steamgriddb.com/profile/preferences/api"
             }
         }
     },
@@ -944,7 +937,7 @@
     "sidebar": {
         "collapse": "Recolher barra lateral",
         "uncollapse": "Mostrar barra lateral",
-        "console": ""
+        "console": "Modo console"
     },
     "status": {
         "installing": "Instalando",
@@ -971,7 +964,7 @@
         "about": "Sobre o Heroic",
         "quit": "Sair do Heroic",
         "reload": "Recarregar o Heroic",
-        "show": "Mostar o Heroic"
+        "show": "Mostrar o Heroic"
     },
     "two_col_table": {
         "save_hint": "Alterações nesta tabela não são salvas automaticamente. Clique no botão +"
@@ -1002,12 +995,12 @@
             "not-found": "Nenhuma versão do Wine encontrada. Clique no ícone de recarregar para tentar novamente.",
             "title": "Versões do Wine",
             "unzipping": "Descompactando",
-            "search": "",
-            "loading": "",
-            "open_folder": "",
+            "search": "Buscar versões...",
+            "loading": "Carregando versões do Wine...",
+            "open_folder": "Abrir pasta",
             "update": "Atualizar",
             "settings": "Configurações",
-            "no-results": ""
+            "no-results": "Nenhuma versão do Wine corresponde à sua busca."
         },
         "release": "Data de lançamento",
         "size": "Tamanho",
@@ -1209,7 +1202,8 @@
             "featuresPlaceholder": "Qualquer recurso",
             "ageRatingAll": "Todos",
             "pageSize": "Por página",
-            "releaseYear": "Ano de lançamento"
+            "releaseYear": "Ano de lançamento",
+            "hideOwned": "Ocultar possuídos"
         },
         "sidebar": "Descontos",
         "sort": {
@@ -1238,13 +1232,13 @@
     "steamgriddb": {
         "error": {
             "no-games": "Nenhum Jogo Encontrado",
-            "no-grids": "",
-            "search": "",
+            "no-grids": "Nenhuma capa encontrada para este jogo.",
+            "search": "Falha ao buscar jogos, por favor verifique sua chave de API do SteamGridDB e tente novamente",
             "grids": ""
         },
         "picker": {
-            "search": "",
-            "title": "",
+            "search": "Buscar jogo",
+            "title": "Capas do SteamGridDB",
             "select-game": ""
         }
     },
@@ -1276,7 +1270,7 @@
             "sideload": "Other",
             "all": "Todos"
         },
-        "empty": "Não há nenhumn jogo instalado. Instale algum primeiro.",
+        "empty": "Não há nenhum jogo instalado. Instale algum primeiro.",
         "games": "Jogos instalados",
         "quitApp": "Fechar o App",
         "loading": "Carregando sua biblioteca…"

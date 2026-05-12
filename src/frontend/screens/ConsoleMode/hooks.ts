@@ -105,11 +105,13 @@ export function useColumnCount(
       const cards = (cardRefs.current ?? []).filter(
         (el): el is HTMLElement => !!el
       )
+
       if (cards.length < 2) {
         setColumns(1)
         return
       }
       const firstTop = cards[0].offsetTop
+
       let count = 1
       for (let i = 1; i < cards.length; i++) {
         if (cards[i].offsetTop !== firstTop) break

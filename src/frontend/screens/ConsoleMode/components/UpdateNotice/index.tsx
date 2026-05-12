@@ -9,14 +9,10 @@ import type { GameInfo } from 'common/types'
 
 export default function UpdateNotice({
   game,
-  onDismiss,
-  gamepadConnected,
-  backButtonLabel
+  onDismiss
 }: {
   game: GameInfo
   onDismiss: () => void
-  gamepadConnected: boolean
-  backButtonLabel: string
 }) {
   const { t } = useTranslation()
 
@@ -38,7 +34,7 @@ export default function UpdateNotice({
     }
     window.addEventListener('keydown', onKeyDown, true)
     return () => window.removeEventListener('keydown', onKeyDown, true)
-  }, [onDismiss])
+  }, [])
 
   useGamepadButtonPress(BTN_BACK, onDismiss)
 
@@ -62,8 +58,6 @@ export default function UpdateNotice({
       <BackHint
         prefix={t('console.update.hintPrefix', 'Press')}
         suffix={t('console.update.hintSuffix', 'to go back')}
-        gamepadConnected={gamepadConnected}
-        backButtonLabel={backButtonLabel}
       />
     </div>
   )

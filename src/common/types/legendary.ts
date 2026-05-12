@@ -106,6 +106,10 @@ type CustomAttributeType =
   | 'extraLaunchOption_001_Name'
   | 'ThirdPartyManagedApp'
   | 'AdditionalCommandLine'
+  | 'ThirdPartyManagedProvider'
+  | 'GameID'
+  | 'RegistryKey'
+  | 'RegistryPath'
 
 interface CustomAttributeValue {
   type: 'STRING'

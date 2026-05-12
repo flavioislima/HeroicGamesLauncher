@@ -189,7 +189,7 @@
                 "title": "Rosetta non trovato"
             }
         },
-        "wineprefix": "Seleziona la cartella del prefisso di Wine",
+        "wineprefix": "Select WinePrefix Folder",
         "yes": "SI",
         "dontShowAgain": "Non mostrare più",
         "choose-nile-binary": "Seleziona binario di Nile",
@@ -244,7 +244,7 @@
             "end-time": "Finito alle",
             "queue-time": "Aggiunto a",
             "start-time": "Iniziato il",
-            "type": "Type"
+            "type": "Tipo"
         },
         "title": "Download",
         "ETA": "Tempo stimato"
@@ -269,9 +269,9 @@
         "library": {
             "refresh": "Aggiorna libreria"
         },
-        "abort": "",
-        "install": "",
-        "uninstall": ""
+        "abort": "Interrompi",
+        "install": "Installa",
+        "uninstall": "Disinstalla"
     },
     "globalSettings": "Impostazioni globali",
     "GOG": "GOG",
@@ -715,13 +715,6 @@
         "offlinemode": "Avvia il gioco in modalità offline",
         "prefered_language": "Lingua Preferita (Codice Lingua)",
         "preferSystemLibs": "Preferisci librerie di sistema",
-        "primerun": {
-            "confirmation": {
-                "message": "È stata rilevata una sola scheda video in questo apparecchio. Nota che questa opzione è solo per apparecchi multi-GPU con headless GPU (come i portatili). Su apparecchi con una sola GPU la GPU è utilizzata automaticamente e abilitare questa opzione può causare problemi. Vuoi veramente abilitare questa opzione?",
-                "title": "È stata rilevata 1 GPU"
-            },
-            "description": "Utilizza la scheda grafica dedicata"
-        },
         "runexe": {
             "message": "Trascina e rilascia i files qui",
             "title": "Avvia l'EXE nel prefix"
@@ -818,7 +811,7 @@
         "scripts": "Script:",
         "enable-quick-sync-menu": "Abilita il menu rapido di sincronizzazione dei salvataggi nella pagina del gioco",
         "disable_gog_presence": "Disattiva gli aggiornamenti di GOG Presence",
-        "start-in-console-mode": ""
+        "start-in-console-mode": "Avvia in Modalità Console"
     },
     "settings": {
         "battlEyeRuntime": {
@@ -927,12 +920,12 @@
         "legacy_warning": "Avviso: la maggior parte delle impostazioni in questa scheda sono obsolete e potrebbero non funzionare.",
         "steamgriddb": {
             "apikey": {
-                "title": "",
-                "placeholder": "",
-                "placeholder_saved": ""
+                "title": "SteamGridDB chiave API",
+                "placeholder": "Inserisci la chiave API di SteamGridDB qui",
+                "placeholder_saved": "Chiave salvata - scrivi per sostituirla, cancella per rimuovere"
             },
             "help": {
-                "description": ""
+                "description": "Fornisci la tua chiave API SteamGridDB per abilitare la ricerca delle copertine dei giochi. La chiave viene memorizzata in forma crittografata se il tuo sistema lo supporta. Puoi ottenerne una su www.steamgriddb.com/profile/preferences/api"
             }
         }
     },
@@ -940,7 +933,7 @@
     "sidebar": {
         "collapse": "Nascondi barra laterale",
         "uncollapse": "Mostra barra laterale",
-        "console": ""
+        "console": "Modalità Console"
     },
     "status": {
         "installing": "Installazione in corso",
@@ -998,12 +991,12 @@
             "not-found": "Nessuna versione di Wine trovata. Per favore clicca l'icona ricarica per provare ancora.",
             "title": "Gestore di Wine",
             "unzipping": "Decompressione in corso",
-            "search": "",
-            "loading": "",
-            "open_folder": "",
-            "update": "",
-            "settings": "",
-            "no-results": ""
+            "search": "Ricerca versioni...",
+            "loading": "Caricamento versioni di wine...",
+            "open_folder": "Apri Cartella",
+            "update": "Aggiorna",
+            "settings": "Impostazioni",
+            "no-results": "Nessuna versione di Wine trovata dalla tua ricerca."
         },
         "release": "Release Date",
         "size": "Dimensione",
@@ -1066,9 +1059,9 @@
     "wineExplanation": {
         "wine-ge": "Wine-GE-Proton è una variante Wine creata da Glorious Eggroll. È stato deprecata in favore di Proton-GE con il launcher UMU.",
         "proton-ge": "GE-Proton è una variante di Proton creata da Glorious Eggroll. È pensato per essere utilizzato su Steam, ma alcuni giochi esterni a Steam potrebbero funzionare meglio con questa variante. Fornisce logs per lo più inutili per la risoluzione dei problemi.",
-        "gpt": "",
-        "wine-crossover": "",
-        "wine-staging-macos": ""
+        "gpt": "Game Porting Toolkit è sviluppato da Apple ed è consigliato per i Mac con processori Apple Silicon M1+, offrendo prestazioni ottimali con i giochi più recenti che utilizzano le DirectX 12.",
+        "wine-crossover": "Wine-Crossover si basa sul progetto open source Crossover Wine ed è consigliato per Mac con processore Intel e per giochi con DirectX 11 o versioni precedenti.",
+        "wine-staging-macos": "Wine-Staging-macOS si basa sul progetto Wine principale ed è consigliato per Mac con processore Intel e per giochi compatibili con DirectX 11 o versioni precedenti, soprattutto se utilizzato in combinazione con lo strumento DXMT."
     },
     "adtraction-locked": {
         "description": "Sembra che il dominio track.adtraction.com non si sia caricato o sia bloccato. Con adtraction, ogni acquisto che fai nel GOG store supporta finanziariamente Heroic. Valuta di rimuovere il blocco se hai voglia di contribuire.",
@@ -1154,128 +1147,129 @@
     "discounts": {
         "region": {
             "countries": {
-                "IT": "",
-                "ES": "",
-                "FI": "",
-                "GR": "",
-                "RO": "",
-                "NO": "",
-                "KR": "",
-                "US": "",
-                "HU": "",
-                "PT": "",
-                "NL": "",
-                "AU": "",
-                "TW": "",
-                "IL": "",
-                "JP": "",
-                "DK": "",
-                "DE": "",
-                "CZ": "",
-                "FR": "",
-                "UA": "",
-                "GB": "",
-                "SE": "",
-                "CN": "",
-                "RU": "",
-                "CA": "",
-                "PL": "",
-                "BR": "",
-                "CH": "",
-                "TR": ""
+                "IT": "Italia",
+                "ES": "Spagna",
+                "FI": "Finlandia",
+                "GR": "Grecia",
+                "RO": "Romania",
+                "NO": "Norvegia",
+                "KR": "Corea Del Sud",
+                "US": "Stati Uniti",
+                "HU": "Ungheria",
+                "PT": "Portogallo",
+                "NL": "Olanda",
+                "AU": "Australia",
+                "TW": "Taiwan",
+                "IL": "Israele",
+                "JP": "Giappone",
+                "DK": "Danimarca",
+                "DE": "Germania",
+                "CZ": "Repubblica Ceca",
+                "FR": "Francia",
+                "UA": "Ucraina",
+                "GB": "Regno Unito",
+                "SE": "Svezia",
+                "CN": "Cina",
+                "RU": "Russia",
+                "CA": "Canada",
+                "PL": "Polonia",
+                "BR": "Brasile",
+                "CH": "Svizzera",
+                "TR": "Turchia"
             },
-            "auto": "",
-            "label": ""
+            "auto": "Auto ({{code}})",
+            "label": "Regione Negozio"
         },
         "filters": {
-            "moreFilters": "",
-            "ageRating": "",
-            "os": "",
-            "price": "",
-            "activeCount_other": "",
-            "hideDlcs": "",
-            "ageRatingOption": "",
-            "genres": "",
-            "activeCount_one": "",
-            "lessFilters": "",
-            "rating": "",
-            "sort": "",
-            "genresPlaceholder": "",
-            "features": "",
-            "featuresPlaceholder": "",
-            "ageRatingAll": "",
-            "pageSize": "",
-            "releaseYear": ""
+            "moreFilters": "Più filtri",
+            "ageRating": "Adatto per età",
+            "os": "Sistema operativo",
+            "price": "Prezzo",
+            "activeCount_other": "{{count}} Attivi",
+            "hideDlcs": "Nascondi DLC",
+            "ageRatingOption": "Mostra giochi classifificati PEGI {{age}} o inferiore",
+            "genres": "Generi",
+            "activeCount_one": "{{count}} attivi",
+            "lessFilters": "Meno filtri",
+            "rating": "Voto",
+            "sort": "Ordina per",
+            "genresPlaceholder": "Tutti i generi",
+            "features": "Caratteristiche",
+            "featuresPlaceholder": "Tutte le caratteristiche",
+            "ageRatingAll": "Tutto",
+            "pageSize": "Per pagina",
+            "releaseYear": "Anno di rilascio",
+            "hideOwned": "Nascondi posseduti"
         },
-        "sidebar": "",
+        "sidebar": "Affari",
         "sort": {
-            "priceDesc": "",
-            "trending": "",
-            "priceAsc": "",
-            "releaseDesc": "",
-            "ratingAsc": "",
-            "releaseAsc": "",
-            "ratingDesc": "",
-            "discount": ""
+            "priceDesc": "Prezzo: Maggiore verso il minore",
+            "trending": "Di tendenza",
+            "priceAsc": "Prezzo: minore al maggiore",
+            "releaseDesc": "Data d'uscita: recente a meno recente",
+            "ratingAsc": "Votazione: minore verso maggiore",
+            "releaseAsc": "Data d'uscita: meno recente a recente",
+            "ratingDesc": "Votazione: maggiore verso minore",
+            "discount": "Grandi sconti"
         },
-        "noMatches": "",
+        "noMatches": "Nessun gioco corrisponde ai filtri correnti.",
         "aria": {
-            "pagination": "",
-            "rating": ""
+            "pagination": "Paginazione",
+            "rating": "Votazione {{rating}} su 10"
         },
-        "error": "",
-        "empty": "",
-        "loading": "",
-        "title": "",
+        "error": "Impossibile caricare gli sconti. Per favore riprova più tardi.",
+        "empty": "Nessun gioco scontato per il momento.",
+        "loading": "Caricamento giochi scontati...",
+        "title": "Affari GOG",
         "pagination": {
-            "prev": ""
+            "prev": "Precedente"
         }
     },
     "steamgriddb": {
         "error": {
-            "no-games": "",
-            "no-grids": "",
-            "search": "",
-            "grids": ""
+            "no-games": "Nessun gioco trovato",
+            "no-grids": "Nessuna copertina trovata per questo gioco.",
+            "search": "Impossibile trovare i giochi. Verifica la tua chiave API di SteamGridDB e riprova",
+            "grids": "Impossibile recuperare le griglie"
         },
         "picker": {
-            "search": "",
-            "title": "",
-            "select-game": ""
+            "search": "Cerca gioco",
+            "title": "Copertine da SteamGridDB",
+            "select-game": "Seleziona gioco:"
         }
     },
     "console": {
         "update": {
-            "hintPrefix": "",
-            "body": "",
-            "title": "",
-            "hintSuffix": ""
+            "hintPrefix": "Premi",
+            "body": "Questo gioco ha un aggiornamento disponibile. Per favore abbandona la Modalità Console e aggiorna il gioco prima di lanciarlo.",
+            "title": "Aggiornamento richiesto",
+            "hintSuffix": "per andare indietro"
         },
-        "sort": "",
+        "sort": "Ordina",
         "cancel": {
-            "hintSuffix": "",
-            "hintPrefix": ""
+            "hintSuffix": "per 3s per annullare",
+            "hintPrefix": "Tenere"
         },
-        "quit": "",
+        "quit": "Chiudi Console",
         "hints": {
-            "launch": "",
-            "sort": "",
-            "navigate": "",
-            "quit": "",
-            "change_store": ""
+            "launch": "Lancia",
+            "sort": "Ordina",
+            "navigate": "Naviga",
+            "quit": "Esci",
+            "change_store": "Cambia store"
         },
-        "launching": "",
+        "launching": "Avviando",
         "card": {
-            "needsUpdate": ""
+            "needsUpdate": "Aggiornamento da fare"
         },
         "filter": {
-            "sideload": "",
-            "all": ""
+            "sideload": "Altre",
+            "all": "Tutto"
         },
-        "empty": "",
-        "games": "",
-        "quitApp": "",
-        "loading": ""
+        "empty": "Nessun gioco da mostrare. Installa qualcosa prima.",
+        "games": "Giochi installati",
+        "quitApp": "Chiudi applicazione",
+        "loading": "Caricamento della tua libreria…"
     },
-    "next": ""
+    "next": "Prossimo"
 }
