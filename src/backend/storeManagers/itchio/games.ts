@@ -4,7 +4,7 @@
  * here; per-game library metadata comes from `./library`.
  */
 
-import { existsSync } from 'graceful-fs'
+import { existsSync, readdirSync, statSync } from 'graceful-fs'
 import { join } from 'path'
 
 import {
@@ -31,6 +31,7 @@ import { installStore } from './electronStores'
 import {
   getGameInfo as getItchioLibraryGameInfo,
   getInstallInfo as getItchioLibraryInstallInfo,
+  getStrictInstallInfo as getItchioLibraryStrictInstallInfo,
   installState as setLibraryInstallState
 } from './library'
 import { ItchioInstallInfo, ItchioUpload } from 'common/types/itchio'
@@ -99,20 +100,175 @@ interface InstallLocationsAddResult {
   installLocation: InstallLocation
 }
 
+interface FetchCavesResult {
+  items: ButlerdCave[]
+  nextCursor?: string
+}
+
 /**
- * Translate butlerd's upload `platforms` map (lower-case `windows`/
- * `linux`/`osx`) into Heroic's mixed-case `InstallPlatform` values.
- * Picks whichever flag is set on the upload; falls back to the
- * requested platform if butlerd's payload doesn't say.
+ * butlerd persists caves across Heroic restarts, so if a previous install
+ * left a cave around (e.g. uninstalled from Heroic's UI but the cave
+ * survived) a fresh Install.Queue with `reason: 'install'` will fail with
+ * "That upload is already installed!". Sweep up stale caves for this
+ * gameId before queueing so a reinstall just works.
+ */
+async function clearStaleCavesForGame(gameId: number): Promise<void> {
+  const client = await getClient()
+  try {
+    const result = await client.call<FetchCavesResult>('Fetch.Caves', {
+      filters: { gameId }
+    })
+    for (const cave of result.items ?? []) {
+      try {
+        await client.call('Uninstall.Perform', { caveId: cave.id, hard: true })
+        logInfo(
+          `itch.io: cleared stale cave ${cave.id} for game ${gameId}`,
+          LogPrefix.Itchio
+        )
+      } catch (err) {
+        logWarning(
+          [
+            `itch.io: failed to clear stale cave ${cave.id}:`,
+            (err as Error).message
+          ],
+          LogPrefix.Itchio
+        )
+      }
+    }
+  } catch (err) {
+    logWarning(
+      ['itch.io: Fetch.Caves failed:', (err as Error).message],
+      LogPrefix.Itchio
+    )
+  }
+}
+
+/**
+ * For a macOS `.app` bundle, find the inner Mach-O executable at
+ * `Contents/MacOS/<binary>`. We can't spawn a `.app` directly because it
+ * is a directory — `launchGame`/`callRunner` need an actual executable
+ * file.
+ */
+function resolveAppBundleExecutable(appBundlePath: string): string | undefined {
+  const macOsDir = join(appBundlePath, 'Contents', 'MacOS')
+  if (!existsSync(macOsDir)) return undefined
+  let entries: string[]
+  try {
+    entries = readdirSync(macOsDir)
+  } catch {
+    return undefined
+  }
+  // Pick the largest executable-bit file in Contents/MacOS — the smaller
+  // ones are usually helpers / launchers.
+  let best: { path: string; size: number } | undefined
+  for (const name of entries) {
+    if (name.startsWith('.')) continue
+    const full = join(macOsDir, name)
+    try {
+      const s = statSync(full)
+      if (!s.isFile()) continue
+      if ((s.mode & 0o111) === 0) continue
+      if (!best || s.size > best.size) best = { path: full, size: s.size }
+    } catch {
+      /* ignore */
+    }
+  }
+  return best?.path
+}
+
+/**
+ * butlerd's post-install verdict sometimes ships with zero launch
+ * candidates (notably for some itch.io macOS uploads where the .app
+ * bundle is the entire payload). Walk the install folder ourselves to
+ * find the most plausible executable so the game can still be launched
+ * without the user manually setting Target Executable.
+ *
+ * Heuristics (in order):
+ *   - macOS install: prefer the first top-level `.app` bundle, resolved
+ *     to its inner `Contents/MacOS/<binary>`.
+ *   - Windows install: prefer the largest `.exe` (skips uninstallers via
+ *     a name filter).
+ *   - Linux install: prefer the largest file with the executable bit.
+ */
+function scanForExecutable(
+  folder: string,
+  platform: InstallPlatform | string
+): string | undefined {
+  if (!folder || !existsSync(folder)) return undefined
+  type Hit = { path: string; size: number }
+  const hits: Hit[] = []
+  const isMacInstall = platform === 'osx' || platform === 'Mac'
+  const isWinInstall = platform === 'windows' || platform === 'Windows'
+  const isLinuxInstall = platform === 'linux'
+
+  const walk = (dir: string, depth: number): void => {
+    let entries: string[]
+    try {
+      entries = readdirSync(dir)
+    } catch {
+      return
+    }
+    for (const name of entries) {
+      const full = join(dir, name)
+      let s: ReturnType<typeof statSync>
+      try {
+        s = statSync(full)
+      } catch {
+        continue
+      }
+      if (s.isDirectory()) {
+        if (isMacInstall && name.endsWith('.app')) {
+          const inner = resolveAppBundleExecutable(full)
+          if (inner) hits.push({ path: inner, size: statSync(inner).size })
+          continue
+        }
+        // Don't recurse forever; itch.io archives are usually 1–3 deep.
+        if (depth < 4) walk(full, depth + 1)
+        continue
+      }
+      if (isWinInstall && name.toLowerCase().endsWith('.exe')) {
+        if (/uninst|crash.?report|setup/i.test(name)) continue
+        hits.push({ path: full, size: s.size })
+      } else if (isLinuxInstall) {
+        if (name.startsWith('.')) continue
+        if ((s.mode & 0o111) !== 0) hits.push({ path: full, size: s.size })
+      }
+    }
+  }
+
+  walk(folder, 0)
+  if (hits.length === 0) return undefined
+  hits.sort((a, b) => b.size - a.size)
+  return hits[0].path
+}
+
+/**
+ * Translate butlerd's upload `platforms` map (`windows` / `linux` / `osx`)
+ * into the lowercase value Heroic's frontend stores in
+ * `GameInfo.install.platform`. We use the same convention as the GOG
+ * runner so `handleRunnersPlatforms` in `frontend/helpers/index.ts`
+ * round-trips cleanly (frontend display 'Mac' → backend 'osx' → stored
+ * 'osx' → next page-open passes 'osx' straight through).
  */
 function uploadInstalledPlatform(
   upload: ItchioUpload | undefined,
-  requested: InstallPlatform
+  requested: InstallPlatform | string
 ): InstallPlatform {
-  if (upload?.platforms?.osx) return 'Mac'
+  if (upload?.platforms?.osx) return 'osx'
   if (upload?.platforms?.linux) return 'linux'
-  if (upload?.platforms?.windows) return 'Windows'
-  return requested
+  if (upload?.platforms?.windows) return 'windows'
+  switch (requested) {
+    case 'Mac':
+    case 'osx':
+      return 'osx'
+    case 'Windows':
+    case 'windows':
+      return 'windows'
+    case 'linux':
+      return 'linux'
+    default:
+      return requested as InstallPlatform
+  }
 }
 
 /**
@@ -124,12 +280,16 @@ function uploadInstalledPlatform(
  */
 function pickLaunchCandidate(
   verdict: ButlerdVerdict | undefined,
-  platform: InstallPlatform
+  platform: InstallPlatform | string
 ): ButlerdVerdictCandidate | undefined {
   const candidates = verdict?.candidates ?? []
   if (candidates.length === 0) return undefined
   const desiredFlavor =
-    platform === 'Mac' ? 'macos' : platform === 'linux' ? 'linux' : 'windows'
+    platform === 'Mac' || platform === 'osx'
+      ? 'macos'
+      : platform === 'linux'
+        ? 'linux'
+        : 'windows'
   const native = candidates.filter((c) => c.flavor === desiredFlavor)
   const pool = native.length ? native : candidates
   return pool.slice().sort((a, b) => (b.size ?? 0) - (a.size ?? 0))[0]
@@ -256,12 +416,15 @@ export async function install(
     return { status: 'error', error: `Unknown itch.io app ${appName}` }
   }
 
-  const installInfo = (await getItchioLibraryInstallInfo(
+  const installInfo = await getItchioLibraryStrictInstallInfo(
     appName,
     platformToInstall
-  )) as ItchioInstallInfo | undefined
+  )
   if (!installInfo) {
-    return { status: 'error', error: 'no compatible upload found' }
+    return {
+      status: 'error',
+      error: `no ${platformToInstall} upload available for ${appName}`
+    }
   }
 
   try {
@@ -269,6 +432,15 @@ export async function install(
     const unsub = client.on('Progress', (params) =>
       emitProgress(appName, params as ButlerdProgress)
     )
+
+    // butlerd retains caves even when Heroic forgets them, which makes a
+    // re-install error out with "That upload is already installed!". Wipe
+    // any pre-existing caves for this gameId so the next Install.Queue
+    // starts from a clean slate.
+    const numericGameId = Number(appName.replace(/^itchio-/, ''))
+    if (!Number.isNaN(numericGameId)) {
+      await clearStaleCavesForGame(numericGameId)
+    }
 
     let queued: InstallQueueResult
     try {
@@ -321,15 +493,35 @@ export async function install(
       cave?.installInfo?.verdict,
       installedPlatform
     )
-    const executable = candidate
-      ? join(installFolder, candidate.path)
-      : ''
+    let executable = candidate ? join(installFolder, candidate.path) : ''
+    // butlerd sometimes hands back the .app bundle path on macOS; resolve
+    // it to the inner Mach-O binary so spawn() can actually run it.
+    if (
+      executable &&
+      (installedPlatform === 'osx' || installedPlatform === 'Mac') &&
+      executable.endsWith('.app')
+    ) {
+      const inner = resolveAppBundleExecutable(executable)
+      if (inner) executable = inner
+    }
     if (!executable) {
-      logWarning(
-        `itch.io install ${appName}: butlerd verdict has no candidates; ` +
-          'launch will require setting Target Executable in game settings.',
-        LogPrefix.Itchio
-      )
+      // butlerd's verdict can be empty for some itch.io uploads (notably
+      // macOS app-bundle-only zips). Fall back to a shallow filesystem
+      // scan so the game still has a launchable target.
+      const scanned = scanForExecutable(installFolder, installedPlatform)
+      if (scanned) {
+        executable = scanned
+        logInfo(
+          `itch.io install ${appName}: executable picked by folder scan: ${scanned}`,
+          LogPrefix.Itchio
+        )
+      } else {
+        logWarning(
+          `itch.io install ${appName}: butlerd verdict and folder scan ` +
+            'both came up empty; set Target Executable in game settings.',
+          LogPrefix.Itchio
+        )
+      }
     }
 
     setLibraryInstallState(appName, true)
@@ -364,15 +556,16 @@ export async function install(
 }
 
 export function isNative(appName: string): boolean {
-  // Mirror sideload: the install metadata's `platform` is the source of
-  // truth once a game is installed. Windows builds always run natively on
-  // win32 (incl. via Wine on non-Windows hosts, treated as "non-native"
-  // here so launchGame goes through the wine prep path).
+  // Stored `install.platform` is the GOG-style lowercase value
+  // ('osx'/'windows'/'linux') because that's what
+  // `frontend/helpers/handleRunnersPlatforms` round-trips for non-Legendary
+  // runners. We accept the Heroic display forms too in case an older
+  // install record is still in the cache.
   const cached = getItchioLibraryGameInfo(appName)
   const platform = cached?.install?.platform
   if (!platform) return false
   if (isWindows) return true
-  if (isMac && platform === 'Mac') return true
+  if (isMac && (platform === 'osx' || platform === 'Mac')) return true
   if (isLinux && platform === 'linux') return true
   return false
 }

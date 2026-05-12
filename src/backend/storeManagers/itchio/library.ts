@@ -173,35 +173,57 @@ export function getGameInfo(appName: string): GameInfo | undefined {
 }
 
 // Map Heroic's InstallPlatform values to butlerd's platform keys.
+// Heroic's frontend runs values through `handleRunnersPlatforms` before they
+// reach non-legendary backends, so we may receive either Heroic's display
+// values ('Mac', 'Windows') or the runner-normalised ones ('osx', 'windows').
 function butlerdPlatformKey(
-  platform: InstallPlatform
+  platform: InstallPlatform | string
 ): 'windows' | 'linux' | 'osx' | undefined {
-  if (platform === 'linux') return 'linux'
-  if (platform === 'Mac') return 'osx'
-  if (platform === 'Windows') return 'windows'
-  return undefined
+  switch (platform) {
+    case 'Mac':
+    case 'osx':
+      return 'osx'
+    case 'linux':
+      return 'linux'
+    case 'Windows':
+    case 'windows':
+      return 'windows'
+    default:
+      return undefined
+  }
 }
 
+/**
+ * `strict` mode: only return an upload that explicitly advertises the
+ * requested platform. Used by the install path so the user's platform
+ * choice in the InstallModal is honoured exactly.
+ *
+ * Lenient mode (default): fall back to the largest upload so cosmetic
+ * callers like the GamePage's preflight `getInstallInfo` can render
+ * size/metadata even when no upload matches the host platform.
+ */
 function pickUploadForPlatform(
   uploads: ItchioUpload[],
-  platform: InstallPlatform
+  platform: InstallPlatform,
+  strict = false
 ): ItchioUpload | undefined {
+  if (uploads.length === 0) return undefined
   const key = butlerdPlatformKey(platform)
-  if (!key) return undefined
-  // Strict: only return an upload that actually advertises the requested
-  // platform. Avoids silently installing a Mac build when the user asked
-  // for Windows (and vice-versa).
-  const matching = uploads.filter((u) => Boolean(u.platforms?.[key]))
-  if (matching.length === 0) return undefined
-  // Prefer the largest matching upload — typically the full release rather
-  // than a stripped-down demo build.
-  return matching.slice().sort((a, b) => b.size - a.size)[0]
+  if (key) {
+    const matching = uploads.filter((u) => Boolean(u.platforms?.[key]))
+    if (matching.length > 0) {
+      return matching.slice().sort((a, b) => b.size - a.size)[0]
+    }
+  }
+  if (strict) return undefined
+  return uploads.slice().sort((a, b) => b.size - a.size)[0]
 }
 
-export async function getInstallInfo(
+async function fetchUploadsAndPick(
   appName: string,
-  installPlatform: InstallPlatform
-): Promise<InstallInfo | undefined> {
+  installPlatform: InstallPlatform,
+  strict: boolean
+): Promise<{ info: GameInfo; gameId: number; upload: ItchioUpload } | undefined> {
   const info = inMemoryLibrary.get(appName)
   if (!info) {
     logError(`itch.io getInstallInfo: unknown app ${appName}`, LogPrefix.Itchio)
@@ -210,37 +232,86 @@ export async function getInstallInfo(
   const gameId = Number(appName.replace(/^itchio-/, ''))
   if (Number.isNaN(gameId)) return undefined
 
+  const client = await getClient()
+  const profileId = configStore.get_nodefault('profileId')
+  // `compatible: true` filters out uploads butlerd considers
+  // incompatible with the host (e.g. windows uploads on macOS), which
+  // is the opposite of what Heroic wants — users explicitly choose
+  // Windows-via-Wine on Mac and Linux. Always fetch the full upload
+  // list and let `pickUploadForPlatform` honour the user's pick.
+  const result = await client.call<FetchGameUploadsResult>(
+    'Fetch.GameUploads',
+    { gameId, profileId, fresh: true }
+  )
+  const upload = pickUploadForPlatform(
+    result.uploads ?? [],
+    installPlatform,
+    strict
+  )
+  if (!upload) return undefined
+  return { info, gameId, upload }
+}
+
+function buildInstallInfo(
+  info: GameInfo,
+  gameId: number,
+  upload: ItchioUpload
+): ItchioInstallInfo {
+  return {
+    game: { ...info, id: gameId, owned_dlc: [] } as unknown as ItchioGame,
+    upload,
+    install_size: upload.size,
+    download_size: upload.size,
+    launch_options: [],
+    manifest: {
+      disk_size: upload.size,
+      download_size: upload.size
+    }
+  }
+}
+
+export async function getInstallInfo(
+  appName: string,
+  installPlatform: InstallPlatform
+): Promise<InstallInfo | undefined> {
   try {
-    const client = await getClient()
-    const profileId = configStore.get_nodefault('profileId')
-    const result = await client.call<FetchGameUploadsResult>(
-      'Fetch.GameUploads',
-      { gameId, profileId, compatible: true, fresh: true }
-    )
-    const upload = pickUploadForPlatform(result.uploads, installPlatform)
-    if (!upload) {
+    const picked = await fetchUploadsAndPick(appName, installPlatform, false)
+    if (!picked) {
       logError(
-        `itch.io: no compatible upload for ${appName} on ${installPlatform}`,
+        `itch.io: no uploads available for ${appName} on ${installPlatform}`,
         LogPrefix.Itchio
       )
       return undefined
     }
-    const installInfo: ItchioInstallInfo = {
-      game: { ...info, id: gameId, owned_dlc: [] } as unknown as ItchioGame,
-      upload,
-      install_size: upload.size,
-      download_size: upload.size,
-      launch_options: [],
-      manifest: {
-        disk_size: upload.size,
-        download_size: upload.size
-      }
-    }
+    const installInfo = buildInstallInfo(picked.info, picked.gameId, picked.upload)
     installStore.set(appName, installInfo)
     return installInfo as unknown as InstallInfo
   } catch (err) {
     logError(
       ['itch.io getInstallInfo failed:', (err as Error).message],
+      LogPrefix.Itchio
+    )
+    return undefined
+  }
+}
+
+/**
+ * Strict variant for the install path: returns undefined if no upload
+ * matches the requested platform exactly. Prevents the install from
+ * silently grabbing a different OS's build when the user picked
+ * Windows-on-Mac on a game without a Windows upload.
+ */
+export async function getStrictInstallInfo(
+  appName: string,
+  installPlatform: InstallPlatform
+): Promise<ItchioInstallInfo | undefined> {
+  try {
+    const picked = await fetchUploadsAndPick(appName, installPlatform, true)
+    if (!picked) return undefined
+    return buildInstallInfo(picked.info, picked.gameId, picked.upload)
+  } catch (err) {
+    logError(
+      ['itch.io getStrictInstallInfo failed:', (err as Error).message],
       LogPrefix.Itchio
     )
     return undefined
