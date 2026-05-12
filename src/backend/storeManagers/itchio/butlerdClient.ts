@@ -100,35 +100,47 @@ export class ButlerdClient {
         // stdout data is just butler being chatty and can be ignored.
         if (this.secret) return
         handshakeBuffer += chunk.toString('utf8')
-        const newlineIndex = handshakeBuffer.indexOf('\n')
-        if (newlineIndex === -1) return
 
-        const line = handshakeBuffer.slice(0, newlineIndex).trim()
-        handshakeBuffer = handshakeBuffer.slice(newlineIndex + 1)
-        if (!line) return
+        // butlerd emits a stream of structured log lines on stdout
+        // BEFORE the listen-notification, e.g.
+        //   {"type":"log","level":"debug",...}
+        //   {"type":"log","level":"debug",...}
+        //   {"type":"butlerd/listen-notification","secret":"...","tcp":...}
+        // Process every newline-terminated line we've buffered so we don't
+        // starve the handshake out of a single multi-line chunk.
+        let newlineIndex = handshakeBuffer.indexOf('\n')
+        while (newlineIndex !== -1 && !this.secret) {
+          const line = handshakeBuffer.slice(0, newlineIndex).trim()
+          handshakeBuffer = handshakeBuffer.slice(newlineIndex + 1)
+          newlineIndex = handshakeBuffer.indexOf('\n')
 
-        try {
-          const handshake = JSON.parse(line) as ButlerdHandshake
-          if (handshake.type !== 'butlerd/listen-notification') {
-            logWarning(
-              ['Unexpected handshake message from butlerd:', line],
+          if (!line) continue
+
+          let parsed: ButlerdHandshake | { type?: string }
+          try {
+            parsed = JSON.parse(line)
+          } catch (err) {
+            logError(
+              [
+                'Failed to parse butlerd stdout line:',
+                (err as Error).message,
+                'line:',
+                line
+              ],
               LogPrefix.Itchio
             )
-            return
+            continue
           }
+
+          if (parsed.type !== 'butlerd/listen-notification') {
+            // Routine pre-handshake log spam — keep it at debug, not warning.
+            logDebug(['butlerd stdout:', line], LogPrefix.Itchio)
+            continue
+          }
+
+          const handshake = parsed as ButlerdHandshake
           this.secret = handshake.secret
           this.connectTcp(handshake.tcp.address).then(resolve).catch(reject)
-        } catch (err) {
-          logError(
-            [
-              'Failed to parse butlerd handshake:',
-              (err as Error).message,
-              'line:',
-              line
-            ],
-            LogPrefix.Itchio
-          )
-          reject(err as Error)
         }
       })
 
