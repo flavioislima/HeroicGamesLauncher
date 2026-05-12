@@ -69,6 +69,40 @@ interface ButlerdProgress {
   bps?: number
 }
 
+interface InstallLocation {
+  id: string
+  path: string
+}
+
+interface InstallLocationsListResult {
+  installLocations: InstallLocation[]
+}
+
+interface InstallLocationsAddResult {
+  installLocation: InstallLocation
+}
+
+/**
+ * butlerd identifies install destinations by id, not by path. We register
+ * the user-chosen parent directory as a butlerd "install location" on
+ * first use and reuse the id afterwards. butlerd creates the per-game
+ * subdirectory inside it.
+ */
+async function ensureInstallLocationId(path: string): Promise<string> {
+  const client = await getClient()
+  const list = await client.call<InstallLocationsListResult>(
+    'Install.Locations.List'
+  )
+  const existing = list.installLocations?.find((loc) => loc.path === path)
+  if (existing) return existing.id
+
+  const added = await client.call<InstallLocationsAddResult>(
+    'Install.Locations.Add',
+    { path }
+  )
+  return added.installLocation.id
+}
+
 export async function getSettings(appName: string): Promise<GameSettings> {
   return (
     GameConfig.get(appName).config ||
@@ -185,10 +219,11 @@ export async function install(
 
     let queued: InstallQueueResult
     try {
+      const installLocationId = await ensureInstallLocationId(path)
       queued = await client.call<InstallQueueResult>('Install.Queue', {
         game: installInfo.game,
         upload: installInfo.upload,
-        installFolder: path,
+        installLocationId,
         reason: 'install'
       })
 
