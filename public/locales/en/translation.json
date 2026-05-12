@@ -838,6 +838,7 @@
                 "game-log": "Game log of {{gameTitle}}",
                 "gog": "GOG log",
                 "heroic": "General Heroic log",
+                "itchio": "itch.io log",
                 "legendary": "Epic Games / Legendary log",
                 "nile": "Amazon / Nile log",
                 "zoom": "Zoom log"
@@ -1053,6 +1054,7 @@
         "console": "Console Mode"
     },
     "status": {
+        "installed": "Installed",
         "installing": "Installing",
         "logging": "Logging In...",
         "preparing_login": "Preparing Login... ",

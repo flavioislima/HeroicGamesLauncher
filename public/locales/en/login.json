@@ -1,5 +1,6 @@
 {
     "button": {
+        "close": "Close",
         "copied": "Copied!",
         "copy": "Copy",
         "error": "Error, try a different Code",
@@ -9,8 +10,9 @@
         "open": "Open Link"
     },
     "itchio": {
+        "api_key_placeholder": "Paste your API key",
         "instructions": "itch.io desktop integration uses a personal API key. Visit your itch.io API keys page, generate a key, and paste it below.",
-        "paste_key": "Paste the API key into the field below and click Login."
+        "paste_and_login": "Paste from clipboard and log in"
     },
     "message": {
         "part1": "In order to log in and install your games, you first need to follow the steps below:",
@@ -21,6 +23,10 @@
         "part6": "Paste your",
         "part7": "authorization code number",
         "part8": "in the input box below and click on the login button."
+    },
+    "sid": {
+        "paste_and_login": "Paste from clipboard and log in",
+        "placeholder": "Paste SID code here"
     },
     "welcome": "Welcome!"
 }
