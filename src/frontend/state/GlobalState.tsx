@@ -961,6 +961,22 @@ class GlobalState extends PureComponent<Props> {
             enabled: true
           }
         })
+      } else if (args.runner === 'itchio') {
+        const library = [...this.state.itchio.library]
+        const index = library.findIndex(
+          (game) => game.app_name === args.app_name
+        )
+        if (index !== -1) {
+          library[index] = args
+        } else {
+          library.push(args)
+        }
+        this.setState({
+          itchio: {
+            ...this.state.itchio,
+            library
+          }
+        })
       }
     })
 

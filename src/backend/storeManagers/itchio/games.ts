@@ -523,7 +523,8 @@ export async function install(
       cachedInfo.caveId = queued.caveId
     }
 
-    sendFrontendMessage('refreshLibrary', 'itchio')
+    const updated = getItchioLibraryGameInfo(appName)
+    if (updated) sendFrontendMessage('pushGameToLibrary', updated)
     return { status: 'done' }
   } catch (err) {
     logError(
@@ -653,7 +654,8 @@ export async function uninstall({
     })
     installStore.delete(appName)
     setLibraryInstallState(appName, false)
-    sendFrontendMessage('refreshLibrary', 'itchio')
+    const updated = getItchioLibraryGameInfo(appName)
+    if (updated) sendFrontendMessage('pushGameToLibrary', updated)
     return { stdout: 'done', stderr: '' }
   } catch (err) {
     logError(
@@ -718,7 +720,8 @@ export async function update(appName: string): Promise<InstallResult> {
     }
 
     installStore.set(appName, installInfo)
-    sendFrontendMessage('refreshLibrary', 'itchio')
+    const updated = getItchioLibraryGameInfo(appName)
+    if (updated) sendFrontendMessage('pushGameToLibrary', updated)
     return { status: 'done' }
   } catch (err) {
     logError(
@@ -734,7 +737,8 @@ export async function update(appName: string): Promise<InstallResult> {
 export async function forceUninstall(appName: string): Promise<void> {
   installStore.delete(appName)
   setLibraryInstallState(appName, false)
-  sendFrontendMessage('refreshLibrary', 'itchio')
+  const updated = getItchioLibraryGameInfo(appName)
+  if (updated) sendFrontendMessage('pushGameToLibrary', updated)
 }
 
 export async function stop(appName: string): Promise<void> {

@@ -331,7 +331,11 @@ export function installState(appName: string, state: boolean): void {
   const info = inMemoryLibrary.get(appName)
   if (!info) return
   info.is_installed = state
-  if (!state) info.install = {}
+  if (!state) {
+    info.install = {}
+    delete info.caveId
+    delete info.folder_name
+  }
   inMemoryLibrary.set(appName, info)
   libraryStore.set('library', Array.from(inMemoryLibrary.values()))
 }

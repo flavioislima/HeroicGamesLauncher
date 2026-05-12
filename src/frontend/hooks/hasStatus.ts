@@ -29,10 +29,14 @@ export function hasStatus(gameInfo: GameInfo, gameSize?: string) {
   } = { ...newGameInfo }
 
   React.useEffect(() => {
-    if (newGameInfo) {
+    // Sync with the prop whenever it changes — otherwise an uninstall that
+    // flips `is_installed` to false in the parent's library state is never
+    // observed here, leaving the card stuck on the previous status.
+    if (gameInfo) {
+      setNewGameInfo(gameInfo)
       return
     }
-    const getGameInfo = async () => {
+    const fetchGameInfo = async () => {
       const updatedInfo = await window.api.getGameInfo(
         appName,
         runner || 'sideload'
@@ -41,7 +45,7 @@ export function hasStatus(gameInfo: GameInfo, gameSize?: string) {
         setNewGameInfo(updatedInfo)
       }
     }
-    getGameInfo()
+    fetchGameInfo()
   }, [appName, gameInfo])
 
   React.useEffect(() => {
