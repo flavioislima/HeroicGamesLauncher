@@ -45,17 +45,18 @@ function logNotImplemented(operation: string, details: object): void {
 
 interface InstallQueueResult {
   id: string
-  install_folder: string
-  staging_folder: string
-  cave_id: string
+  installFolder: string
+  stagingFolder: string
+  caveId: string
 }
 
 interface ButlerdCave {
   id: string
-  game_id: number
-  install_folder: string
-  installed_size: number
-  channel_name?: string
+  game?: { id?: number }
+  installInfo?: {
+    installFolder?: string
+    installedSize?: number
+  }
 }
 
 interface FetchCaveResult {
@@ -187,13 +188,13 @@ export async function install(
       queued = await client.call<InstallQueueResult>('Install.Queue', {
         game: installInfo.game,
         upload: installInfo.upload,
-        install_folder: path,
+        installFolder: path,
         reason: 'install'
       })
 
       await client.call('Install.Perform', {
         id: queued.id,
-        staging_folder: queued.staging_folder
+        stagingFolder: queued.stagingFolder
       })
     } finally {
       unsub()
@@ -201,7 +202,7 @@ export async function install(
 
     installStore.set(appName, {
       ...installInfo,
-      // overwrite install_folder with butlerd's resolved value
+      // overwrite installFolder with butlerd's resolved value
       game: installInfo.game,
       upload: installInfo.upload
     })
@@ -211,20 +212,19 @@ export async function install(
     const cachedInfo = getItchioLibraryGameInfo(appName)
     if (cachedInfo) {
       cachedInfo.install = {
-        install_path: queued.install_folder,
+        install_path: queued.installFolder,
         install_size: String(installInfo.install_size),
         is_dlc: false,
-        version: installInfo.upload.channel_name ?? '0',
+        version: installInfo.upload.channelName ?? '0',
         platform: platformToInstall,
         executable: '',
         appName
       }
       cachedInfo.is_installed = true
-      cachedInfo.folder_name = queued.install_folder
-      // The cave_id is the canonical butlerd handle for this install; stash
-      // it on `install` via the underlying record so uninstall/launch can
-      // reach it.
-      ;(cachedInfo as GameInfo & { cave_id?: string }).cave_id = queued.cave_id
+      cachedInfo.folder_name = queued.installFolder
+      // The caveId is the canonical butlerd handle for this install; stash
+      // it on the in-memory GameInfo so uninstall/launch can reach it.
+      ;(cachedInfo as GameInfo & { caveId?: string }).caveId = queued.caveId
     }
 
     sendFrontendMessage('refreshLibrary', 'itchio')
@@ -282,7 +282,7 @@ export async function launch(
   const caveId = getCaveId(appName)
   if (!caveId) {
     logError(
-      `itch.io launch: ${appName} has no cave_id; is it installed?`,
+      `itch.io launch: ${appName} has no caveId; is it installed?`,
       LogPrefix.Itchio
     )
     return false
@@ -335,7 +335,7 @@ export async function launch(
   sendGameStatusUpdate({ appName, runner: 'itchio', status: 'playing' })
 
   try {
-    await client.call('Launch', { cave_id: caveId })
+    await client.call('Launch', { caveId })
     logWriter.writeString('[itchio] launch finished\n')
     return true
   } catch (err) {
@@ -411,9 +411,9 @@ export function syncSaves(
 
 function getCaveId(appName: string): string | undefined {
   const cached = getItchioLibraryGameInfo(appName) as
-    | (GameInfo & { cave_id?: string })
+    | (GameInfo & { caveId?: string })
     | undefined
-  return cached?.cave_id
+  return cached?.caveId
 }
 
 export async function uninstall({
@@ -430,7 +430,7 @@ export async function uninstall({
   try {
     const client = await getClient()
     await client.call('Uninstall.Perform', {
-      cave_id: caveId,
+      caveId,
       hard: deleteFiles ?? true
     })
     installStore.delete(appName)
@@ -472,14 +472,14 @@ export async function update(appName: string): Promise<InstallResult> {
 
     try {
       const queued = await client.call<InstallQueueResult>('Install.Queue', {
-        cave_id: caveId,
+        caveId,
         game: installInfo.game,
         upload: installInfo.upload,
         reason: 'update'
       })
       await client.call('Install.Perform', {
         id: queued.id,
-        staging_folder: queued.staging_folder
+        stagingFolder: queued.stagingFolder
       })
     } finally {
       unsub()
@@ -534,9 +534,10 @@ export async function isGameAvailable(appName: string): Promise<boolean> {
   try {
     const client = await getClient()
     const result = await client.call<FetchCaveResult>('Fetch.Cave', {
-      cave_id: caveId
+      caveId
     })
-    return Boolean(result.cave && existsSync(result.cave.install_folder))
+    const installFolder = result.cave?.installInfo?.installFolder
+    return Boolean(installFolder && existsSync(installFolder))
   } catch (err) {
     logWarning(
       ['itch.io isGameAvailable: Fetch.Cave failed:', (err as Error).message],

@@ -44,7 +44,7 @@ function gameToAppName(game: ItchioGame): string {
 }
 
 function gameToGameInfo(game: ItchioGame): GameInfo {
-  const cover = game.cover_url ?? game.still_cover_url ?? ''
+  const cover = game.coverUrl ?? game.stillCoverUrl ?? ''
   return {
     app_name: gameToAppName(game),
     runner: 'itchio',
@@ -55,8 +55,8 @@ function gameToGameInfo(game: ItchioGame): GameInfo {
     is_installed: false,
     canRunOffline: true,
     store_url: game.url,
-    developer: game.user?.display_name || game.user?.username,
-    description: game.short_text
+    developer: game.user?.displayName || game.user?.username,
+    description: game.shortText
   }
 }
 
@@ -104,7 +104,7 @@ export async function refresh(): Promise<ExecResult | null> {
     const result = await client.call<FetchProfileGamesResult>(
       'Fetch.ProfileGames',
       {
-        profile_id: profileId,
+        profileId,
         cursor,
         // Force a network refresh on the first page; subsequent pages
         // honour butlerd's own cache.
@@ -185,7 +185,7 @@ export async function getInstallInfo(
     const profileId = configStore.get_nodefault('profileId')
     const result = await client.call<FetchGameUploadsResult>(
       'Fetch.GameUploads',
-      { game_id: gameId, profile_id: profileId, compatible: true, fresh: true }
+      { gameId, profileId, compatible: true, fresh: true }
     )
     const upload = pickUploadForPlatform(result.uploads, installPlatform)
     if (!upload) {
@@ -218,7 +218,7 @@ export async function getInstallInfo(
 }
 
 interface CheckUpdateGameUpdate {
-  cave_id: string
+  caveId: string
   game?: { id?: number }
 }
 
@@ -231,7 +231,7 @@ export async function listUpdateableGames(): Promise<string[]> {
   if (!ItchioUser.isLoggedIn()) return []
   const caveByApp = new Map<string, string>()
   for (const game of inMemoryLibrary.values()) {
-    const caveId = (game as GameInfo & { cave_id?: string }).cave_id
+    const caveId = (game as GameInfo & { caveId?: string }).caveId
     if (game.is_installed && caveId) caveByApp.set(game.app_name, caveId)
   }
   if (caveByApp.size === 0) return []
@@ -239,13 +239,13 @@ export async function listUpdateableGames(): Promise<string[]> {
   try {
     const client = await getClient()
     const result = await client.call<CheckUpdateResult>('CheckUpdate', {
-      cave_ids: Array.from(caveByApp.values()),
+      caveIds: Array.from(caveByApp.values()),
       verbose: false
     })
     const updates: string[] = []
     for (const update of result.updates ?? []) {
       for (const [appName, caveId] of caveByApp) {
-        if (caveId === update.cave_id) {
+        if (caveId === update.caveId) {
           updates.push(appName)
           break
         }

@@ -54,7 +54,7 @@ export class ItchioUser {
       const client = await getClient()
       const result = await client.call<LoginWithAPIKeyResult>(
         'Profile.LoginWithAPIKey',
-        { api_key: apiKey }
+        { apiKey }
       )
       const { profile } = result
       configStore.set('profileId', profile.id)
@@ -78,7 +78,7 @@ export class ItchioUser {
     if (profileId !== undefined) {
       try {
         const client = await getClient()
-        await client.call('Profile.Forget', { profile_id: profileId })
+        await client.call('Profile.Forget', { profileId })
       } catch (err) {
         logWarning(
           ['Profile.Forget failed (continuing):', (err as Error).message],
@@ -107,7 +107,7 @@ export class ItchioUser {
         const client = await getClient()
         const result = await client.call<UseSavedLoginResult>(
           'Profile.UseSavedLogin',
-          { profile_id: profileId }
+          { profileId }
         )
         configStore.set('userData', result.profile.user)
         return result.profile.user

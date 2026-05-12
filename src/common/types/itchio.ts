@@ -1,24 +1,31 @@
 /**
  * Types for the itch.io store integration.
  *
- * These mirror butler / butlerd JSON-RPC schemas; the canonical reference is
- * https://docs.itch.ovh/butlerd/master/ — keep them in sync with the version
- * of butler bundled by Heroic.
+ * Field-naming convention:
+ *   - butlerd JSON-RPC payloads use camelCase (apiKey, displayName,
+ *     installFolder, caveId, ...). Types describing wire shapes — anything
+ *     a butlerd call directly produces or consumes — therefore use
+ *     camelCase.
+ *   - Heroic's own `GameInfo` / `InstalledInfo` shapes use snake_case
+ *     (app_name, install_path, install_size). `ItchioInstallInfo.manifest`
+ *     mirrors those snake_case keys so the rest of Heroic's UI consumes
+ *     the union without runtime branching.
+ *
+ * Reference: https://docs.itch.ovh/butlerd/master/
  */
 
 import type { LaunchOption } from 'common/types'
 
-// itch.io upload platforms exposed by butlerd. Linux + macOS use lower-case
-// keys in the wire format.
+// itch.io upload platforms exposed by butlerd. Lower-case in the wire format.
 export type ItchioInstallPlatform = 'windows' | 'linux' | 'osx'
 
 export interface ItchioUserData {
   id: number
   username: string
-  display_name?: string
+  displayName?: string
   url: string
-  cover_url?: string
-  press_user?: boolean
+  coverUrl?: string
+  pressUser?: boolean
   developer?: boolean
   gamer?: boolean
 }
@@ -39,7 +46,7 @@ export interface ItchioRegisterData {
 export interface ItchioGameUser {
   id: number
   username: string
-  display_name?: string
+  displayName?: string
   url: string
 }
 
@@ -47,9 +54,9 @@ export interface ItchioGame {
   id: number
   title: string
   url: string
-  short_text?: string
-  cover_url?: string
-  still_cover_url?: string
+  shortText?: string
+  coverUrl?: string
+  stillCoverUrl?: string
   classification?:
     | 'game'
     | 'tool'
@@ -70,22 +77,27 @@ export interface ItchioGame {
 export interface ItchioUpload {
   id: number
   filename: string
-  display_name?: string
+  displayName?: string
   size: number
-  channel_name?: string
+  channelName?: string
   platforms: Partial<Record<ItchioInstallPlatform, boolean>>
+}
+
+export interface ItchioCaveInstallInfo {
+  installFolder: string
+  installedSize: number
+  pinned?: boolean
 }
 
 export interface ItchioCave {
   id: string
-  game_id: number
-  install_folder: string
-  installed_size: number
-  channel_name?: string
+  game?: ItchioGame
+  upload?: ItchioUpload
+  installInfo?: ItchioCaveInstallInfo
   build?: {
     id: number
     version: string
-    user_version?: string
+    userVersion?: string
   }
 }
 
