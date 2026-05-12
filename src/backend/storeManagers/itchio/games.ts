@@ -19,7 +19,13 @@ import {
 import { InstallResult, RemoveArgs } from 'common/types/game_manager'
 import type LogWriter from 'backend/logger/log_writer'
 
-import { LogPrefix, logError, logInfo, logWarning } from 'backend/logger'
+import {
+  LogPrefix,
+  createGameLogWriter,
+  logError,
+  logInfo,
+  logWarning
+} from 'backend/logger'
 import { GameConfig } from 'backend/game_config'
 import { killPattern, shutdownWine } from 'backend/utils'
 import { sendFrontendMessage } from '../../ipc'
@@ -388,22 +394,69 @@ export function onInstallOrUpdateOutput(
   )
 }
 
-function emitProgress(appName: string, p: ButlerdProgress): void {
+/**
+ * Per-install state for throttling progress logs. butlerd emits Progress
+ * notifications several times per second; we only want a log line when
+ * the percent advances meaningfully or after a time gap, so the install
+ * log stays readable.
+ */
+interface ProgressLogState {
+  lastLoggedPercent: number
+  lastLoggedAt: number
+  logWriter?: LogWriter
+}
+
+const progressLogState: Map<string, ProgressLogState> = new Map()
+
+function emitProgress(
+  appName: string,
+  action: 'installing' | 'updating',
+  p: ButlerdProgress
+): void {
   if (p.progress === undefined) return
+  const percent = Math.round(p.progress * 100)
+  const eta =
+    p.eta !== undefined && Number.isFinite(p.eta)
+      ? new Date(p.eta * 1000).toISOString().substring(11, 19)
+      : ''
+  const downSpeed =
+    p.bps !== undefined ? Math.round(p.bps / (1024 * 1024)) : undefined
+
   sendFrontendMessage('progressUpdate', {
     appName,
     runner: 'itchio',
-    status: 'installing',
+    status: action,
     progress: {
-      percent: Math.round(p.progress * 100),
+      percent,
       bytes: '',
-      eta:
-        p.eta !== undefined && Number.isFinite(p.eta)
-          ? new Date(p.eta * 1000).toISOString().substring(11, 19)
-          : '',
-      downSpeed:
-        p.bps !== undefined ? Math.round(p.bps / (1024 * 1024)) : undefined
+      eta,
+      downSpeed
     }
+  })
+
+  // Throttle log output: only emit once per percent step or every 2s,
+  // whichever comes first, so the log isn't drowned by butlerd's high-
+  // frequency Progress notifications.
+  const state = progressLogState.get(appName)
+  const now = Date.now()
+  if (
+    state &&
+    percent === state.lastLoggedPercent &&
+    now - state.lastLoggedAt < 2000
+  ) {
+    return
+  }
+  const line = `Progress for ${appName}: ${percent}% ${
+    eta ? `ETA ${eta}` : ''
+  }${downSpeed !== undefined ? ` Down: ${downSpeed}MB/s` : ''}`.trim()
+  logInfo(line, LogPrefix.Itchio)
+  state?.logWriter?.logInfo(line).catch(() => {
+    /* writer may be closed; ignore */
+  })
+  progressLogState.set(appName, {
+    lastLoggedPercent: percent,
+    lastLoggedAt: now,
+    logWriter: state?.logWriter
   })
 }
 
@@ -428,9 +481,25 @@ export async function install(
   }
 
   try {
+    const installLogWriter = await createGameLogWriter(
+      appName,
+      'itchio',
+      'install'
+    )
+    progressLogState.set(appName, {
+      lastLoggedPercent: -1,
+      lastLoggedAt: 0,
+      logWriter: installLogWriter
+    })
+    const headline = `Installing ${appName} (${platformToInstall})`
+    logInfo(headline, LogPrefix.Itchio)
+    installLogWriter.logInfo(headline).catch(() => {
+      /* ignore */
+    })
+
     const client = await getClient()
     const unsub = client.on('Progress', (params) =>
-      emitProgress(appName, params as ButlerdProgress)
+      emitProgress(appName, 'installing', params as ButlerdProgress)
     )
 
     // butlerd retains caves even when Heroic forgets them, which makes a
@@ -552,6 +621,21 @@ export async function install(
       LogPrefix.Itchio
     )
     return { status: 'error', error: (err as Error).message }
+  } finally {
+    await finishProgressLog(appName)
+  }
+}
+
+async function finishProgressLog(appName: string): Promise<void> {
+  const state = progressLogState.get(appName)
+  if (!state) return
+  progressLogState.delete(appName)
+  if (state.logWriter) {
+    try {
+      await state.logWriter.close()
+    } catch {
+      /* writer may already be closed */
+    }
   }
 }
 
@@ -724,9 +808,25 @@ export async function update(appName: string): Promise<InstallResult> {
   }
 
   try {
+    const updateLogWriter = await createGameLogWriter(
+      appName,
+      'itchio',
+      'update'
+    )
+    progressLogState.set(appName, {
+      lastLoggedPercent: -1,
+      lastLoggedAt: 0,
+      logWriter: updateLogWriter
+    })
+    const headline = `Updating ${appName} (${platform})`
+    logInfo(headline, LogPrefix.Itchio)
+    updateLogWriter.logInfo(headline).catch(() => {
+      /* ignore */
+    })
+
     const client = await getClient()
     const unsub = client.on('Progress', (params) =>
-      emitProgress(appName, params as ButlerdProgress)
+      emitProgress(appName, 'updating', params as ButlerdProgress)
     )
 
     try {
@@ -753,6 +853,8 @@ export async function update(appName: string): Promise<InstallResult> {
       LogPrefix.Itchio
     )
     return { status: 'error', error: (err as Error).message }
+  } finally {
+    await finishProgressLog(appName)
   }
 }
 
