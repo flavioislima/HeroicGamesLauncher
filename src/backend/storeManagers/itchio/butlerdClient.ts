@@ -14,11 +14,38 @@ import { Socket } from 'net'
 
 import {
   LogPrefix,
+  getRunnerLogWriter,
   logDebug,
   logError,
   logInfo,
   logWarning
 } from 'backend/logger'
+
+// Mirror butlerd diagnostics to the per-runner log file so users can pull
+// up a focused "itch.io log" from Settings → Logs without grepping the
+// general Heroic log. The runner LogWriter is lazily created on first
+// access and shared across the process.
+function logToRunner(
+  level: 'INFO' | 'WARNING' | 'ERROR' | 'DEBUG',
+  message: string
+): void {
+  try {
+    const writer = getRunnerLogWriter('itchio')
+    switch (level) {
+      case 'WARNING':
+        writer.logWarning(message)
+        break
+      case 'ERROR':
+        writer.logError(message)
+        break
+      default:
+        writer.logInfo(message)
+        break
+    }
+  } catch {
+    /* writer setup failure shouldn't break butlerd */
+  }
+}
 
 interface ButlerdHandshake {
   type: 'butlerd/listen-notification'
@@ -77,6 +104,7 @@ export class ButlerdClient {
   private spawnAndConnect(): Promise<void> {
     return new Promise((resolve, reject) => {
       logInfo(['Spawning butlerd:', this.butlerBin], LogPrefix.Itchio)
+      logToRunner('INFO', `Spawning butlerd: ${this.butlerBin}`)
 
       const daemon = spawn(this.butlerBin, [
         'daemon',
@@ -145,19 +173,21 @@ export class ButlerdClient {
       })
 
       daemon.stderr?.on('data', (chunk: Buffer) => {
-        logDebug(['butlerd stderr:', chunk.toString('utf8')], LogPrefix.Itchio)
+        const text = chunk.toString('utf8')
+        logDebug(['butlerd stderr:', text], LogPrefix.Itchio)
+        logToRunner('INFO', `stderr: ${text.trimEnd()}`)
       })
 
       daemon.on('exit', (code, signal) => {
-        logWarning(
-          ['butlerd exited with code', String(code), 'signal', String(signal)],
-          LogPrefix.Itchio
-        )
+        const msg = `butlerd exited (code=${code}, signal=${signal})`
+        logWarning(msg, LogPrefix.Itchio)
+        logToRunner('WARNING', msg)
         this.teardown(new Error(`butlerd exited (code=${code})`))
       })
 
       daemon.on('error', (err) => {
         logError(['butlerd spawn error:', err.message], LogPrefix.Itchio)
+        logToRunner('ERROR', `butlerd spawn error: ${err.message}`)
         reject(err)
       })
     })

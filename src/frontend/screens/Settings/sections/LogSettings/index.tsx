@@ -80,7 +80,7 @@ export default function LogSettings() {
   )
   const [refreshing, setRefreshing] = useState<boolean>(true)
 
-  const { epic, gog, amazon, zoom, sideloadedLibrary } =
+  const { epic, gog, amazon, zoom, itchio, sideloadedLibrary } =
     useContext(ContextProvider)
   const [installedGames, setInstalledGames] = useState<GameInfo[]>([])
 
@@ -90,6 +90,7 @@ export default function LogSettings() {
     games = games.concat(gog.library.filter((game) => game.is_installed))
     games = games.concat(amazon.library.filter((game) => game.is_installed))
     games = games.concat(zoom.library.filter((game) => game.is_installed))
+    games = games.concat(itchio.library.filter((game) => game.is_installed))
     games = games.concat(sideloadedLibrary.filter((game) => game.is_installed))
     games = games.sort((game1, game2) => game1.title.localeCompare(game2.title))
 
@@ -99,7 +100,8 @@ export default function LogSettings() {
     gog.library,
     amazon.library,
     sideloadedLibrary,
-    zoom.library
+    zoom.library,
+    itchio.library
   ])
 
   const getLogContent = () => {
@@ -151,6 +153,8 @@ export default function LogSettings() {
       return t('setting.log.descriptiveNames.nile', 'Amazon / Nile log')
     if (showLogOf.runner === 'zoom')
       return t('setting.log.descriptiveNames.zoom', 'Zoom log')
+    if (showLogOf.runner === 'itchio')
+      return t('setting.log.descriptiveNames.itchio', 'itch.io log')
     return ''
   }, [showLogOf, installedGames, t])
 
@@ -164,6 +168,9 @@ export default function LogSettings() {
     if (zoom.enabled) {
       baseFiles.push({ title: 'Zoom', args: { runner: 'zoom' } })
     }
+    if (itchio.username) {
+      baseFiles.push({ title: 'itch.io', args: { runner: 'itchio' } })
+    }
     const logsForInstalledGames = installedGames.map((game) => ({
       title: game.title,
       args: {
@@ -172,7 +179,7 @@ export default function LogSettings() {
       }
     }))
     return baseFiles.concat(logsForInstalledGames)
-  }, [installedGames, zoom.enabled])
+  }, [installedGames, zoom.enabled, itchio.username])
 
   return (
     <>
