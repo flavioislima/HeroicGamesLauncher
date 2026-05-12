@@ -177,7 +177,8 @@ function pickUploadForPlatform(
 
 export async function getInstallInfo(
   appName: string,
-  installPlatform: InstallPlatform
+  installPlatform: InstallPlatform,
+  _options: { branch?: string; build?: string; lang?: string; retries?: number }
 ): Promise<InstallInfo | undefined> {
   const info = inMemoryLibrary.get(appName)
   if (!info) {

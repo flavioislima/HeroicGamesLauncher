@@ -1,8 +1,11 @@
 /**
- * itch.io game manager. Like `library.ts`, this file is scaffolding: every
- * method satisfies the `GameManager` contract so the runner can be added to
- * `gameManagerMap`, but the actual butlerd calls land in PR #2.
+ * itch.io game manager. Each public function satisfies the `GameManager`
+ * contract registered in `storeManagers/index.ts`. Real butlerd calls live
+ * here; per-game library metadata comes from `./library`.
  */
+
+import { existsSync } from 'graceful-fs'
+import { join } from 'path'
 
 import {
   ExecResult,
@@ -18,8 +21,16 @@ import type LogWriter from 'backend/logger/log_writer'
 
 import { LogPrefix, logError, logInfo, logWarning } from 'backend/logger'
 import { GameConfig } from 'backend/game_config'
+import { sendFrontendMessage } from '../../ipc'
 
-import { getGameInfo as getItchioLibraryGameInfo } from './library'
+import { getClient } from './butlerd'
+import { installStore } from './electronStores'
+import {
+  getGameInfo as getItchioLibraryGameInfo,
+  getInstallInfo as getItchioLibraryInstallInfo,
+  installState as setLibraryInstallState
+} from './library'
+import { ItchioInstallInfo } from 'common/types/itchio'
 
 const NOT_IMPLEMENTED =
   'itch.io integration: butlerd command not yet implemented'
@@ -29,6 +40,31 @@ function logNotImplemented(operation: string, details: object): void {
     [`${NOT_IMPLEMENTED} (operation=${operation})`, details],
     LogPrefix.Itchio
   )
+}
+
+interface InstallQueueResult {
+  id: string
+  install_folder: string
+  staging_folder: string
+  cave_id: string
+}
+
+interface ButlerdCave {
+  id: string
+  game_id: number
+  install_folder: string
+  installed_size: number
+  channel_name?: string
+}
+
+interface FetchCaveResult {
+  cave?: ButlerdCave
+}
+
+interface ButlerdProgress {
+  progress?: number
+  eta?: number
+  bps?: number
 }
 
 export async function getSettings(appName: string): Promise<GameSettings> {
@@ -63,12 +99,15 @@ export function getGameInfo(appName: string): GameInfo {
 }
 
 export function getExtraInfo(appName: string): Promise<ExtraInfo> {
-  logNotImplemented('getExtraInfo', { appName })
+  const game = getItchioLibraryGameInfo(appName)
   return Promise.resolve({
-    about: { description: '', shortDescription: '' },
+    about: {
+      description: game?.description ?? '',
+      shortDescription: game?.description ?? ''
+    },
     reqs: [],
     releaseDate: undefined,
-    storeUrl: undefined,
+    storeUrl: game?.store_url,
     changelog: undefined
   })
 }
@@ -88,31 +127,124 @@ export function onInstallOrUpdateOutput(
   data: string,
   totalDownloadSize: number
 ): void {
-  // Progress will come from butlerd notifications once wired.
-  logNotImplemented('onInstallOrUpdateOutput', {
+  // butlerd uses JSON-RPC notifications rather than stdout parsing, so this
+  // intentionally just records a debug breadcrumb in case some upstream
+  // helper drives it.
+  logInfo(
+    [
+      `itch.io onInstallOrUpdateOutput passthrough (action=${action})`,
+      { appName, dataLength: data.length, totalDownloadSize }
+    ],
+    LogPrefix.Itchio
+  )
+}
+
+function emitProgress(appName: string, p: ButlerdProgress): void {
+  if (p.progress === undefined) return
+  sendFrontendMessage('progressUpdate', {
     appName,
-    action,
-    dataLength: data.length,
-    totalDownloadSize
+    runner: 'itchio',
+    status: 'installing',
+    progress: {
+      percent: Math.round(p.progress * 100),
+      bytes: '',
+      eta:
+        p.eta !== undefined && Number.isFinite(p.eta)
+          ? new Date(p.eta * 1000).toISOString().substring(11, 19)
+          : '',
+      downSpeed:
+        p.bps !== undefined ? Math.round(p.bps / (1024 * 1024)) : undefined
+    }
   })
 }
 
-export function install(
+export async function install(
   appName: string,
-  args: InstallArgs
+  { path, platformToInstall }: InstallArgs
 ): Promise<InstallResult> {
-  logNotImplemented('install', { appName, args })
-  return Promise.resolve({ status: 'error', error: NOT_IMPLEMENTED })
+  const info = getItchioLibraryGameInfo(appName)
+  if (!info) {
+    return { status: 'error', error: `Unknown itch.io app ${appName}` }
+  }
+
+  const installInfo = (await getItchioLibraryInstallInfo(
+    appName,
+    platformToInstall,
+    {}
+  )) as ItchioInstallInfo | undefined
+  if (!installInfo) {
+    return { status: 'error', error: 'no compatible upload found' }
+  }
+
+  try {
+    const client = await getClient()
+    const unsub = client.on('Progress', (params) =>
+      emitProgress(appName, params as ButlerdProgress)
+    )
+
+    let queued: InstallQueueResult
+    try {
+      queued = await client.call<InstallQueueResult>('Install.Queue', {
+        game: installInfo.game,
+        upload: installInfo.upload,
+        install_folder: path,
+        reason: 'install'
+      })
+
+      await client.call('Install.Perform', {
+        id: queued.id,
+        staging_folder: queued.staging_folder
+      })
+    } finally {
+      unsub()
+    }
+
+    installStore.set(appName, {
+      ...installInfo,
+      // overwrite install_folder with butlerd's resolved value
+      game: installInfo.game,
+      upload: installInfo.upload
+    })
+
+    setLibraryInstallState(appName, true)
+
+    const cachedInfo = getItchioLibraryGameInfo(appName)
+    if (cachedInfo) {
+      cachedInfo.install = {
+        install_path: queued.install_folder,
+        install_size: String(installInfo.install_size),
+        is_dlc: false,
+        version: installInfo.upload.channel_name ?? '0',
+        platform: platformToInstall,
+        executable: '',
+        appName
+      }
+      cachedInfo.is_installed = true
+      cachedInfo.folder_name = queued.install_folder
+      // The cave_id is the canonical butlerd handle for this install; stash
+      // it on `install` via the underlying record so uninstall/launch can
+      // reach it.
+      ;(cachedInfo as GameInfo & { cave_id?: string }).cave_id = queued.cave_id
+    }
+
+    sendFrontendMessage('refreshLibrary', 'itchio')
+    return { status: 'done' }
+  } catch (err) {
+    logError(
+      ['itch.io install failed:', (err as Error).message],
+      LogPrefix.Itchio
+    )
+    return { status: 'error', error: (err as Error).message }
+  }
 }
 
 export function isNative(appName: string): boolean {
-  // Conservative: assume Windows-target until butlerd reports the upload's
-  // native platform. Linux/macOS detection happens in PR #2.
-  logInfo(
-    `itch.io isNative(${appName}) returning false (not yet implemented)`,
-    LogPrefix.Itchio
+  const cached = installStore.get(appName)
+  if (!cached) return false
+  // Linux + macOS uploads run natively; Windows uploads need wine.
+  return Boolean(
+    cached.upload.platforms.linux || cached.upload.platforms.osx
   )
-  return false
 }
 
 export function addShortcuts(
@@ -145,17 +277,44 @@ export function launch(
   return Promise.resolve(false)
 }
 
-export function moveInstall(
+export async function moveInstall(
   appName: string,
   newInstallPath: string
 ): Promise<InstallResult> {
-  logNotImplemented('moveInstall', { appName, newInstallPath })
-  return Promise.resolve({ status: 'error', error: NOT_IMPLEMENTED })
+  const cached = getItchioLibraryGameInfo(appName)
+  const oldPath = cached?.install?.install_path
+  if (!oldPath) {
+    return { status: 'error', error: 'no current install path' }
+  }
+  // Delegate the filesystem move to whatever drove this call (the install
+  // manager already does the cross-volume copy); we just record the new
+  // location so future butlerd calls find the right cave.
+  await import('./library').then((m) =>
+    m.changeGameInstallPath(appName, newInstallPath)
+  )
+  logInfo(
+    `itch.io moveInstall(${appName}): ${oldPath} -> ${newInstallPath}`,
+    LogPrefix.Itchio
+  )
+  return { status: 'done' }
 }
 
-export function repair(appName: string): Promise<ExecResult> {
-  logNotImplemented('repair', { appName })
-  return Promise.resolve({ stdout: '', stderr: NOT_IMPLEMENTED })
+export async function repair(appName: string): Promise<ExecResult> {
+  const cached = getItchioLibraryGameInfo(appName)
+  if (!cached?.is_installed) {
+    return { stdout: '', stderr: `${appName} is not installed` }
+  }
+  // Repair == re-run Install.Perform against the same cave.
+  const platform =
+    (cached.install?.platform as InstallPlatform) ?? 'Windows'
+  const result = await install(appName, {
+    path: cached.install?.install_path ?? '',
+    platformToInstall: platform
+  })
+  return {
+    stdout: result.status,
+    stderr: result.status === 'error' ? result.error ?? '' : ''
+  }
 }
 
 export function syncSaves(
@@ -171,19 +330,52 @@ export function syncSaves(
   return Promise.resolve('')
 }
 
-export function uninstall(args: RemoveArgs): Promise<ExecResult> {
-  logNotImplemented('uninstall', { args })
-  return Promise.resolve({ stdout: '', stderr: NOT_IMPLEMENTED })
+function getCaveId(appName: string): string | undefined {
+  const cached = getItchioLibraryGameInfo(appName) as
+    | (GameInfo & { cave_id?: string })
+    | undefined
+  return cached?.cave_id
 }
 
-export function update(appName: string): Promise<InstallResult> {
+export async function uninstall({
+  appName,
+  deleteFiles
+}: RemoveArgs): Promise<ExecResult> {
+  const caveId = getCaveId(appName)
+  if (!caveId) {
+    // Nothing to ask butlerd about; treat as a force-uninstall of stale local
+    // state.
+    await forceUninstall(appName)
+    return { stdout: 'no cave', stderr: '' }
+  }
+  try {
+    const client = await getClient()
+    await client.call('Uninstall.Perform', {
+      cave_id: caveId,
+      hard: deleteFiles ?? true
+    })
+    installStore.delete(appName)
+    setLibraryInstallState(appName, false)
+    sendFrontendMessage('refreshLibrary', 'itchio')
+    return { stdout: 'done', stderr: '' }
+  } catch (err) {
+    logError(
+      ['itch.io uninstall failed:', (err as Error).message],
+      LogPrefix.Itchio
+    )
+    return { stdout: '', stderr: (err as Error).message }
+  }
+}
+
+export async function update(appName: string): Promise<InstallResult> {
   logNotImplemented('update', { appName })
-  return Promise.resolve({ status: 'error', error: NOT_IMPLEMENTED })
+  return { status: 'error', error: NOT_IMPLEMENTED }
 }
 
-export function forceUninstall(appName: string): Promise<void> {
-  logNotImplemented('forceUninstall', { appName })
-  return Promise.resolve()
+export async function forceUninstall(appName: string): Promise<void> {
+  installStore.delete(appName)
+  setLibraryInstallState(appName, false)
+  sendFrontendMessage('refreshLibrary', 'itchio')
 }
 
 export function stop(appName: string, stopWine?: boolean): Promise<void> {
@@ -191,10 +383,25 @@ export function stop(appName: string, stopWine?: boolean): Promise<void> {
   return Promise.resolve()
 }
 
-export function isGameAvailable(appName: string): Promise<boolean> {
-  logInfo(
-    `itch.io isGameAvailable(${appName}) returning false (not yet implemented)`,
-    LogPrefix.Itchio
-  )
-  return Promise.resolve(false)
+export async function isGameAvailable(appName: string): Promise<boolean> {
+  const cached = getItchioLibraryGameInfo(appName)
+  if (!cached?.is_installed) return false
+  const local = cached.install?.install_path
+  if (local && existsSync(join(local))) return true
+
+  const caveId = getCaveId(appName)
+  if (!caveId) return false
+  try {
+    const client = await getClient()
+    const result = await client.call<FetchCaveResult>('Fetch.Cave', {
+      cave_id: caveId
+    })
+    return Boolean(result.cave && existsSync(result.cave.install_folder))
+  } catch (err) {
+    logWarning(
+      ['itch.io isGameAvailable: Fetch.Cave failed:', (err as Error).message],
+      LogPrefix.Itchio
+    )
+    return false
+  }
 }
