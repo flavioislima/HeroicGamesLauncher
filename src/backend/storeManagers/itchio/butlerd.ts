@@ -36,10 +36,7 @@ export async function withButlerd<T>(
   try {
     return await fn(client)
   } catch (err) {
-    logError(
-      ['butlerd call failed:', (err as Error).message],
-      LogPrefix.Itchio
-    )
+    logError(['butlerd call failed:', (err as Error).message], LogPrefix.Itchio)
     throw err
   }
 }

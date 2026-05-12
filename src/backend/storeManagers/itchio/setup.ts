@@ -18,7 +18,10 @@ export default function setupItchio(): Promise<void> {
   if (!existsSync(itchioConfigPath)) {
     try {
       mkdirSync(itchioConfigPath, { recursive: true })
-      logInfo(`Created itch.io config dir at ${itchioConfigPath}`, LogPrefix.Itchio)
+      logInfo(
+        `Created itch.io config dir at ${itchioConfigPath}`,
+        LogPrefix.Itchio
+      )
     } catch (err) {
       logError(
         [`Failed to create ${itchioConfigPath}:`, (err as Error).message],

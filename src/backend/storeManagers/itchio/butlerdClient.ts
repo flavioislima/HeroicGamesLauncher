@@ -36,26 +36,13 @@ interface JsonRpcRequest {
   params: unknown
 }
 
-interface JsonRpcResponse {
-  jsonrpc: '2.0'
-  id: JsonRpcId
-  result?: unknown
-  error?: { code: number; message: string; data?: unknown }
-}
-
-interface JsonRpcNotification {
-  jsonrpc: '2.0'
-  method: string
-  params: unknown
-}
-
 type PendingCall = {
   resolve: (value: unknown) => void
   reject: (err: Error) => void
 }
 
 export type NotificationHandler = (params: unknown) => void
-export type RequestHandler = (params: unknown) => unknown | Promise<unknown>
+export type RequestHandler = (params: unknown) => unknown
 
 export class ButlerdClient {
   private daemon?: ChildProcess

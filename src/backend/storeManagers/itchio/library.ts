@@ -43,13 +43,6 @@ function gameToAppName(game: ItchioGame): string {
   return `itchio-${game.id}`
 }
 
-function platformFromUpload(upload: ItchioUpload): InstallPlatform {
-  if (upload.platforms.linux) return 'linux'
-  if (upload.platforms.osx) return 'Mac'
-  if (upload.platforms.windows) return 'Windows'
-  return 'Windows'
-}
-
 function gameToGameInfo(game: ItchioGame): GameInfo {
   const cover = game.cover_url ?? game.still_cover_url ?? ''
   return {
@@ -177,8 +170,7 @@ function pickUploadForPlatform(
 
 export async function getInstallInfo(
   appName: string,
-  installPlatform: InstallPlatform,
-  _options: { branch?: string; build?: string; lang?: string; retries?: number }
+  installPlatform: InstallPlatform
 ): Promise<InstallInfo | undefined> {
   const info = inMemoryLibrary.get(appName)
   if (!info) {

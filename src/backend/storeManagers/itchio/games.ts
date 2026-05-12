@@ -170,8 +170,7 @@ export async function install(
 
   const installInfo = (await getItchioLibraryInstallInfo(
     appName,
-    platformToInstall,
-    {}
+    platformToInstall
   )) as ItchioInstallInfo | undefined
   if (!installInfo) {
     return { status: 'error', error: 'no compatible upload found' }
@@ -243,9 +242,7 @@ export function isNative(appName: string): boolean {
   const cached = installStore.get(appName)
   if (!cached) return false
   // Linux + macOS uploads run natively; Windows uploads need wine.
-  return Boolean(
-    cached.upload.platforms.linux || cached.upload.platforms.osx
-  )
+  return Boolean(cached.upload.platforms.linux || cached.upload.platforms.osx)
 }
 
 export function addShortcuts(
@@ -271,14 +268,6 @@ interface PickManifestActionParams {
   actions: ManifestAction[]
 }
 
-interface PrereqsParams {
-  tasks?: unknown
-}
-
-interface AcceptLicenseParams {
-  text?: string
-}
-
 interface LaunchRunningParams {
   pid?: number
 }
@@ -288,9 +277,7 @@ const runningPidByApp = new Map<string, number>()
 export async function launch(
   appName: string,
   logWriter: LogWriter,
-  launchArguments?: LaunchOption,
-  _args?: string[],
-  _skipVersionCheck?: boolean
+  launchArguments?: LaunchOption
 ): Promise<boolean> {
   const caveId = getCaveId(appName)
   if (!caveId) {
@@ -316,31 +303,24 @@ export async function launch(
     launchArguments && 'name' in launchArguments
       ? launchArguments.name
       : undefined
-  const unsubPick = client.handle(
-    'PickManifestAction',
-    (params: unknown) => {
-      const { actions } = (params ?? {}) as PickManifestActionParams
-      if (requestedActionName && actions?.length) {
-        const idx = actions.findIndex((a) => a.name === requestedActionName)
-        if (idx >= 0) return { index: idx }
-      }
-      return { index: 0 }
+  const unsubPick = client.handle('PickManifestAction', (params: unknown) => {
+    const { actions } = (params ?? {}) as PickManifestActionParams
+    if (requestedActionName && actions?.length) {
+      const idx = actions.findIndex((a) => a.name === requestedActionName)
+      if (idx >= 0) return { index: idx }
     }
-  )
-  const unsubLicense = client.handle(
-    'AcceptLicense',
-    (_params: unknown) => {
-      logInfo(`itch.io: auto-accepting license for ${appName}`, LogPrefix.Itchio)
-      return { accept: true }
-    }
-  )
-  const unsubPrereqs = client.handle('PrereqsFailed', (_params: unknown) => ({
+    return { index: 0 }
+  })
+  const unsubLicense = client.handle('AcceptLicense', () => {
+    logInfo(`itch.io: auto-accepting license for ${appName}`, LogPrefix.Itchio)
+    return { accept: true }
+  })
+  const unsubPrereqs = client.handle('PrereqsFailed', () => ({
     continue: true
   }))
-  const unsubAllowSandboxSetup = client.handle(
-    'AllowSandboxSetup',
-    () => ({ allow: true })
-  )
+  const unsubAllowSandboxSetup = client.handle('AllowSandboxSetup', () => ({
+    allow: true
+  }))
 
   const unsubRunning = client.on('LaunchRunning', (params: unknown) => {
     const { pid } = (params ?? {}) as LaunchRunningParams
@@ -405,15 +385,14 @@ export async function repair(appName: string): Promise<ExecResult> {
     return { stdout: '', stderr: `${appName} is not installed` }
   }
   // Repair == re-run Install.Perform against the same cave.
-  const platform =
-    (cached.install?.platform as InstallPlatform) ?? 'Windows'
+  const platform = (cached.install?.platform as InstallPlatform) ?? 'Windows'
   const result = await install(appName, {
     path: cached.install?.install_path ?? '',
     platformToInstall: platform
   })
   return {
     stdout: result.status,
-    stderr: result.status === 'error' ? result.error ?? '' : ''
+    stderr: result.status === 'error' ? (result.error ?? '') : ''
   }
 }
 
@@ -476,14 +455,11 @@ export async function update(appName: string): Promise<InstallResult> {
   if (!cached?.is_installed) {
     return { status: 'error', error: `${appName} is not installed` }
   }
-  const platform =
-    (cached.install?.platform as InstallPlatform) ?? 'Windows'
+  const platform = (cached.install?.platform as InstallPlatform) ?? 'Windows'
 
-  const installInfo = (await getItchioLibraryInstallInfo(
-    appName,
-    platform,
-    {}
-  )) as ItchioInstallInfo | undefined
+  const installInfo = (await getItchioLibraryInstallInfo(appName, platform)) as
+    | ItchioInstallInfo
+    | undefined
   if (!installInfo) {
     return { status: 'error', error: 'no compatible upload for update' }
   }
@@ -527,10 +503,7 @@ export async function forceUninstall(appName: string): Promise<void> {
   sendFrontendMessage('refreshLibrary', 'itchio')
 }
 
-export async function stop(
-  appName: string,
-  _stopWine?: boolean
-): Promise<void> {
+export async function stop(appName: string): Promise<void> {
   const pid = runningPidByApp.get(appName)
   if (!pid) {
     logWarning(

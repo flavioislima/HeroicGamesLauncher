@@ -17,7 +17,9 @@ export default function ItchioLogin({ backdropClick }: Props) {
   const { itchio } = useContext(ContextProvider)
   const { t } = useTranslation('login')
 
-  const [apiKeysUrl, setApiKeysUrl] = useState('https://itch.io/user/settings/api-keys')
+  const [apiKeysUrl, setApiKeysUrl] = useState(
+    'https://itch.io/user/settings/api-keys'
+  )
   const [input, setInput] = useState('')
   const [status, setStatus] = useState({ loading: false, error: false })
   const [linkCopied, setLinkCopied] = useState(false)
@@ -78,7 +80,9 @@ export default function ItchioLogin({ backdropClick }: Props) {
                 </Typography>
                 <Stack direction="row" spacing={1}>
                   <Button
-                    className={linkCopied ? 'icon-button-success' : 'icon-button'}
+                    className={
+                      linkCopied ? 'icon-button-success' : 'icon-button'
+                    }
                     onClick={handleCopyLink}
                     endIcon={<LinkIcon fontSize="small" />}
                     variant="outlined"
