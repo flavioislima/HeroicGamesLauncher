@@ -21,6 +21,7 @@ import type LogWriter from 'backend/logger/log_writer'
 
 import { LogPrefix, logError, logInfo, logWarning } from 'backend/logger'
 import { GameConfig } from 'backend/game_config'
+import { sendGameStatusUpdate } from 'backend/utils'
 import { sendFrontendMessage } from '../../ipc'
 
 import { getClient } from './butlerd'
@@ -260,21 +261,120 @@ export function removeShortcuts(appName: string): Promise<void> {
   return Promise.resolve()
 }
 
-export function launch(
+interface ManifestAction {
+  name: string
+  path?: string
+  args?: string[]
+}
+
+interface PickManifestActionParams {
+  actions: ManifestAction[]
+}
+
+interface PrereqsParams {
+  tasks?: unknown
+}
+
+interface AcceptLicenseParams {
+  text?: string
+}
+
+interface LaunchRunningParams {
+  pid?: number
+}
+
+const runningPidByApp = new Map<string, number>()
+
+export async function launch(
   appName: string,
   logWriter: LogWriter,
   launchArguments?: LaunchOption,
-  args?: string[],
-  skipVersionCheck?: boolean
+  _args?: string[],
+  _skipVersionCheck?: boolean
 ): Promise<boolean> {
-  logNotImplemented('launch', {
-    appName,
-    launchArguments,
-    args,
-    skipVersionCheck,
-    hasLogWriter: Boolean(logWriter)
+  const caveId = getCaveId(appName)
+  if (!caveId) {
+    logError(
+      `itch.io launch: ${appName} has no cave_id; is it installed?`,
+      LogPrefix.Itchio
+    )
+    return false
+  }
+
+  const cached = getItchioLibraryGameInfo(appName)
+  logWriter.writeString(
+    `[itchio] launching ${cached?.title ?? appName} (cave=${caveId})\n`
+  )
+
+  const client = await getClient()
+
+  // butlerd may call back asking the client to pick an action, accept a
+  // license, or acknowledge prereq results. Default to picking the first
+  // option / accepting / continuing — typical for the long tail of itch.io
+  // games that ship a single executable.
+  const requestedActionName =
+    launchArguments && 'name' in launchArguments
+      ? launchArguments.name
+      : undefined
+  const unsubPick = client.handle(
+    'PickManifestAction',
+    (params: unknown) => {
+      const { actions } = (params ?? {}) as PickManifestActionParams
+      if (requestedActionName && actions?.length) {
+        const idx = actions.findIndex((a) => a.name === requestedActionName)
+        if (idx >= 0) return { index: idx }
+      }
+      return { index: 0 }
+    }
+  )
+  const unsubLicense = client.handle(
+    'AcceptLicense',
+    (_params: unknown) => {
+      logInfo(`itch.io: auto-accepting license for ${appName}`, LogPrefix.Itchio)
+      return { accept: true }
+    }
+  )
+  const unsubPrereqs = client.handle('PrereqsFailed', (_params: unknown) => ({
+    continue: true
+  }))
+  const unsubAllowSandboxSetup = client.handle(
+    'AllowSandboxSetup',
+    () => ({ allow: true })
+  )
+
+  const unsubRunning = client.on('LaunchRunning', (params: unknown) => {
+    const { pid } = (params ?? {}) as LaunchRunningParams
+    if (pid) runningPidByApp.set(appName, pid)
+    sendGameStatusUpdate({ appName, runner: 'itchio', status: 'playing' })
   })
-  return Promise.resolve(false)
+  const unsubExited = client.on('LaunchExited', () => {
+    runningPidByApp.delete(appName)
+    sendGameStatusUpdate({ appName, runner: 'itchio', status: 'done' })
+  })
+
+  sendGameStatusUpdate({ appName, runner: 'itchio', status: 'playing' })
+
+  try {
+    await client.call('Launch', { cave_id: caveId })
+    logWriter.writeString('[itchio] launch finished\n')
+    return true
+  } catch (err) {
+    logError(
+      ['itch.io launch failed:', (err as Error).message],
+      LogPrefix.Itchio
+    )
+    logWriter.writeString(`[itchio] launch error: ${(err as Error).message}\n`)
+    sendGameStatusUpdate({ appName, runner: 'itchio', status: 'done' })
+    return false
+  } finally {
+    unsubPick()
+    unsubLicense()
+    unsubPrereqs()
+    unsubAllowSandboxSetup()
+    unsubRunning()
+    unsubExited()
+    runningPidByApp.delete(appName)
+  }
 }
 
 export async function moveInstall(
@@ -378,9 +478,27 @@ export async function forceUninstall(appName: string): Promise<void> {
   sendFrontendMessage('refreshLibrary', 'itchio')
 }
 
-export function stop(appName: string, stopWine?: boolean): Promise<void> {
-  logNotImplemented('stop', { appName, stopWine })
-  return Promise.resolve()
+export async function stop(
+  appName: string,
+  _stopWine?: boolean
+): Promise<void> {
+  const pid = runningPidByApp.get(appName)
+  if (!pid) {
+    logWarning(
+      `itch.io stop(${appName}): no running pid tracked`,
+      LogPrefix.Itchio
+    )
+    return
+  }
+  try {
+    process.kill(pid, 'SIGTERM')
+  } catch (err) {
+    logWarning(
+      [`itch.io stop(${appName}) SIGTERM failed:`, (err as Error).message],
+      LogPrefix.Itchio
+    )
+  }
+  runningPidByApp.delete(appName)
 }
 
 export async function isGameAvailable(appName: string): Promise<boolean> {

@@ -55,6 +55,7 @@ type PendingCall = {
 }
 
 export type NotificationHandler = (params: unknown) => void
+export type RequestHandler = (params: unknown) => unknown | Promise<unknown>
 
 export class ButlerdClient {
   private daemon?: ChildProcess
@@ -68,6 +69,7 @@ export class ButlerdClient {
     string,
     Set<NotificationHandler>
   >()
+  private readonly requestHandlers = new Map<string, RequestHandler>()
 
   constructor(
     private readonly butlerBin: string,
@@ -202,7 +204,13 @@ export class ButlerdClient {
   }
 
   private handleMessage(line: string): void {
-    let msg: JsonRpcResponse | JsonRpcNotification
+    let msg: {
+      id?: JsonRpcId
+      method?: string
+      params?: unknown
+      result?: unknown
+      error?: { code: number; message: string; data?: unknown }
+    }
     try {
       msg = JSON.parse(line)
     } catch (err) {
@@ -213,10 +221,20 @@ export class ButlerdClient {
       return
     }
 
-    if ('id' in msg && msg.id !== undefined) {
-      const resolver = this.pending.get(msg.id)
+    const hasMethod = typeof msg.method === 'string'
+    const hasId = msg.id !== undefined
+
+    // Server -> client REQUEST: has both `id` and `method`. We must respond.
+    if (hasMethod && hasId) {
+      this.handleServerRequest(msg.id as JsonRpcId, msg.method!, msg.params)
+      return
+    }
+
+    // Response to one of our outbound calls.
+    if (hasId) {
+      const resolver = this.pending.get(msg.id as JsonRpcId)
       if (!resolver) return
-      this.pending.delete(msg.id)
+      this.pending.delete(msg.id as JsonRpcId)
       if (msg.error) {
         resolver.reject(
           new Error(`butlerd error ${msg.error.code}: ${msg.error.message}`)
@@ -227,8 +245,9 @@ export class ButlerdClient {
       return
     }
 
-    if ('method' in msg) {
-      const handlers = this.notificationHandlers.get(msg.method)
+    // Server -> client NOTIFICATION (no id, no response expected).
+    if (hasMethod) {
+      const handlers = this.notificationHandlers.get(msg.method!)
       handlers?.forEach((handler) => {
         try {
           handler(msg.params)
@@ -243,6 +262,44 @@ export class ButlerdClient {
         }
       })
     }
+  }
+
+  private handleServerRequest(
+    id: JsonRpcId,
+    method: string,
+    params: unknown
+  ): void {
+    const handler = this.requestHandlers.get(method)
+    if (!handler) {
+      // No handler registered: send an error so butlerd doesn't hang.
+      this.socket?.write(
+        JSON.stringify({
+          jsonrpc: '2.0',
+          id,
+          error: {
+            code: -32601,
+            message: `no client handler for ${method}`
+          }
+        }) + '\n'
+      )
+      return
+    }
+    Promise.resolve()
+      .then(() => handler(params))
+      .then((result) => {
+        this.socket?.write(
+          JSON.stringify({ jsonrpc: '2.0', id, result }) + '\n'
+        )
+      })
+      .catch((err: Error) => {
+        this.socket?.write(
+          JSON.stringify({
+            jsonrpc: '2.0',
+            id,
+            error: { code: -32000, message: err.message }
+          }) + '\n'
+        )
+      })
   }
 
   /**
@@ -264,6 +321,21 @@ export class ButlerdClient {
       })
       this.socket!.write(JSON.stringify(request) + '\n')
     })
+  }
+
+  /**
+   * Register a handler for a server-initiated REQUEST (e.g.
+   * `PickManifestAction`). The handler's resolved value is sent back as the
+   * RPC result. Only one handler per method; calling again replaces it.
+   * Returns an unregister function.
+   */
+  handle(method: string, handler: RequestHandler): () => void {
+    this.requestHandlers.set(method, handler)
+    return () => {
+      if (this.requestHandlers.get(method) === handler) {
+        this.requestHandlers.delete(method)
+      }
+    }
   }
 
   /**
