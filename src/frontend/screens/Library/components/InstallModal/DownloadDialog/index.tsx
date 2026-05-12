@@ -6,6 +6,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import classNames from 'classnames'
+import { Tooltip } from '@mui/material'
 import {
   GameInfo,
   GameStatus,
@@ -783,9 +784,29 @@ export default function DownloadDialog({
         {children}
       </DialogContent>
       <DialogFooter>
-        <button onClick={handleSwitchToImport} className="button is-secondary">
-          {t('button.import', 'Import Game')}
-        </button>
+        <Tooltip
+          title={
+            runner === 'itchio'
+              ? t(
+                  'button.import.itchioUnsupported',
+                  'Importing itch.io games is not supported yet'
+                )
+              : ''
+          }
+          disableHoverListener={runner !== 'itchio'}
+          disableFocusListener={runner !== 'itchio'}
+          disableTouchListener={runner !== 'itchio'}
+        >
+          <span>
+            <button
+              onClick={handleSwitchToImport}
+              disabled={runner === 'itchio'}
+              className="button is-secondary"
+            >
+              {t('button.import', 'Import Game')}
+            </button>
+          </span>
+        </Tooltip>
         <button
           onClick={async () => handleInstall()}
           className="button is-primary"

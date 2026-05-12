@@ -13,6 +13,7 @@ import {
   Stop,
   Warning
 } from '@mui/icons-material'
+import { Tooltip } from '@mui/material'
 import classNames from 'classnames'
 import { GameInfo } from 'common/types'
 import useSetting from 'frontend/hooks/useSetting'
@@ -236,20 +237,41 @@ const MainButton = ({ gameInfo, handlePlay, handleInstall }: Props) => {
           >
             {getButtonLabel()}
           </button>
-          <button
-            disabled={disabledInstallButtons || is.installing || is.importing}
-            className={'button mainBtn outline'}
-            onClick={() =>
-              openInstallGameModal({
-                appName: gameInfo.app_name,
-                runner: gameInfo.runner,
-                gameInfo,
-                action: 'import'
-              })
+          <Tooltip
+            title={
+              gameInfo.runner === 'itchio'
+                ? t(
+                    'button.import.itchioUnsupported',
+                    'Importing itch.io games is not supported yet'
+                  )
+                : ''
             }
+            disableHoverListener={gameInfo.runner !== 'itchio'}
+            disableFocusListener={gameInfo.runner !== 'itchio'}
+            disableTouchListener={gameInfo.runner !== 'itchio'}
           >
-            {t('button.import', 'Import Game')}
-          </button>
+            <span>
+              <button
+                disabled={
+                  disabledInstallButtons ||
+                  is.installing ||
+                  is.importing ||
+                  gameInfo.runner === 'itchio'
+                }
+                className={'button mainBtn outline'}
+                onClick={() =>
+                  openInstallGameModal({
+                    appName: gameInfo.app_name,
+                    runner: gameInfo.runner,
+                    gameInfo,
+                    action: 'import'
+                  })
+                }
+              >
+                {t('button.import', 'Import Game')}
+              </button>
+            </span>
+          </Tooltip>
         </span>
       )}
     </div>
