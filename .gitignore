@@ -37,3 +37,4 @@ flatpak-build
 .env
 
 playwright-report
+public/bin/**

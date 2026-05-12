@@ -37,7 +37,8 @@ const RELEASE_TAGS = {
   // download time, but we pin a version here so reproducible builds get a
   // known butler and `.release_tags` invalidation works the same way as
   // for the other binaries.
-  butler: '15.21.0'
+  // source: https://broth.itch.zone/butler
+  butler: '15.27.0'
 } as const satisfies Record<DownloadedBinary, string>
 
 const pathExists = async (path: string): Promise<boolean> =>
