@@ -1,4 +1,10 @@
-import { existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'graceful-fs'
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  rmSync,
+  statSync
+} from 'graceful-fs'
 import { join } from 'path'
 
 import {
@@ -124,7 +130,10 @@ async function clearStaleCavesForGame(gameId: number): Promise<void> {
     await Promise.all(
       (result.items ?? []).map(async (cave) => {
         try {
-          await client.call('Uninstall.Perform', { caveId: cave.id, hard: true })
+          await client.call('Uninstall.Perform', {
+            caveId: cave.id,
+            hard: true
+          })
           logInfo(
             `itch.io: cleared stale cave ${cave.id} for game ${gameId}`,
             LogPrefix.Itchio
@@ -735,11 +744,7 @@ export async function update(appName: string): Promise<InstallResult> {
     return { status: 'error', error: 'no compatible upload for update' }
   }
 
-  const updateLogWriter = await createGameLogWriter(
-    appName,
-    'itchio',
-    'update'
-  )
+  const updateLogWriter = await createGameLogWriter(appName, 'itchio', 'update')
   try {
     const headline = `Updating ${appName} (${platform})`
     logInfo(headline, LogPrefix.Itchio)

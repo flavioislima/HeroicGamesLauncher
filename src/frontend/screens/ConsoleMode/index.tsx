@@ -147,7 +147,11 @@ export default function ConsoleMode() {
         enabled: storesWithGames.has('sideload')
       },
       { key: 'zoom', label: 'ZOOM', enabled: storesWithGames.has('zoom') },
-      { key: 'itchio', label: 'itch.io', enabled: storesWithGames.has('itchio') }
+      {
+        key: 'itchio',
+        label: 'itch.io',
+        enabled: storesWithGames.has('itchio')
+      }
     ],
     [t, storesWithGames, allGames.length]
   )

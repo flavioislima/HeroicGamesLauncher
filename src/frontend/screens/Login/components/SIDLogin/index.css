@@ -45,7 +45,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: 150ms color, 150ms background-color;
+  transition:
+    150ms color,
+    150ms background-color;
 }
 
 .sid-modal__close:hover {
@@ -178,7 +180,9 @@
   border-radius: 8px;
   box-shadow: 0px 2px 4px rgb(0 0 0 / 15%);
   font-family: var(--primary-font-family);
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
   box-sizing: border-box;
 }
 
@@ -201,7 +205,9 @@
   color: var(--accent);
   border-radius: 6px;
   cursor: pointer;
-  transition: 150ms color, 150ms background-color;
+  transition:
+    150ms color,
+    150ms background-color;
   padding: 0;
 }
 

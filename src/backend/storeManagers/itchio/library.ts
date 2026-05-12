@@ -280,7 +280,8 @@ export async function listUpdateableGames(): Promise<string[]> {
   if (!ItchioUser.isLoggedIn()) return []
   const appByCave = new Map<string, string>()
   for (const game of inMemoryLibrary.values()) {
-    if (game.is_installed && game.caveId) appByCave.set(game.caveId, game.app_name)
+    if (game.is_installed && game.caveId)
+      appByCave.set(game.caveId, game.app_name)
   }
   if (appByCave.size === 0) return []
 
