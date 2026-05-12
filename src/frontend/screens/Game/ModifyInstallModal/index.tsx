@@ -10,6 +10,7 @@ import { LegendaryInstallInfo } from 'common/types/legendary'
 import { GogInstallInfo } from 'common/types/gog'
 import { NileInstallInfo } from 'common/types/nile'
 import { ZoomInstallInfo, ZoomInstalledInfo } from 'common/types/zoom'
+import { ItchioInstallInfo } from 'common/types/itchio'
 import { useTranslation } from 'react-i18next'
 import LegendaryModifyInstallModal from './Legendary'
 import GOGModifyInstallModal from './GOG'
@@ -22,6 +23,7 @@ interface ModifyInstallProps {
     | NileInstallInfo
     | ZoomInstalledInfo
     | ZoomInstallInfo
+    | ItchioInstallInfo
     | null
   onClose: () => void
 }

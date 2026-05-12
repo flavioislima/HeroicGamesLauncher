@@ -61,6 +61,10 @@ export interface ItchioGame {
     | 'comic'
     | 'book'
   user: ItchioGameUser
+  // itch.io has no DLC concept; declared as a required empty array so
+  // the generic `InstallInfo['game'].owned_dlc` access in DownloadDialog
+  // narrows cleanly across all union variants.
+  owned_dlc: { app_name: string; title: string }[]
 }
 
 export interface ItchioUpload {
@@ -91,4 +95,13 @@ export interface ItchioInstallInfo {
   install_size: number
   download_size: number
   launch_options?: LaunchOption[]
+  /**
+   * Manifest shape kept structurally compatible with the rest of the
+   * `InstallInfo` union so generic UI like DownloadDialog can read
+   * `disk_size` / `download_size` without runtime branching.
+   */
+  manifest: {
+    disk_size: number
+    download_size: number
+  }
 }
