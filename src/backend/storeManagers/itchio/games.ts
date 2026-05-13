@@ -18,6 +18,8 @@ import {
 } from 'common/types'
 import { InstallResult, RemoveArgs } from 'common/types/game_manager'
 import type LogWriter from 'backend/logger/log_writer'
+import { dialog } from 'electron'
+import i18next from 'i18next'
 
 import {
   LogPrefix,
@@ -36,6 +38,7 @@ import {
 import { sendFrontendMessage } from '../../ipc'
 import { launchGame } from 'backend/storeManagers/storeManagerCommon/games'
 import { isLinux, isMac, isWindows } from 'backend/constants/environment'
+import { getMainWindow } from 'backend/main_window'
 
 import { getClient } from './butlerd'
 import { installStore } from './electronStores'
@@ -191,6 +194,22 @@ function resolveAppBundleExecutable(
 // installers/uninstallers. Without this, size-sorted picks can land on
 // the crash handler instead of the game.
 const WINDOWS_AUX_EXE_RE = /uninst|crash(.?report|handler|pad)|setup/i
+
+// Matches installer-style names. Used at launch time to detect cases where
+// the chosen executable IS the installer (e.g. the itch.io upload ships
+// an installer rather than a ready-to-run game), so we can warn the user
+// and pass silent-install args. We deliberately do NOT require a word
+// boundary before the keyword — itch.io devs commonly concatenate the
+// game title with "Installer" (e.g. OctodadInstallerV1.5.3.exe).
+const WINDOWS_INSTALLER_EXE_RE = /(setup|install)/i
+const WINDOWS_UNINSTALLER_RE = /uninst/i
+
+function isLikelyWindowsInstaller(executablePath: string): boolean {
+  const name = basename(executablePath).toLowerCase()
+  if (!name.endsWith('.exe')) return false
+  if (WINDOWS_UNINSTALLER_RE.test(name)) return false
+  return WINDOWS_INSTALLER_EXE_RE.test(name)
+}
 
 // Walked only when butlerd's verdict is empty.
 function scanForExecutable(
@@ -640,7 +659,72 @@ export async function launch(
     )
     return false
   }
-  return launchGame(appName, logWriter, cached, 'itchio', args)
+
+  // Some itch.io uploads ship a Windows installer rather than a ready-to-run
+  // game. butlerd then exposes that installer as the only candidate, so a
+  // plain launch ends up running setup.exe and prompting the user inside Wine.
+  // Detect that case, warn the user, and try a silent install into the
+  // already-chosen install folder. If the installer flags don't apply, the
+  // user can override the executable via Settings > Advanced > Alternative exe.
+  const launchArgs = await maybePrepareInstallerLaunch(cached, args)
+  if (launchArgs === null) return false
+
+  return launchGame(appName, logWriter, cached, 'itchio', launchArgs)
+}
+
+async function maybePrepareInstallerLaunch(
+  cached: GameInfo,
+  args: string[]
+): Promise<string[] | null> {
+  const settings = await getSettings(cached.app_name)
+  // User-overridden target wins — don't second-guess it.
+  if (settings.targetExe) return args
+
+  const executable = cached.install?.executable
+  const installPath = cached.install?.install_path
+  const platform = cached.install?.platform
+
+  if (!executable || !installPath || !platform) return args
+  if (butlerdPlatformKey(platform) !== 'windows') return args
+  if (!isLikelyWindowsInstaller(executable)) return args
+
+  logWarning(
+    `itch.io launch: ${cached.app_name} executable looks like an installer ` +
+      `(${basename(executable)}); attempting silent install into ${installPath}`,
+    LogPrefix.Itchio
+  )
+
+  const mainWindow = getMainWindow()
+  if (mainWindow) {
+    const { response } = await dialog.showMessageBox(mainWindow, {
+      type: 'warning',
+      title: i18next.t(
+        'box.warning.itchio.installer.title',
+        'Installer detected'
+      ),
+      message: i18next.t(
+        'box.warning.itchio.installer.message',
+        'Heroic detected that the executable for "{{title}}" is an installer ({{exe}}).\n\nHeroic will try to run it silently and install the game into:\n{{path}}\n\nIf the game does not launch afterwards, open the game settings > Advanced > Alternative exe and pick the actual game executable.\n\nContinue launching?',
+        {
+          title: cached.title,
+          exe: basename(executable),
+          path: installPath,
+          // Native Electron dialog renders text verbatim, so i18next's
+          // default HTML-escaping turns "/" into "&#x2F;" on screen.
+          interpolation: { escapeValue: false }
+        }
+      ),
+      buttons: [i18next.t('box.yes', 'Yes'), i18next.t('box.no', 'No')],
+      defaultId: 0,
+      cancelId: 1
+    })
+    if (response !== 0) return null
+  }
+
+  // /quiet covers MSI-style installers; /dir=... is honoured by InnoSetup
+  // and a few others. If the installer ignores these flags it will still
+  // launch interactively, which is the same behaviour as before this hook.
+  return [...args, '/quiet', `/dir=${installPath}`]
 }
 
 export async function moveInstall(

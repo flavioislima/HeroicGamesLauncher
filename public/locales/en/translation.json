@@ -170,6 +170,12 @@
                 "install": "Epic Servers are having major outage right now, the game cannot be installed!",
                 "update": "Epic Servers are having major outage right now, the game cannot be updated!"
             },
+            "itchio": {
+                "installer": {
+                    "message": "Heroic detected that the executable for \"{{title}}\" is an installer ({{exe}}).\n\nHeroic will try to run it silently and install the game into:\n{{path}}\n\nIf the game does not launch afterwards, open the game settings > Advanced > Alternative exe and pick the actual game executable.\n\nContinue launching?",
+                    "title": "Installer detected"
+                }
+            },
             "rosetta": {
                 "message": "Heroic requires Rosetta to run correctly on macOS with Apple Silicon chips. Please install it from the macOS terminal using the following command: \"softwareupdate --install-rosetta\" and restart Heroic. ",
                 "title": "Rosetta not found"
