@@ -5,7 +5,7 @@ import {
   rmSync,
   statSync
 } from 'graceful-fs'
-import { join } from 'path'
+import { basename, join } from 'path'
 
 import {
   ExecResult,
@@ -185,6 +185,13 @@ function resolveAppBundleExecutable(
   return best
 }
 
+// Non-game Windows exes commonly shipped alongside the actual binary.
+// Catches Unity (UnityCrashHandler64.exe), Unreal (CrashReportClient.exe),
+// Chromium (crashpad_handler.exe), generic *crash_report* variants, and
+// installers/uninstallers. Without this, size-sorted picks can land on
+// the crash handler instead of the game.
+const WINDOWS_AUX_EXE_RE = /uninst|crash(.?report|handler|pad)|setup/i
+
 // Walked only when butlerd's verdict is empty.
 function scanForExecutable(
   folder: string,
@@ -220,7 +227,7 @@ function scanForExecutable(
         continue
       }
       if (key === 'windows' && name.toLowerCase().endsWith('.exe')) {
-        if (/uninst|crash.?report|setup/i.test(name)) continue
+        if (WINDOWS_AUX_EXE_RE.test(name)) continue
         hits.push({ path: full, size: s.size })
       } else if (key === 'linux') {
         if (name.startsWith('.')) continue
@@ -269,7 +276,15 @@ function pickLaunchCandidate(
   const desiredFlavor = FLAVOR_BY_KEY[butlerdPlatformKey(platform) ?? 'windows']
   const native = candidates.filter((c) => c.flavor === desiredFlavor)
   const pool = native.length ? native : candidates
-  return pool.slice().sort((a, b) => (b.size ?? 0) - (a.size ?? 0))[0]
+  // On Windows, butlerd can return e.g. UnityCrashHandler64.exe as the
+  // largest candidate. Strip those out, but fall back to the unfiltered
+  // pool if filtering would leave nothing to launch.
+  const filtered =
+    butlerdPlatformKey(platform) === 'windows'
+      ? pool.filter((c) => !WINDOWS_AUX_EXE_RE.test(basename(c.path)))
+      : pool
+  const finalPool = filtered.length ? filtered : pool
+  return finalPool.slice().sort((a, b) => (b.size ?? 0) - (a.size ?? 0))[0]
 }
 
 // Create a wrapper folder named after the game inside the user-chosen
