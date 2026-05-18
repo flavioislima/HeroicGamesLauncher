@@ -49,6 +49,12 @@
 .controller-hints.xbox .buttonImage.back {
   --imageUrl: url(/src/frontend/assets/controllers/xbox-series/XboxSeriesX_B.png);
 }
+.controller-hints.xbox .buttonImage.l1 {
+  --imageUrl: url(/src/frontend/assets/controllers/xbox-series/XboxSeriesX_LB.png);
+}
+.controller-hints.xbox .buttonImage.r1 {
+  --imageUrl: url(/src/frontend/assets/controllers/xbox-series/XboxSeriesX_RB.png);
+}
 
 .controller-hints.ps5 .buttonImage.d-pad {
   --imageUrl: url(/src/frontend/assets/controllers/ps5/PS5_Dpad.png);
@@ -70,6 +76,12 @@
 }
 .controller-hints.ps5 .buttonImage.back {
   --imageUrl: url(/src/frontend/assets/controllers/ps5/PS5_Circle.png);
+}
+.controller-hints.ps5 .buttonImage.l1 {
+  --imageUrl: url(/src/frontend/assets/controllers/ps5/PS5_L1.png);
+}
+.controller-hints.ps5 .buttonImage.r1 {
+  --imageUrl: url(/src/frontend/assets/controllers/ps5/PS5_R1.png);
 }
 
 .controller-hints.ps4 .buttonImage.d-pad {
@@ -93,6 +105,12 @@
 .controller-hints.ps4 .buttonImage.back {
   --imageUrl: url(/src/frontend/assets/controllers/ps4/PS4_Circle.png);
 }
+.controller-hints.ps4 .buttonImage.l1 {
+  --imageUrl: url(/src/frontend/assets/controllers/ps4/PS4_L1.png);
+}
+.controller-hints.ps4 .buttonImage.r1 {
+  --imageUrl: url(/src/frontend/assets/controllers/ps4/PS4_R1.png);
+}
 
 .controller-hints.steam-deck .buttonImage.d-pad {
   --imageUrl: url(/src/frontend/assets/controllers/steam-deck/SteamDeck_Dpad.png);
@@ -114,4 +132,10 @@
 }
 .controller-hints.steam-deck .buttonImage.back {
   --imageUrl: url(/src/frontend/assets/controllers/steam-deck/SteamDeck_B.png);
+}
+.controller-hints.steam-deck .buttonImage.l1 {
+  --imageUrl: url(/src/frontend/assets/controllers/steam-deck/SteamDeck_L1.png);
+}
+.controller-hints.steam-deck .buttonImage.r1 {
+  --imageUrl: url(/src/frontend/assets/controllers/steam-deck/SteamDeck_R1.png);
 }

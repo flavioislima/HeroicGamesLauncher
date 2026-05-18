@@ -13,9 +13,18 @@ export default function ControllerHints() {
   const [altActionHint2, setAltActionHint2] = useState('') // Y / Triangle
   const [backActionHint, setBackActionHint] = useState('') // B / Circle
   const [backActionFallback, setBackActionFallback] = useState('')
+  const [prevPageHint, setPrevPageHint] = useState('') // L1 / LB
+  const [nextPageHint, setNextPageHint] = useState('') // R1 / RB
+  const [moveHint, setMoveHint] = useState('')
+  const [scrollHint, setScrollHint] = useState('')
 
   const location = useLocation()
   const { t } = useTranslation()
+  const inWebview =
+    location.pathname.startsWith('/store/') ||
+    location.pathname.startsWith('/loginweb/') ||
+    location.pathname === '/wiki' ||
+    location.pathname.startsWith('/store-page')
 
   // set hints for an element
   const setHintsFor = (target: HTMLElement) => {
@@ -81,6 +90,20 @@ export default function ControllerHints() {
     setBackActionHint(back)
   }
 
+  // Hints shown when the user is inside a store webview. The bottom bar lives
+  // in the host, but the actions described here run inside the webview's
+  // preload (public/webviewPreload.js). Keep these in sync with that file.
+  const applyWebviewHints = () => {
+    setMainActionHint(t('controller.hints.select', 'Select'))
+    setBackActionHint(t('controller.hints.back', 'Back'))
+    setAltActionHint(t('controller.hints.url_bar', 'URL bar'))
+    setAltActionHint2(t('controller.hints.search', 'Search'))
+    setPrevPageHint(t('controller.hints.previous_page', 'Previous page'))
+    setNextPageHint(t('controller.hints.next_page', 'Next page'))
+    setMoveHint(t('controller.hints.move_focus', 'Move focus'))
+    setScrollHint(t('controller.hints.scroll', 'Scroll'))
+  }
+
   // proxy method to set hints depending on what's focused
   const setHints = (target: HTMLElement | null | typeof globalThis) => {
     // sometimes focus can be null or the window object
@@ -99,6 +122,9 @@ export default function ControllerHints() {
   // listen to `focus` events to detect the current focused element
   useEffect(() => {
     const onFocusChanged = (e: FocusEvent) => {
+      // Inside a store webview the hints are driven by `applyWebviewHints` and
+      // must not be overridden by host focus changes (URL bar, sidebar, ...).
+      if (inWebview) return
       const tgt = !e.target ? null : (e.target as HTMLElement)
       setHints(tgt)
     }
@@ -108,7 +134,7 @@ export default function ControllerHints() {
     return () => {
       window.removeEventListener('focus', onFocusChanged)
     }
-  }, [])
+  }, [inWebview])
 
   useEffect(() => {
     // check if there's any page to go back
@@ -118,9 +144,17 @@ export default function ControllerHints() {
       setBackActionFallback(t('controller.hints.back', 'Back'))
     }
 
-    // check focused element after a page change
-    setHints(document.querySelector<HTMLElement>(':focus'))
-  }, [location])
+    if (inWebview) {
+      applyWebviewHints()
+    } else {
+      setPrevPageHint('')
+      setNextPageHint('')
+      setMoveHint('')
+      setScrollHint('')
+      // check focused element after a page change
+      setHints(document.querySelector<HTMLElement>(':focus'))
+    }
+  }, [location, inWebview])
 
   useEffect(() => {
     // set the brand for the images to use
@@ -162,14 +196,28 @@ export default function ControllerHints() {
         <i className="buttonImage alt-action2" />
         {altActionHint2 || '–'}
       </div>
+      {inWebview && (
+        <>
+          <div className="hint">
+            <i className="buttonImage l1" />
+            {prevPageHint || '–'}
+          </div>
+          <div className="hint">
+            <i className="buttonImage r1" />
+            {nextPageHint || '–'}
+          </div>
+        </>
+      )}
       <div className="hint">
         <i className="buttonImage d-pad" />
         <i className="buttonImage left-stick" />
-        {t('controller.hints.move_cursor', 'Move cursor')}
+        {inWebview
+          ? moveHint || t('controller.hints.move_focus', 'Move focus')
+          : t('controller.hints.move_cursor', 'Move cursor')}
       </div>
       <div className="hint">
         <i className="buttonImage right-stick" />
-        {t('controller.hints.scroll', 'Scroll')}
+        {scrollHint || t('controller.hints.scroll', 'Scroll')}
       </div>
     </div>
   )

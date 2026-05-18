@@ -22,6 +22,13 @@ const SCROLL_REPEAT_DELAY = 50
 
 let controllerIsDisabled = false
 let currentController = -1
+let webviewHasFocus = false
+
+export const toggleWebviewFocus = (focused: boolean) => {
+  webviewHasFocus = focused
+}
+
+export const isUsingGamepad = () => currentController !== -1
 
 export const initGamepad = () => {
   window.api.requestAppSettings().then(({ disableController }: AppSettings) => {
@@ -77,6 +84,13 @@ export const initGamepad = () => {
       //
       // the browser still detects the gamepad interactions even
       // if the screen is not focused when playing a game
+      return
+    }
+
+    // when the store webview is focused, its preload handles gamepad input
+    // directly. Skip host-side handling to avoid double processing — but keep
+    // `guide` working as a global escape hatch to toggle Console Mode.
+    if (webviewHasFocus && action !== 'guide') {
       return
     }
 
