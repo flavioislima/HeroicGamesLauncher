@@ -51,7 +51,9 @@ export default function InstallOverlay({
 
       // we're now installing, close modal
       onDismiss()
-    } catch {}
+    } catch {
+      // install errors are surfaced by the install flow itself
+    }
   }
 
   return (

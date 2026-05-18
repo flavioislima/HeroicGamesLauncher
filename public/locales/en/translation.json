@@ -1056,6 +1056,7 @@
         "console": "Console Mode"
     },
     "status": {
+        "installed": "Installed",
         "installing": "Installing",
         "logging": "Logging In...",
         "preparing_login": "Preparing Login... ",

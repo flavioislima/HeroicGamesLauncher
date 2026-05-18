@@ -5,10 +5,7 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { ToggleSwitch, UpdateComponent } from 'frontend/components/UI'
 import WebviewControls from 'frontend/components/UI/WebviewControls'
 import ContextProvider from 'frontend/state/ContextProvider'
-import {
-  isUsingGamepad,
-  toggleWebviewFocus
-} from 'frontend/helpers/gamepad'
+import { isUsingGamepad, toggleWebviewFocus } from 'frontend/helpers/gamepad'
 import './index.css'
 import LoginWarning from '../Login/components/LoginWarning'
 import { NileLoginData } from 'common/types/nile'

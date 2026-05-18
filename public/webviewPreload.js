@@ -106,11 +106,15 @@ function isVisible(el) {
   // include elements just off-screen so navigation can pull them in
   const vh = window.innerHeight
   const vw = window.innerWidth
-  return r.bottom > -200 && r.top < vh + 200 && r.right > -200 && r.left < vw + 200
+  return (
+    r.bottom > -200 && r.top < vh + 200 && r.right > -200 && r.left < vw + 200
+  )
 }
 
 function getFocusables() {
-  return Array.from(document.querySelectorAll(FOCUSABLE_SELECTOR)).filter(isVisible)
+  return Array.from(document.querySelectorAll(FOCUSABLE_SELECTOR)).filter(
+    isVisible
+  )
 }
 
 function pickInitialFocus() {
@@ -175,13 +179,20 @@ function navigate(direction) {
 
   if (best) {
     best.focus({ preventScroll: false })
-    best.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' })
+    best.scrollIntoView({
+      block: 'nearest',
+      inline: 'nearest',
+      behavior: 'smooth'
+    })
     return true
   }
 
   // No candidate in the desired direction — fall back to scrolling.
   if (direction === 'down' || direction === 'up') {
-    window.scrollBy({ top: direction === 'down' ? 400 : -400, behavior: 'smooth' })
+    window.scrollBy({
+      top: direction === 'down' ? 400 : -400,
+      behavior: 'smooth'
+    })
     return true
   }
   return false
@@ -205,7 +216,8 @@ function handleAction(action) {
   switch (action) {
     case 'mainAction': {
       const el = document.activeElement
-      if (el && el !== document.body && typeof el.click === 'function') el.click()
+      if (el && el !== document.body && typeof el.click === 'function')
+        el.click()
       break
     }
     case 'back': {

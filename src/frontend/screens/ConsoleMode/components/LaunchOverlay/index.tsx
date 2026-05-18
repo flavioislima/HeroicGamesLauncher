@@ -42,8 +42,9 @@ export default function LaunchOverlay({
     }
   })
 
-  const onOverlayKeyDown = (e: React.KeyboardEvent) => {}
-  const onOverlayKeyUp = (e: React.KeyboardEvent) => {}
+  // intentional no-ops: keyboard handling lives in the global listener below
+  const onOverlayKeyDown = () => {}
+  const onOverlayKeyUp = () => {}
 
   // Escape quits when idle; hold it while launching to cancel.
   useEffect(() => {
